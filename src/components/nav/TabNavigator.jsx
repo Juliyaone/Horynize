@@ -1,24 +1,26 @@
-import * as React from 'react';
+import React, { useContext } from 'react';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 
-import DevicesIcon from '../../img/icons/nav/devices.jsx';
-import HomeIcon from '../../img/icons/nav/home.jsx';
-import SettingIcon from '../../img/icons/nav/setting.jsx';
+import DevicesIcon from '../../img/icons/nav/devices';
+import HomeIcon from '../../img/icons/nav/home';
+import SettingIcon from '../../img/icons/nav/setting';
 
-
-import HomeStackNavigator from './HomeStackNavigator.jsx';
-import SettingsStackNavigator from './SettingsStackNavigator.jsx';
-import DevicesStackNavigator from './DevicesStackNavigator.jsx';
-
+import HomeStackNavigator from './HomeStackNavigator';
+import SettingsStackNavigator from './SettingsStackNavigator';
+import DevicesStackNavigator from './DevicesStackNavigator';
+import { AuthContext } from '../providers/AuthContext';
 
 const Tab = createBottomTabNavigator();
 
 function TabNavigator() {
+  const { userToken } = useContext(AuthContext);
+
   const activTabIconColor = '#ED7635';
   return (
     <Tab.Navigator
+      initialRouteName="DevicesStack"
       screenOptions={({ route }) => ({
-        tabBarIcon: ({ focused, color, size }) => {
+        tabBarIcon: ({ focused, color }) => {
           let iconXml;
 
           if (route.name === 'HomeStack') {
@@ -41,16 +43,29 @@ function TabNavigator() {
           justifyContent: 'center',
           paddingBottom: 0,
           borderTopWidth: 1,
-          borderTopColor: '#BEBEC0'
+          borderTopColor: '#BEBEC0',
         },
-        tabBarLabel: ''
+        tabBarLabel: '',
       })}
     >
-      <Tab.Screen name="DevicesStack" options={{ headerShown: false }} component={DevicesStackNavigator} />
-
-      <Tab.Screen name="HomeStack" options={{ headerShown: false }} component={HomeStackNavigator} />
-      <Tab.Screen name="SettingsStack" options={{ headerShown: false }} component={SettingsStackNavigator} />
-
+      <Tab.Screen
+        name="DevicesStack"
+        component={DevicesStackNavigator}
+        options={{ unmountOnBlur: true, headerShown: false }}
+      />
+      {userToken
+      && (
+      <Tab.Screen
+        name="HomeStack"
+        options={{ unmountOnBlur: true, headerShown: false }}
+        component={HomeStackNavigator}
+      />
+      )}
+      <Tab.Screen
+        name="SettingsStack"
+        options={{ unmountOnBlur: true, headerShown: false }}
+        component={SettingsStackNavigator}
+      />
     </Tab.Navigator>
   );
 }

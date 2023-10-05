@@ -1,9 +1,11 @@
 import React, { useContext } from 'react';
-import { View, Text, TextInput, StyleSheet, ScrollView } from 'react-native';
+import {
+  View, Text, TextInput, StyleSheet, ScrollView,
+} from 'react-native';
 import { Formik } from 'formik';
 import * as yup from 'yup';
 
-import { AuthContext } from "../../components/providers/AuthContext"
+import { AuthContext } from '../../components/providers/AuthContext'
 import ApplyIcon from '../../img/icons/apply';
 
 import CustomButton from '../../components/CustomButton';
@@ -17,11 +19,56 @@ const ServerSchema = yup.object({
   id_model: yup.string().required('Model ID is required'),
 });
 
-{/* <UserContext.Provider value={{ userId, setUserId, userData, setUserData, setIsConnection, isConnection, currentDayOfWeek, unitId }}> */ }
-
+const styles = StyleSheet.create({
+  container: {
+    padding: 10,
+    justifyContent: 'center',
+  },
+  title: {
+    textAlign: 'center',
+    fontFamily: 'SFProDisplay',
+    fontStyle: 'normal',
+    fontWeight: '600',
+    fontSize: 20,
+    lineHeight: 28,
+    letterSpacing: 0.35,
+    color: '#212121',
+    marginBottom: 30,
+  },
+  inputContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    borderWidth: 0,
+    backgroundColor: '#DDDDDD',
+    borderRadius: 16,
+  },
+  lastInputContainer: {
+    marginBottom: 30,
+  },
+  input: {
+    flex: 1,
+    borderWidth: 0,
+    backgroundColor: '#DDDDDD',
+    borderRadius: 16,
+    padding: 15,
+    color: '#212121',
+    fontSize: 16,
+  },
+  inputIcon: {
+    width: 15,
+    height: 15,
+    marginRight: 10,
+    marginLeft: 10,
+  },
+  errorText: {
+    color: '#FF5204',
+    padding: 0,
+    marginTop: 0,
+    marginBottom: 10,
+  },
+});
 
 export default function DevicesAddScreen({ navigation }) {
-
   const { userId, unitId } = useContext(AuthContext);
 
   return (
@@ -50,7 +97,7 @@ export default function DevicesAddScreen({ navigation }) {
             <View style={styles.container}>
               {Object.keys(props.values).map((key) => (
                 (key !== 'userid' && key !== 'controllerid') && (
-                  <React.Fragment key={key} >
+                  <React.Fragment key={key}>
                     <View style={styles.inputContainer}>
                       <ApplyIcon style={styles.inputIcon} />
                       <TextInput
@@ -67,7 +114,7 @@ export default function DevicesAddScreen({ navigation }) {
                   </React.Fragment>
                 )
               ))}
-              <CustomButton text='Приязать установку' onPress={props.handleSubmit} />
+              <CustomButton text="Приязать установку" onPress={props.handleSubmit} />
             </View>
           )}
         </Formik>
@@ -75,54 +122,3 @@ export default function DevicesAddScreen({ navigation }) {
     </ScrollView>
   );
 }
-
-const styles = StyleSheet.create({
-
-  container: {
-    padding: 10,
-    justifyContent: 'center',
-  },
-  title: {
-    textAlign: "center",
-    fontFamily: "SFProDisplay",
-    fontStyle: "normal",
-    fontWeight: '600',
-    fontSize: 20,
-    lineHeight: 28,
-    letterSpacing: 0.35,
-    color: "#212121",
-    marginBottom: 30
-  },
-  inputContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    borderWidth: 0,
-    backgroundColor: '#DDDDDD',
-    borderRadius: 16,
-  },
-  lastInputContainer: {
-    marginBottom: 30
-  },
-  input: {
-    flex: 1,
-    borderWidth: 0,
-    backgroundColor: '#DDDDDD',
-    borderRadius: 16,
-    padding: 15,
-    color: '#212121',
-    fontSize: 16,
-  },
-  inputIcon: {
-    width: 15,
-    height: 15,
-    marginRight: 10,
-    marginLeft: 10
-  },
-  errorText: {
-    color: '#FF5204',
-    padding: 0,
-    marginTop: 0,
-    marginBottom: 10
-  },
-
-});

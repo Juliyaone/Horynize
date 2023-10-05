@@ -1,8 +1,11 @@
 import React, { useContext, useEffect, useState } from 'react';
-import { StyleSheet, View, Text, TouchableOpacity, ScrollView, SafeAreaView } from 'react-native';
+import {
+  StyleSheet, View, Text, TouchableOpacity, ScrollView, SafeAreaView,
+} from 'react-native';
+import { CommonActions } from '@react-navigation/native';
 import { UserContext } from '../../components/providers/UserContext';
 import GoBackComponent from '../../components/GoBack';
-import { AuthContext } from "../../components/providers/AuthContext";
+import { AuthContext } from '../../components/providers/AuthContext';
 
 import CustomButton from '../../components/CustomButton';
 import Loader from '../../components/Loader';
@@ -15,61 +18,54 @@ import ChatIcon from '../../img/icons/chat';
 
 import { useGetContactsQuery } from '../../redux/usersApi';
 
-function SettingsScreen({ navigation }) {
+import { getDeviceWordForm } from '../../utils';
 
-  const { userId, setUserId, userData, setUserData } = useContext(UserContext);
+function SettingsScreen({ navigation }) {
+  const {
+    userId, setUserId, userData, setUserData,
+  } = useContext(UserContext);
   const { data: contacts, isLoading: isLoadingContacts } = useGetContactsQuery();
 
-  const { signOut, emailAuthContext, userName, allControllers } = useContext(AuthContext);
+  const {
+    signOut, emailAuthContext, userName, allControllers,
+  } = useContext(AuthContext);
 
   const [email, setEmail] = useState('');
   const [tel, setTel] = useState('');
 
   useEffect(() => {
-    if (contacts && contacts.contacts && contacts.contacts.length > 0) {
+    if (contacts && contacts?.contacts && contacts.contacts.length > 0) {
       console.log('contacts', contacts);
 
       console.log('emailAuthContext', emailAuthContext);
       console.log('userNameAuthContext', userName);
       console.log('allControllersAuthContext', allControllers);
 
-      
-      
       setEmail(contacts.contacts[0].email);
       setTel(contacts.contacts[0].phone);
     }
-  }, [contacts])
+  }, [allControllers, contacts, emailAuthContext, userName])
 
   if (isLoadingContacts) {
     return <Loader />
   }
 
   const handleLogout = () => {
+    navigation.dispatch(
+      CommonActions.reset({
+        index: 0,
+        routes: [{ name: 'DevicesStack' }],
+      }),
+    );
     signOut();
     setUserId('');
     setUserData('');
     navigation.navigate('Start');
   }
 
-
-  function getDeviceWordForm(num) {
-    const lastDigit = num % 10;
-    const lastTwoDigits = num % 100;
-
-    if (lastDigit === 1 && lastTwoDigits !== 11) {
-      return 'устройство';
-    } else if (lastDigit >= 2 && lastDigit <= 4 && (lastTwoDigits < 10 || lastTwoDigits > 20)) {
-      return 'устройства';
-    } else {
-      return 'устройств';
-    }
-  }
-
-
   const onChangePassword = () => {
     navigation.navigate('ChangeUserData');
   }
-
 
   return (
     <ScrollView>
@@ -90,11 +86,15 @@ function SettingsScreen({ navigation }) {
               <Text style={styles.cardUserText}>{userName}</Text>
             </View>
             <View style={styles.cardUserNumberOfDevicesBox}>
-              <Text style={styles.cardUserNumberOfDevicesText}>{allControllers.length} {getDeviceWordForm(1)}</Text>
+              <Text style={styles.cardUserNumberOfDevicesText}>
+                {allControllers?.length}
+                {' '}
+                {getDeviceWordForm(1)}
+              </Text>
               <ArrowRightSmallIcon />
             </View>
             <View style={styles.cardUserBtnBox}>
-              <CustomButton text={'Выйти'} IconComponent={ExitIcon} onPress={handleLogout} />
+              <CustomButton text="Выйти" IconComponent={ExitIcon} onPress={handleLogout} />
             </View>
           </View>
 
@@ -108,12 +108,10 @@ function SettingsScreen({ navigation }) {
               <Text style={styles.cardUserText}>{emailAuthContext}</Text>
             </View>
             <View style={styles.cardUserBtnBox}>
-              <CustomButton text={'Изменить данные'} IconComponent={LockIcon} onPress={onChangePassword} />
+              <CustomButton text="Изменить данные" IconComponent={LockIcon} onPress={onChangePassword} />
             </View>
           </View>
         </>
-
-
 
         {/* } */}
         <View style={styles.cardUserBox}>
@@ -127,10 +125,9 @@ function SettingsScreen({ navigation }) {
             <Text style={styles.cardUserText}>{email}</Text>
           </View>
           <View style={styles.cardUserBtnBox}>
-            <CustomButton text={'Обратиться в сервис'} IconComponent={ChatIcon} />
+            <CustomButton text="Обратиться в сервис" IconComponent={ChatIcon} />
           </View>
         </View>
-
 
       </View>
     </ScrollView>
@@ -154,7 +151,7 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     letterSpacing: 0.38,
     color: '#222222',
-    marginBottom: 25
+    marginBottom: 25,
   },
   cardUserDataHeaderText: {
     fontFamily: 'SFProDisplayBold',
@@ -165,7 +162,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     letterSpacing: 0.38,
     color: '#222222',
-    marginBottom: 15
+    marginBottom: 15,
   },
   cardUserBox: {
     alignItems: 'flex-start',
@@ -176,61 +173,61 @@ const styles = StyleSheet.create({
     shadowColor: '#000',
     shadowOffset: {
       width: 0,
-      height: 1
+      height: 1,
     },
     shadowOpacity: 0.12,
     shadowRadius: 2,
     elevation: 1,
-    marginBottom: 15
+    marginBottom: 15,
   },
   cardUserNumberOfDevicesBox: {
     flexDirection: 'row',
     justifyContent: 'center',
     alignItems: 'center',
-    marginBottom: 22
+    marginBottom: 22,
   },
   cardUserBtnBox: {
     width: '100%',
-    marginTop: 25
+    marginTop: 25,
   },
   cardUserName: {
-    fontFamily: "SFProDisplay",
-    fontStyle: "normal",
+    fontFamily: 'SFProDisplay',
+    fontStyle: 'normal',
     fontWeight: '700',
     fontSize: 22,
     lineHeight: 28,
-    alignItems: "center",
+    alignItems: 'center',
     letterSpacing: 0.35,
-    color: "#212121",
-    marginBottom: 12
+    color: '#212121',
+    marginBottom: 12,
   },
   cardUserOrganization: {
-    fontFamily: "SFProDisplay",
-    fontStyle: "normal",
+    fontFamily: 'SFProDisplay',
+    fontStyle: 'normal',
     fontWeight: '400',
     fontSize: 16,
     lineHeight: 28,
-    alignItems: "center",
+    alignItems: 'center',
     letterSpacing: 0.35,
-    color: "#212121",
-    marginBottom: 8
+    color: '#212121',
+    marginBottom: 8,
   },
   cardUserNumberOfDevicesText: {
-    fontFamily: "SFProDisplay",
-    fontStyle: "normal",
+    fontFamily: 'SFProDisplay',
+    fontStyle: 'normal',
     fontWeight: '400',
     fontSize: 16,
     lineHeight: 16,
-    alignItems: "center",
+    alignItems: 'center',
     letterSpacing: 0.35,
-    color: "#212121"
+    color: '#212121',
   },
   cardUserDataBox: {
     width: '100%',
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 12
+    marginBottom: 12,
   },
 
 });

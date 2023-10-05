@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Button, Platform, View } from 'react-native';
 import DateTimePicker from '@react-native-community/datetimepicker';
 
+// TODO
 export default function TimePicker({ closeModal, setTime }) {
   const [date, setDate] = useState(new Date());
   const [mode, setMode] = useState('time');
