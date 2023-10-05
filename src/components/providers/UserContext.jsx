@@ -1,9 +1,11 @@
-import React, { createContext, useState, useEffect, useContext } from 'react';
-import { AuthContext } from "../providers/AuthContext";
-// import { useGetParamsQuery } from '../../redux/usersApi';
+import React, {
+  createContext, useState, useEffect, useContext, useMemo,
+} from 'react';
+import { AuthContext } from './AuthContext';
+
 export const UserContext = createContext();
 
-export const UserProvider = ({ children }) => {
+export function UserProvider({ children }) {
   const [userId, setUserId] = useState('');
   const [isConnection, setIsConnection] = useState(false);
 
@@ -14,11 +16,11 @@ export const UserProvider = ({ children }) => {
     units: '',
     jwt: '',
     id_model: '',
-    name_model: ''
+    name_model: '',
   });
 
   const [currentDayOfWeek, setCurrentDayOfWeek] = useState(null);
-  
+
   const { unitId } = useContext(AuthContext);
 
   useEffect(() => {
@@ -27,9 +29,13 @@ export const UserProvider = ({ children }) => {
     setCurrentDayOfWeek(dayOfWeek);
   }, []);
 
+  const value = useMemo(() => ({
+    userId, setUserId, userData, setUserData, setIsConnection, isConnection, currentDayOfWeek, unitId,
+  }), [currentDayOfWeek, isConnection, unitId, userData, userId])
+
   return (
-      <UserContext.Provider value={{ userId, setUserId,  userData, setUserData, setIsConnection, isConnection, currentDayOfWeek, unitId }}>
-        {children} 
-      </UserContext.Provider>
+    <UserContext.Provider value={value}>
+      {children}
+    </UserContext.Provider>
   );
 }

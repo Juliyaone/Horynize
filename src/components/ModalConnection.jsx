@@ -4,8 +4,8 @@ import {
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 
-// import SaveIcon from '../img/icons/save.svg';
-// import GoodIcon from '../img/icons/good.svg';
+import ConnectionIcon from '../img/icons/connectionIcon';
+import GoodIcon from '../img/icons/goodIcon';
 
 const screenHeight = Dimensions.get('window').height;
 
@@ -14,7 +14,7 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'flex-end',
     alignItems: 'center',
-    backgroundColor: 'rgba(0,0,0,0.5)',
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
   },
   modalView: {
     alignItems: 'center',
@@ -35,7 +35,7 @@ const styles = StyleSheet.create({
     elevation: 5,
   },
   modalText: {
-
+    fontFamily: 'SFProDisplay',
     fontStyle: 'normal',
     fontWeight: '600',
     fontSize: 20,
@@ -64,7 +64,7 @@ const styles = StyleSheet.create({
   icon: {
     marginRight: 8,
   },
-  iconSave: {
+  iconConnection: {
     marginBottom: 30,
   },
   text: {
@@ -74,8 +74,7 @@ const styles = StyleSheet.create({
   },
 });
 
-// TODO: icons
-export default function ModalSuccess({ successText, visible, onDismiss }) {
+export default function ModalConnection({ connectionText, visible, onDismiss }) {
   return (
     <Modal
       animationType="slide"
@@ -84,9 +83,9 @@ export default function ModalSuccess({ successText, visible, onDismiss }) {
     >
       <TouchableOpacity style={styles.centeredView} onPress={onDismiss}>
         <View style={styles.modalView}>
-          <Text style={styles.modalText}>{successText}</Text>
-          <View style={styles.iconSave}>
-            {/* <SaveIcon /> */}
+          <Text style={styles.modalText}>{connectionText}</Text>
+          <View style={styles.iconConnection}>
+            <ConnectionIcon />
           </View>
           <TouchableOpacity activeOpacity={0.8} style={styles.button} onPress={onDismiss}>
             <LinearGradient
@@ -94,7 +93,7 @@ export default function ModalSuccess({ successText, visible, onDismiss }) {
               style={styles.gradientBackground}
             >
               <View style={styles.content}>
-                {/* <GoodIcon style={styles.icon} /> */}
+                <GoodIcon style={styles.icon} />
                 <Text style={styles.text}>Хорошо</Text>
               </View>
             </LinearGradient>

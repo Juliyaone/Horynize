@@ -1,26 +1,191 @@
-import React, { useRef, useState, useEffect } from 'react';
-import { StyleSheet, View, Text, Modal, TouchableOpacity, PanResponder, Switch, Image } from 'react-native';
+import React, { useRef, useState, useCallback } from 'react';
+import {
+  StyleSheet, View, Text, Modal, TouchableOpacity, PanResponder, Image,
+} from 'react-native';
 
 import { LinearGradient } from 'expo-linear-gradient';
 
-import CoolingActiveIcon from "../../img/coolingActiveIcon.png";
-import CoolingDeactiveIcon from "../../img/coolingDeactiveIcon.png";
+import CoolingActiveIcon from '../../img/coolingActiveIcon.png';
+import CoolingDeactiveIcon from '../../img/coolingDeactiveIcon.png';
 
-import TempActiveIcon from "../../img/tempActiveIcon.png";
-import TempDeactiveIcon from "../../img/tempDeactiveIcon.png";
+import TempActiveIcon from '../../img/tempActiveIcon.png';
+import TempDeactiveIcon from '../../img/tempDeactiveIcon.png';
 
-import VentActiveIcon from "../../img/ventActiveIcon.png";
-import VentDeactiveIcon from "../../img/ventDeactiveIcon.png";
+import VentActiveIcon from '../../img/ventActiveIcon.png';
+import VentDeactiveIcon from '../../img/ventDeactiveIcon.png';
 
-import HumidityBtnIcon from "../../img/icons/btnHumidity";
+import HumidityBtnIcon from '../../img/icons/btnHumidity';
 
-function ModeModal({ modalVisible, setModalVisible, unitParams, sendParamsRes, setResMode, resMode }) {
+const styles = StyleSheet.create({
+  centeredView: {
+    flex: 1,
+    justifyContent: 'flex-end',
+    alignItems: 'center',
+    backgroundColor: 'rgba(0,0,0,0.5)',
+  },
+  modalView: {
+    width: '100%',
+    minHeight: '50%',
+    backgroundColor: 'white',
+    borderRadius: 20,
+    padding: 35,
+    alignItems: 'center',
+    justifyContent: 'center',
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
+    elevation: 5,
+  },
+  openButton: {
+    backgroundColor: '#F194FF',
+    borderRadius: 20,
+    padding: 10,
+    elevation: 2,
+  },
+  textStyle: {
+    color: 'white',
+    fontWeight: 'bold',
+    textAlign: 'center',
+  },
+  modalText: {
+    fontFamily: 'SFProDisplay',
+    fontStyle: 'normal',
+    fontWeight: '600',
+    fontSize: 20,
+    lineHeight: 28,
+    letterSpacing: 0.35,
+    color: '#212121',
+    marginBottom: 15,
+  },
+  button: {
+    width: '100%',
+    borderRadius: 16,
+    overflow: 'hidden',
+    marginTop: 0,
+    marginBottom: 10,
+  },
+  gradientBackground: {
+    paddingHorizontal: 16,
+    paddingVertical: 15,
+  },
+  content: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  icon: {
+    marginRight: 8,
+  },
+  text: {
+    color: 'white',
+    fontSize: 16,
+    fontWeight: 'bold',
+  },
+  boxDays: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 4,
+  },
+  boxAutoRun: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    width: '100%',
+    marginBottom: 25,
+  },
+  sliderBox: {
+    marginBottom: 25,
+  },
+  boxAutoMode: {
+    width: '100%',
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    justifyContent: 'space-between',
+    marginBottom: 23,
+  },
+  boxAutoModeItem: {
+    width: 90,
+    height: 90,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: '#FFFFFF',
+    borderRadius: 8,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.12,
+    shadowRadius: 2,
+    borderColor: 'transparent',
+    borderWidth: 1,
+    elevation: 1,
+    marginBottom: 15,
+    padding: 10,
+  },
+  boxAutoModeItemActive: {
+    borderColor: '#ED7635',
+  },
+  boxAutoModeText: {
+    fontFamily: 'SFProDisplay',
+    fontStyle: 'normal',
+    fontWeight: '600',
+    fontSize: 10,
+    lineHeight: 12,
+    textAlign: 'center',
+    letterSpacing: 0.374,
+    color: '#787880',
+  },
+  boxAutoModeTextActive: {
+    color: '#ED7635',
+  },
+  sliderBoxText: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  sliderValueBox: {
+    width: 79,
+    heigh: 32,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: '#FFFFFF',
+    borderRadius: 8,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.12,
+    shadowRadius: 2,
+    elevation: 1,
+    marginBottom: 15,
+    padding: 10,
+  },
+  sliderValueText: {
+    fontFamily: 'SFProDisplay',
+    fontStyle: 'normal',
+    fontWeight: '400',
+    fontSize: 16,
+    lineHeight: 19,
+    letterSpacing: 0.374,
+    color: '#787880',
+  },
+  sliderText: {
+    fontFamily: 'SFProDisplay',
+    fontStyle: 'normal',
+    fontWeight: '400',
+    fontSize: 16,
+    lineHeight: 19,
+    letterSpacing: 0.374,
+    color: '#787880',
+  },
 
-  console.log('resMode', resMode);
+});
 
-  const [isEnabled, setIsEnabled] = useState(false);
-
-  const [activeItem, setActiveItem] = useState(null);
+function ModeModal({
+  modalVisible, setModalVisible, sendParamsData, unitId, resMode,
+}) {
+  const [activeItem, setActiveItem] = useState(resMode);
 
   const panResponder = useRef(
     PanResponder.create({
@@ -30,9 +195,8 @@ function ModeModal({ modalVisible, setModalVisible, unitParams, sendParamsRes, s
           setModalVisible(false);
         }
       },
-    })
+    }),
   ).current;
-
 
   const iconSelector = (imageKeyIcon, active) => {
     if (active) {
@@ -67,10 +231,10 @@ function ModeModal({ modalVisible, setModalVisible, unitParams, sendParamsRes, s
   const handlePress = (itemId) => {
     if (activeItem === itemId) {
       setActiveItem(null);
-      setResMode(0); // Обнуление res, если режим деактивирован
+      // setResMode(0); // Обнуление res, если режим деактивирован
     } else {
       setActiveItem(itemId);
-      setResMode(itemId); // Установка res в значение itemId (1, 2, 3 или 4)
+      // setResMode(itemId); // Установка res в значение itemId (1, 2, 3 или 4)
     }
   };
 
@@ -81,12 +245,20 @@ function ModeModal({ modalVisible, setModalVisible, unitParams, sendParamsRes, s
     { id: 4, name: 'Климат-контроль', imageKeyIcon: 'Auto' },
   ];
 
-  console.log();
+  const onPress = useCallback(() => {
+    if (activeItem) {
+      sendParamsData({
+        controllerId: String(unitId),
+        res: String(activeItem),
+      });
+    }
+    setModalVisible(false);
+  }, [activeItem, sendParamsData, setModalVisible, unitId]);
 
   return (
     <Modal
       animationType="slide"
-      transparent={true}
+      transparent
       visible={modalVisible}
       onRequestClose={() => {
         setModalVisible(!modalVisible);
@@ -96,7 +268,7 @@ function ModeModal({ modalVisible, setModalVisible, unitParams, sendParamsRes, s
         <View style={styles.modalView} {...panResponder.panHandlers}>
           <Text style={styles.modalText}>Автоматический режим</Text>
           <View style={styles.boxAutoMode}>
-            {arr.map((item, index) => {
+            {arr.map((item) => {
               const iconOrText = iconSelector(item.imageKeyIcon, activeItem === item.id);
 
               const keyForRender = ['Temp', 'Vent', 'Cooling', 'Auto'];
@@ -137,11 +309,15 @@ function ModeModal({ modalVisible, setModalVisible, unitParams, sendParamsRes, s
             })}
           </View>
 
-          <TouchableOpacity activeOpacity={0.8} style={styles.button}
-            onPress={sendParamsRes}>
+          <TouchableOpacity
+            activeOpacity={0.8}
+            style={styles.button}
+            onPress={onPress}
+          >
             <LinearGradient
               colors={['#FEB84A', '#FF5204']}
-              style={styles.gradientBackground}>
+              style={styles.gradientBackground}
+            >
               <View style={styles.content}>
                 <HumidityBtnIcon style={styles.icon} />
                 <Text style={styles.text}>Применить</Text>
@@ -153,171 +329,5 @@ function ModeModal({ modalVisible, setModalVisible, unitParams, sendParamsRes, s
     </Modal>
   );
 }
-
-const styles = StyleSheet.create({
-  centeredView: {
-    flex: 1,
-    justifyContent: 'flex-end',
-    alignItems: 'center',
-    backgroundColor: 'rgba(0,0,0,0.5)',
-  },
-  modalView: {
-    width: '100%',
-    minHeight: '50%',
-    backgroundColor: 'white',
-    borderRadius: 20,
-    padding: 35,
-    alignItems: 'center',
-    justifyContent: 'center',
-    shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-    shadowOpacity: 0.25,
-    shadowRadius: 3.84,
-    elevation: 5,
-  },
-  openButton: {
-    backgroundColor: '#F194FF',
-    borderRadius: 20,
-    padding: 10,
-    elevation: 2,
-  },
-  textStyle: {
-    color: 'white',
-    fontWeight: 'bold',
-    textAlign: 'center',
-  },
-  modalText: {
-    fontFamily: "SFProDisplay",
-    fontStyle: "normal",
-    fontWeight: '600',
-    fontSize: 20,
-    lineHeight: 28,
-    letterSpacing: 0.35,
-    color: "#212121",
-    marginBottom: 15
-  },
-  button: {
-    width: '100%',
-    borderRadius: 16,
-    overflow: 'hidden',
-    marginTop: 0,
-    marginBottom: 10
-  },
-  gradientBackground: {
-    paddingHorizontal: 16,
-    paddingVertical: 15,
-  },
-  content: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center'
-  },
-  icon: {
-    marginRight: 8,
-  },
-  text: {
-    color: 'white',
-    fontSize: 16,
-    fontWeight: 'bold',
-  },
-  boxDays: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 4
-  },
-  boxAutoRun: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    width: '100%',
-    marginBottom: 25
-  },
-  sliderBox: {
-    marginBottom: 25
-  },
-  boxAutoMode: {
-    width: '100%',
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    justifyContent: 'space-between',
-    marginBottom: 23
-  },
-  boxAutoModeItem: {
-    width: 90,
-    height: 90,
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: '#FFFFFF',
-    borderRadius: 8,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.12,
-    shadowRadius: 2,
-    borderColor: 'transparent',
-    borderWidth: 1,
-    elevation: 1,
-    marginBottom: 15,
-    padding: 10
-  },
-  boxAutoModeItemActive: {
-    borderColor: '#ED7635',
-  },
-  boxAutoModeText: {
-    fontFamily: "SFProDisplay",
-    fontStyle: "normal",
-    fontWeight: '600',
-    fontSize: 10,
-    lineHeight: 12,
-    textAlign: "center",
-    letterSpacing: 0.374,
-    color: "#787880"
-  },
-  boxAutoModeTextActive: {
-    color: '#ED7635'
-  },
-  sliderBoxText: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-  },
-  sliderValueBox: {
-    width: 79,
-    heigh: 32,
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: '#FFFFFF',
-    borderRadius: 8,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.12,
-    shadowRadius: 2,
-    elevation: 1,
-    marginBottom: 15,
-    padding: 10
-  },
-  sliderValueText: {
-    fontFamily: "SFProDisplay",
-    fontStyle: "normal",
-    fontWeight: '400',
-    fontSize: 16,
-    lineHeight: 19,
-    letterSpacing: 0.374,
-    color: "#787880"
-  },
-  sliderText: {
-    fontFamily: "SFProDisplay",
-    fontStyle: "normal",
-    fontWeight: '400',
-    fontSize: 16,
-    lineHeight: 19,
-    letterSpacing: 0.374,
-    color: "#787880"
-  }
-
-});
 
 export default ModeModal;

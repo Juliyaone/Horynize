@@ -1,15 +1,17 @@
 import React, { useState, useContext } from 'react';
-import { StyleSheet, View, Text, TextInput } from 'react-native';
+import {
+  StyleSheet, View, Text, TextInput,
+} from 'react-native';
 
 import { Formik } from 'formik';
 import * as yup from 'yup';
 
 import { UserContext } from '../../components/providers/UserContext';
-import { AuthContext } from "../../components/providers/AuthContext";
-import { saveCredentials } from "../../components/providers/SecureStore";
+import { AuthContext } from '../../components/providers/AuthContext';
+import { saveCredentials } from '../../components/providers/SecureStore';
 
 import ApplyIcon from '../../img/icons/apply';
-import GoBackComponent from "../../components/GoBack";
+import GoBackComponent from '../../components/GoBack';
 
 import ModalError from '../../components/ModalError';
 import Loader from '../../components/Loader';
@@ -26,7 +28,7 @@ const validationSchema = yup.object().shape({
     .required('Введите ваш пароль'),
 });
 
-const SignInScreen = ({ navigation }) => {
+function SignInScreen({ navigation }) {
   const [errorText, setErrorText] = useState('');
   const [authorizationError, setAuthorizationError] = useState(false);
 
@@ -36,40 +38,37 @@ const SignInScreen = ({ navigation }) => {
   const [loginUser, { isLoading }] = useLoginUserMutation();
 
   const sendAuthorizationData = async (values) => {
-
     if (values.username !== '' && values.password !== '') {
       try {
         const answer = await loginUser(values).unwrap();
         console.log('answerSignIn', answer);
 
-        if (answer["0"]?.jwt) {
-          const token = answer["0"].jwt;
-          const controllers = answer.controllers;
+        if (answer['0']?.jwt) {
+          const token = answer['0'].jwt;
+          const { controllers } = answer;
           const controllerId = String(answer.controllers[0].id_controller);
-          const userId = String(answer["0"].id_user);
-          const email = String(answer["0"].email);
-          const userName = String(answer["0"].username);
+          const userId = String(answer['0'].id_user);
+          const email = String(answer['0'].email);
+          const userName = String(answer['0'].username);
 
-
-          await saveCredentials(values.username, values.password );
+          await saveCredentials(values.username, values.password);
 
           await signIn(token, controllerId, userId, controllers, email, userName);
         }
 
-        setUserId(answer["0"].id_user);
+        setUserId(answer['0'].id_user);
 
         setUserData({
-          username: answer["0"].username,
-          email: answer["0"].email,
-          id: answer["0"].id_user,
+          username: answer['0'].username,
+          email: answer['0'].email,
+          id: answer['0'].id_user,
           units: answer.controllers,
-          jwt: answer["0"].jwt,
+          jwt: answer['0'].jwt,
           id_model: answer.controllers[0].id_model,
-          name_model: answer.controllers[0].name
+          name_model: answer.controllers[0].name,
         });
 
-        navigation.navigate("MainApp");
-
+        navigation.navigate('MainApp');
       } catch (error) {
         console.log('error', error);
         let errorMessage;
@@ -93,7 +92,6 @@ const SignInScreen = ({ navigation }) => {
     }
   }
 
-
   const handleSubmit = async (values) => {
     sendAuthorizationData(values)
   };
@@ -102,19 +100,18 @@ const SignInScreen = ({ navigation }) => {
     return <Loader />;
   }
 
-
   return (
     <View style={styles.container}>
 
-      {authorizationError &&
+      {authorizationError
+        && (
         <ModalError
           errorText={errorText}
           visible={!!authorizationError}
           onDismiss={() => setAuthorizationError(null)}
         />
-      }
+        )}
       <GoBackComponent navigation={navigation} />
-
 
       <Text style={styles.title}>Авторизация</Text>
 
@@ -124,7 +121,9 @@ const SignInScreen = ({ navigation }) => {
         validationSchema={validationSchema}
       >
 
-        {({ handleChange, handleBlur, handleSubmit, values, errors }) => (
+        {({
+          handleChange, handleBlur, handleSubmit, values, errors,
+        }) => (
 
           <View>
             {errors.username && <Text style={styles.errorText}>{errors.username}</Text>}
@@ -153,7 +152,7 @@ const SignInScreen = ({ navigation }) => {
                 secureTextEntry
               />
             </View>
-            <CustomButton onPress={handleSubmit} text={'Войти'} IconComponent={false} style={{ width: "100%" }} />
+            <CustomButton onPress={handleSubmit} text="Войти" IconComponent={false} style={{ width: '100%' }} />
 
           </View>
         )}
@@ -168,15 +167,15 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   title: {
-    textAlign: "center",
-    fontFamily: "SFProDisplay",
-    fontStyle: "normal",
+    textAlign: 'center',
+    fontFamily: 'SFProDisplay',
+    fontStyle: 'normal',
     fontWeight: '600',
     fontSize: 20,
     lineHeight: 28,
     letterSpacing: 0.35,
-    color: "#212121",
-    marginBottom: 30
+    color: '#212121',
+    marginBottom: 30,
   },
   inputContainer: {
     flexDirection: 'row',
@@ -187,7 +186,7 @@ const styles = StyleSheet.create({
     marginBottom: 10,
   },
   lastInputContainer: {
-    marginBottom: 30
+    marginBottom: 30,
   },
   input: {
     flex: 1,
@@ -202,20 +201,15 @@ const styles = StyleSheet.create({
     width: 15,
     height: 15,
     marginRight: 10,
-    marginLeft: 10
+    marginLeft: 10,
   },
   errorText: {
     color: '#FF5204',
     padding: 0,
     marginTop: 0,
-    marginBottom: 10
+    marginBottom: 10,
   },
 
 });
 
 export default SignInScreen;
-
-
-
-
-

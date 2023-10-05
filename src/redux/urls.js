@@ -15,8 +15,6 @@ export const CHANGE_PASSWORD = `${BASE_URL}/users/edituser`;
 
 // /api/users/edituser
 
-
-
 const UNITS = '/vent-units';
 
 // Список контроллеров пользователя
@@ -32,19 +30,17 @@ export const UNITS_GET_PARAMS = `${BASE_URL}${UNITS}/getparams`;
 // Приязка/отвязка, контроллера к пользователю,  редактирование custonName
 export const UNITS_BIND = `${BASE_URL}${UNITS}/bind`;
 
-
-//Получить Список  дней, для которых подключен таймер
+// Получить Список  дней, для которых подключен таймер
 export const UNITS_DAY_TIMERS = `${BASE_URL}${UNITS}/daytimers`;
 
-//Получить Список таймеров дня
+// Получить Список таймеров дня
 export const UNITS_TIMERS = `${BASE_URL}${UNITS}/timers`;
 
-//Установка Список  дней, для которых подключен таймер
+// Установка Список  дней, для которых подключен таймер
 export const UNITS_SET_DAY_TIMERS = `${BASE_URL}${UNITS}/setdaystimers`;
 
-//Установка таймеров для дня  (4 таймера на день)
+// Установка таймеров для дня  (4 таймера на день)
 export const UNITS_SET_TIMERS = `${BASE_URL}${UNITS}/settimers`;
-
 
 const INFO = '/info';
 

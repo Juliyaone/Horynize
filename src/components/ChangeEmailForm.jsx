@@ -1,9 +1,11 @@
 import React from 'react';
-import { View, Text, TextInput, StyleSheet } from 'react-native';
-import { useChangePasswordMutation } from '../redux/usersApi';
+import {
+  View, Text, TextInput, StyleSheet,
+} from 'react-native';
 import { Formik } from 'formik';
 import * as yup from 'yup';
-import Loader from '../components/Loader';
+import { useChangePasswordMutation } from '../redux/usersApi';
+import Loader from './Loader';
 import ApplyIcon from '../img/icons/apply';
 
 import CustomButton from './CustomButton';
@@ -13,7 +15,57 @@ const editSchema = yup.object({
   password: yup.string().required('Пароль обязателен').min(8, 'Пароль должен быть не менее 8 символов'),
 });
 
-const ChangeEmailForm = ({ navigation }) => {
+const styles = StyleSheet.create({
+  container: {
+    padding: 10,
+    justifyContent: 'center',
+  },
+  title: {
+    textAlign: 'center',
+    fontFamily: 'SFProDisplay',
+    fontStyle: 'normal',
+    fontWeight: '600',
+    fontSize: 20,
+    lineHeight: 28,
+    letterSpacing: 0.35,
+    color: '#212121',
+    marginBottom: 30,
+  },
+  inputContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    borderWidth: 0,
+    backgroundColor: '#DDDDDD',
+    borderRadius: 16,
+  },
+  lastInputContainer: {
+    marginBottom: 10,
+  },
+  input: {
+    flex: 1,
+    borderWidth: 0,
+    backgroundColor: '#DDDDDD',
+    borderRadius: 16,
+    padding: 15,
+    color: '#212121',
+    fontSize: 16,
+  },
+  inputIcon: {
+    width: 15,
+    height: 15,
+    marginRight: 10,
+    marginLeft: 10,
+  },
+  errorText: {
+    color: '#FF5204',
+    padding: 0,
+    marginTop: 0,
+    marginBottom: 10,
+  },
+
+});
+
+function ChangeEmailForm() {
   const [changePassword, { isLoading: isLoaderChangePassword }] = useChangePasswordMutation();
 
   const onClickBtnEditUser = (values) => {
@@ -76,55 +128,5 @@ const ChangeEmailForm = ({ navigation }) => {
     </Formik>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    padding: 10,
-    justifyContent: 'center',
-  },
-  title: {
-    textAlign: "center",
-    fontFamily: "SFProDisplay",
-    fontStyle: "normal",
-    fontWeight: '600',
-    fontSize: 20,
-    lineHeight: 28,
-    letterSpacing: 0.35,
-    color: "#212121",
-    marginBottom: 30
-  },
-  inputContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    borderWidth: 0,
-    backgroundColor: '#DDDDDD',
-    borderRadius: 16,
-  },
-  lastInputContainer: {
-    marginBottom: 10
-  },
-  input: {
-    flex: 1,
-    borderWidth: 0,
-    backgroundColor: '#DDDDDD',
-    borderRadius: 16,
-    padding: 15,
-    color: '#212121',
-    fontSize: 16,
-  },
-  inputIcon: {
-    width: 15,
-    height: 15,
-    marginRight: 10,
-    marginLeft: 10
-  },
-  errorText: {
-    color: '#FF5204',
-    padding: 0,
-    marginTop: 0,
-    marginBottom: 10
-  },
-
-});
 
 export default ChangeEmailForm;

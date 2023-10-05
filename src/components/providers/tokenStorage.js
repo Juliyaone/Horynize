@@ -1,28 +1,21 @@
-import React from 'react';
-
-import AsyncStorage from "@react-native-async-storage/async-storage";
-
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export const saveTokenToStorage = async (token) => {
-    if( token !== null ) {
-
-  await AsyncStorage.setItem('userToken', token)
-  console.log('token записали в асинксторадж', token);
-    } else {
-      console.log('token не смогли записать в асинксторадж', token);
-
-    }
+  if (token !== null) {
+    await AsyncStorage.setItem('userToken', token)
+    console.log('token записали в асинксторадж', token);
+  } else {
+    console.log('token не смогли записать в асинксторадж', token);
+  }
 }
 
-
 export const getTokenFromStorage = async () => {
-  const token = await AsyncStorage.getItem("userToken");
-  if( token !== null ) {
+  const token = await AsyncStorage.getItem('userToken');
+  if (token !== null) {
     // console.log('token получили из асинксторадж', token);
     return token;
-  } else {
-    console.log('нет токена в асинксторадж', token);
   }
+  console.log('нет токена в асинксторадж', token);
 }
 
 export const isTokenExpired = (token) => {
@@ -34,11 +27,14 @@ export const isTokenExpired = (token) => {
   }
 };
 
+
+// TODO: not exist on back
 export const refreshToken = async () => {
   // Здесь ваш API-запрос для обновления токена.
   // Используйте AsyncStorage для сохранения нового токена.
   // Верните новый токен или null, если обновление не удалось.
-  const refreshToken = await AsyncStorage.getItem("refreshToken"); // предполагается, что вы также сохраняете refreshToken
+  const refreshToken = await AsyncStorage.getItem('refreshToken'); 
+  // предполагается, что вы также сохраняете refreshToken
   if (refreshToken) {
     try {
       const response = await fetch('YOUR_REFRESH_TOKEN_URL', {
@@ -60,7 +56,6 @@ export const refreshToken = async () => {
   }
   return null;
 };
-
 
 export const deleteTokenFromStorage = async () => {
   await AsyncStorage.removeItem('userToken');

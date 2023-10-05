@@ -1,8 +1,8 @@
 import * as React from 'react';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 
-import DevicesAddScreen from '../../screens/Devices/DevicesAddScreen.jsx';
-import DevicesScreen from '../../screens/Devices/DevicesScreen.jsx';
+import DevicesAddScreen from '../../screens/Devices/DevicesAddScreen';
+import DevicesScreen from '../../screens/Devices/DevicesScreen';
 
 const DevicesStack = createNativeStackNavigator();
 

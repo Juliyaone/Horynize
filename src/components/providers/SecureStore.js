@@ -18,12 +18,10 @@ export const getStoredCredentials = async () => {
 
     if (username && password) {
       return { username, password };
-    } else {
-      return null;
     }
+    return null;
   } catch (error) {
     console.error('Could not retrieve credentials', error);
     return null;
   }
 };
-
