@@ -292,13 +292,22 @@ function HomePlayScreen({ navigation, route }) {
   const [isDisabled, setIsDisabled] = useState(true);
   const [entriesUnitParams, setEntriesUnitParams] = useState();
   const [sendParams, { isLoading }] = useSendParamsMutation();
-
+  const dayMapping = {
+    Пн: 1,
+    Вт: 2,
+    Ср: 3,
+    Чт: 4,
+    Пт: 5,
+    Сб: 6,
+    Вс: 0,
+  };
   const { data: dayTimers, isLoading: isLoadingGetDayTimers } = useUnitsGetDayTimersQuery({ controllerId: unitId });
   const {
     data: timers,
     isLoading: isLoadingTimers,
-  } = useGetTimersUnitQuery({ controllerId: unitId, day: currentDayOfWeek });
-
+    refetch: refetchTimers,
+  } = useGetTimersUnitQuery({ controllerId: unitId, day: dayMapping[currentDayOfWeek] });
+  console.log(timers, 'timers')
   const {
     data: unitParams,
     error: errorunitParamsDevices,
@@ -459,18 +468,22 @@ function HomePlayScreen({ navigation, route }) {
         {(item[0] === 'ZagrFiltr') && (
         <>
           <Text style={styles.boxPowerBtnTextName}>Автозапуск</Text>
+          {timers.timers && (
+          <>
+            <View style={styles.boxPowerBtnTextBox}>
+              <Text style={styles.boxPowerBtnText}>{timers?.timers[0].time}</Text>
+            </View>
+            {timers?.timers[1].fanSpeed === '255' && (
+              <>
+                <Text style={styles.boxPowerBtnText}>до</Text>
+                <View style={styles.boxPowerBtnTextBox}>
+                  <Text style={styles.boxPowerBtnText}>{timers?.timers[1].time}</Text>
+                </View>
 
-          <View style={styles.boxPowerBtnTextBox}>
-            <Text style={styles.boxPowerBtnText}>{timers?.timers[0].time}</Text>
-            <Text style={styles.boxPowerBtnText}>:</Text>
-            <Text style={styles.boxPowerBtnText}>{timers?.timers[1].time}</Text>
-          </View>
-          <Text style={styles.boxPowerBtnText}>до</Text>
-          <View style={styles.boxPowerBtnTextBox}>
-            <Text style={styles.boxPowerBtnText}>{timers?.timers[2].time}</Text>
-            <Text style={styles.boxPowerBtnText}>:</Text>
-            <Text style={styles.boxPowerBtnText}>{timers?.timers[3].time}</Text>
-          </View>
+              </>
+            )}
+          </>
+          )}
         </>
         )}
 
@@ -558,15 +571,15 @@ function HomePlayScreen({ navigation, route }) {
     try {
       const answerTemperature = await sendParams(data);
       // console.log('answerTemperature', answerTemperature);
-      // await refetchUnitParams();
-      setRefresh(!refresh); // Обновляем состояние только после выполнения refetch
+      await refetchUnitParams();
+      // setRefresh(!refresh); // Обновляем состояние только после выполнения refetch
 
-      if (answerTemperature.data && answerTemperature.data.data[0]) {
-        setTemperature(answerTemperature.data.data[0].tempTarget);
-      }
+      // if (answerTemperature.data && answerTemperature.data.data[0]) {
+      //   setTemperature(answerTemperature.data.data[0].tempTarget);
+      // }
 
-      setSuccessText('Данные изменены');
-      setSpeedSuccess(true);
+      // setSuccessText('Данные изменены');
+      // setSpeedSuccess(true);
     } catch (error) {
       console.log('error', error);
       let errorMessage;
@@ -582,9 +595,9 @@ function HomePlayScreen({ navigation, route }) {
         errorMessage = JSON.stringify(error);
       }
 
-      setErrorText(errorMessage);
+      // setErrorText(errorMessage);
 
-      setStatusError(true);
+      // setStatusError(true);
     }
   }
 

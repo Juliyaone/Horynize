@@ -51,7 +51,7 @@ function TabNavigator() {
       <Tab.Screen
         name="DevicesStack"
         component={DevicesStackNavigator}
-        options={{ unmountOnBlur: true, headerShown: false }}
+        options={{ headerShown: false }}
       />
       {userToken
       && (

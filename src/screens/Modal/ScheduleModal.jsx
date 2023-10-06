@@ -223,12 +223,21 @@ function ScheduleModal({
   setModalVisible,
   unitId,
 }) {
+  const dayMapping = {
+    Пн: 1,
+    Вт: 2,
+    Ср: 3,
+    Чт: 4,
+    Пт: 5,
+    Сб: 6,
+    Вс: 0,
+  };
   const { currentDayOfWeek } = useContext(UserContext);
   const [modalVisibleStartTime, setModalVisibleStartTime] = useState(false);
   const [modalVisibleFinishTime, setModalVisibleFinishTime] = useState(false);
   const [modalVisibleTemperature, setModalVisibleTemperature] = useState(false);
 
-  const [selectedDay, setSelectedDay] = useState(currentDayOfWeek);
+  const [selectedDay, setSelectedDay] = useState(null);
   // const [selectedDayInfo, setSelectedDayInfo] = useState(null);
 
   // const [week, setWeek] = useState('0000000');
@@ -254,34 +263,12 @@ function ScheduleModal({
   const [valueSliderSpeed, setValueSliderSpeed] = useState(0);
 
   const startTimeDate = new Date(startTime);
-  // const finishTimeDate = new Date(finishTime);
+  const finishTimeDate = new Date(finishTime);
 
   const startHours = startTimeDate.getHours();
   const startMinutes = startTimeDate.getMinutes();
-  // const finishHours = finishTimeDate.getHours();
-  // const finishMinutes = finishTimeDate.getMinutes();
-
-  // useEffect(() => {
-  //   const getDayTimersData = () => {
-  //     const arrWeekData = [];
-
-  //     Object.entries(dayTimers.timers[0]).map((item) => {
-
-  //       if (item[1] !== "") {
-  //         arrWeekData.push(item[1]);
-  //       } else {
-  //         arrWeekData.push(0);
-  //       }
-  //     })
-  //     return arrWeekData.join("");
-  //   }
-
-  //   const dayTimersData = getDayTimersData();
-
-  //   if (dayTimersData !== '0000000') {
-  //     setWeek(dayTimersData);
-  //   }
-  // }, [dayTimers]);
+  const finishHours = finishTimeDate.getHours();
+  const finishMinutes = finishTimeDate.getMinutes();
 
   const panResponder = useRef(
     PanResponder.create({
@@ -300,15 +287,15 @@ function ScheduleModal({
 
   const displayDays = ['Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб', 'Вс'];
   const serverDaysOrder = ['Сб', 'Пт', 'Чт', 'Ср', 'Вт', 'Пн', 'Вс'];
-  const dayMapping = {
-    Пн: 1,
-    Вт: 2,
-    Ср: 3,
-    Чт: 4,
-    Пт: 5,
-    Сб: 6,
-    Вс: 0,
-  };
+  const serverDay = {
+    0: '0000001',
+    1: '0000010',
+    2: '0000100',
+    3: '0001000',
+    4: '0010000',
+    5: '0100000',
+    6: '1000000',
+  }
 
   const openModalStartTime = () => {
     setModalVisibleStartTime(true);
@@ -323,11 +310,11 @@ function ScheduleModal({
   };
 
   const handleDayPressDay = (day) => {
+    setSelectedDay(dayMapping[day]);
     if (selectedDays.includes(day)) {
-      setSelectedDay(day);
       setSelectedDays(selectedDays.filter((d) => d !== day));
     } else {
-      setSelectedDays([...selectedDays, day]);
+      setSelectedDays([day]);
     }
   };
 
@@ -415,7 +402,7 @@ function ScheduleModal({
 
     const data = {
       controllerId: unitId,
-      day: 0,
+      day: selectedDay,
       timers: {
         num1: {
           time: String(`${startHours}:${startMinutes}`),
@@ -423,9 +410,9 @@ function ScheduleModal({
           fanSpeed: String(fanTargetSchedule),
         },
         num2: {
-          time: '0',
-          tempTarget: '0',
-          fanSpeed: '255',
+          time: String(`${finishHours}:${finishMinutes}`),
+          tempTarget: String(temperatureSchedule),
+          fanSpeed: String(fanTargetSchedule),
         },
         num3: {
           time: '0',
@@ -442,6 +429,11 @@ function ScheduleModal({
     try {
       if (data && selectedDay) {
         await sendTimers(data);
+        await sendDayTimers({
+          controllerId: unitId,
+          days: serverDay[selectedDay],
+        });
+        setSelectedDay(null);
       }
     } catch (error) {
       console.log('error', error);
@@ -532,9 +524,9 @@ function ScheduleModal({
 
             <View style={styles.boxDays}>
 
-              {displayDays.map((day, index) => (
+              {displayDays.map((day) => (
                 <TouchableOpacity
-                  key={index}
+                  key={day}
                   style={[
                     styles.dayButton,
                     { backgroundColor: selectedDays.includes(day) ? '#ED7635' : '#ffffff' },

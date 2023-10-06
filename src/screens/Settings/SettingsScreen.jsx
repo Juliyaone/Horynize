@@ -20,120 +20,6 @@ import { useGetContactsQuery } from '../../redux/usersApi';
 
 import { getDeviceWordForm } from '../../utils';
 
-function SettingsScreen({ navigation }) {
-  const {
-    userId, setUserId, userData, setUserData,
-  } = useContext(UserContext);
-  const { data: contacts, isLoading: isLoadingContacts } = useGetContactsQuery();
-
-  const {
-    signOut, emailAuthContext, userName, allControllers,
-  } = useContext(AuthContext);
-
-  const [email, setEmail] = useState('');
-  const [tel, setTel] = useState('');
-
-  useEffect(() => {
-    if (contacts && contacts?.contacts && contacts.contacts.length > 0) {
-      console.log('contacts', contacts);
-
-      console.log('emailAuthContext', emailAuthContext);
-      console.log('userNameAuthContext', userName);
-      console.log('allControllersAuthContext', allControllers);
-
-      setEmail(contacts.contacts[0].email);
-      setTel(contacts.contacts[0].phone);
-    }
-  }, [allControllers, contacts, emailAuthContext, userName])
-
-  if (isLoadingContacts) {
-    return <Loader />
-  }
-
-  const handleLogout = () => {
-    navigation.dispatch(
-      CommonActions.reset({
-        index: 0,
-        routes: [{ name: 'DevicesStack' }],
-      }),
-    );
-    signOut();
-    setUserId('');
-    setUserData('');
-    navigation.navigate('Start');
-  }
-
-  const onChangePassword = () => {
-    navigation.navigate('ChangeUserData');
-  }
-
-  return (
-    <ScrollView>
-      <GoBackComponent navigation={navigation} />
-
-      <View style={styles.container}>
-
-        <Text style={styles.headerTextSettings}>Настройки</Text>
-        {/* {(userData.username !== '') && */}
-        <>
-          <View style={styles.cardUserBox}>
-            <View style={styles.cardUserDataBox}>
-              <Text style={styles.cardUserDataHeaderText}>Пользователь</Text>
-              <SettingsIcon />
-            </View>
-            <View style={styles.cardUserDataBox}>
-              <Text style={styles.cardUserText}>Логин</Text>
-              <Text style={styles.cardUserText}>{userName}</Text>
-            </View>
-            <View style={styles.cardUserNumberOfDevicesBox}>
-              <Text style={styles.cardUserNumberOfDevicesText}>
-                {allControllers?.length}
-                {' '}
-                {getDeviceWordForm(1)}
-              </Text>
-              <ArrowRightSmallIcon />
-            </View>
-            <View style={styles.cardUserBtnBox}>
-              <CustomButton text="Выйти" IconComponent={ExitIcon} onPress={handleLogout} />
-            </View>
-          </View>
-
-          <View style={styles.cardUserBox}>
-            <View style={styles.cardUserDataBox}>
-              <Text style={styles.cardUserDataHeaderText}>Личные данные</Text>
-              <SettingsIcon />
-            </View>
-            <View style={styles.cardUserDataBox}>
-              <Text style={styles.cardUserText}>Адрес эл. почты</Text>
-              <Text style={styles.cardUserText}>{emailAuthContext}</Text>
-            </View>
-            <View style={styles.cardUserBtnBox}>
-              <CustomButton text="Изменить данные" IconComponent={LockIcon} onPress={onChangePassword} />
-            </View>
-          </View>
-        </>
-
-        {/* } */}
-        <View style={styles.cardUserBox}>
-          <Text style={styles.cardUserDataHeaderText}>Наши контакты</Text>
-          <View style={styles.cardUserDataBox}>
-            <Text style={styles.cardUserText}>Телефон</Text>
-            <Text style={styles.cardUserText}>{tel}</Text>
-          </View>
-          <View style={styles.cardUserDataBox}>
-            <Text style={styles.cardUserText}>Адрес эл. почты</Text>
-            <Text style={styles.cardUserText}>{email}</Text>
-          </View>
-          <View style={styles.cardUserBtnBox}>
-            <CustomButton text="Обратиться в сервис" IconComponent={ChatIcon} />
-          </View>
-        </View>
-
-      </View>
-    </ScrollView>
-  );
-}
-
 const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -231,5 +117,127 @@ const styles = StyleSheet.create({
   },
 
 });
+
+function SettingsScreen({ navigation }) {
+  const {
+    userId, setUserId, userData, setUserData,
+  } = useContext(UserContext);
+  const { data: contacts, isLoading: isLoadingContacts } = useGetContactsQuery();
+
+  const {
+    signOut, emailAuthContext, userName, allControllers, userToken,
+  } = useContext(AuthContext);
+
+  const [email, setEmail] = useState('');
+  const [tel, setTel] = useState('');
+
+  useEffect(() => {
+    if (contacts && contacts?.contacts && contacts.contacts.length > 0) {
+      console.log('contacts', contacts);
+
+      console.log('emailAuthContext', emailAuthContext);
+      console.log('userNameAuthContext', userName);
+      console.log('allControllersAuthContext', allControllers);
+
+      setEmail(contacts.contacts[0].email);
+      setTel(contacts.contacts[0].phone);
+    }
+  }, [allControllers, contacts, emailAuthContext, userName])
+
+  if (isLoadingContacts) {
+    return <Loader />
+  }
+
+  const handleLogout = () => {
+    navigation.dispatch(
+      CommonActions.reset({
+        index: 0,
+        routes: [{ name: 'DevicesStack' }],
+      }),
+    );
+    signOut();
+    setUserId('');
+    setUserData('');
+    navigation.navigate('Start');
+  }
+  const handleLogin = () => {
+    navigation.navigate('Start');
+  }
+
+  const onChangePassword = () => {
+    navigation.navigate('ChangeUserData');
+  }
+
+  return (
+    <ScrollView>
+      <GoBackComponent navigation={navigation} />
+
+      <View style={styles.container}>
+
+        <Text style={styles.headerTextSettings}>Настройки</Text>
+        {userToken && (
+        <>
+          <View style={styles.cardUserBox}>
+            <View style={styles.cardUserDataBox}>
+              <Text style={styles.cardUserDataHeaderText}>Пользователь</Text>
+              <SettingsIcon />
+            </View>
+            <View style={styles.cardUserDataBox}>
+              <Text style={styles.cardUserText}>Логин</Text>
+              <Text style={styles.cardUserText}>{userName}</Text>
+            </View>
+            <View style={styles.cardUserNumberOfDevicesBox}>
+              <Text style={styles.cardUserNumberOfDevicesText}>
+                {allControllers?.length}
+                {' '}
+                {getDeviceWordForm(1)}
+              </Text>
+              <ArrowRightSmallIcon />
+            </View>
+            <View style={styles.cardUserBtnBox}>
+              <CustomButton text="Выйти" IconComponent={ExitIcon} onPress={handleLogout} />
+            </View>
+          </View>
+
+          <View style={styles.cardUserBox}>
+            <View style={styles.cardUserDataBox}>
+              <Text style={styles.cardUserDataHeaderText}>Личные данные</Text>
+              <SettingsIcon />
+            </View>
+            <View style={styles.cardUserDataBox}>
+              <Text style={styles.cardUserText}>Адрес эл. почты</Text>
+              <Text style={styles.cardUserText}>{emailAuthContext}</Text>
+            </View>
+            <View style={styles.cardUserBtnBox}>
+              <CustomButton text="Изменить данные" IconComponent={LockIcon} onPress={onChangePassword} />
+            </View>
+          </View>
+        </>
+        ) }
+        <View style={styles.cardUserBox}>
+          <Text style={styles.cardUserDataHeaderText}>Наши контакты</Text>
+          <View style={styles.cardUserDataBox}>
+            <Text style={styles.cardUserText}>Телефон</Text>
+            <Text style={styles.cardUserText}>{tel}</Text>
+          </View>
+          <View style={styles.cardUserDataBox}>
+            <Text style={styles.cardUserText}>Адрес эл. почты</Text>
+            <Text style={styles.cardUserText}>{email}</Text>
+          </View>
+          <View style={styles.cardUserBtnBox}>
+            <CustomButton text="Обратиться в сервис" IconComponent={ChatIcon} />
+          </View>
+        </View>
+
+        {!userToken && (
+        <View style={styles.cardUserBtnBox}>
+          <CustomButton text="Войти" IconComponent={ExitIcon} onPress={handleLogin} />
+        </View>
+        )}
+
+      </View>
+    </ScrollView>
+  );
+}
 
 export default SettingsScreen;

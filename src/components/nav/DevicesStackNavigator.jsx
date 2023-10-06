@@ -8,8 +8,21 @@ const DevicesStack = createNativeStackNavigator();
 
 function DevicesStackNavigator() {
   return (
-    <DevicesStack.Navigator screenOptions={{ headerShown: false }}>
-      <DevicesStack.Screen name="Devices" component={DevicesScreen} />
+    <DevicesStack.Navigator
+      initialRouteName="Devices"
+      screenOptions={{
+        unmountOnBlur: true,
+        headerShown: false,
+      }}
+    >
+      <DevicesStack.Screen
+        name="Devices"
+        component={DevicesScreen}
+        screenOptions={{
+          unmountOnBlur: true,
+          headerShown: false,
+        }}
+      />
       <DevicesStack.Screen name="DevicesAdd" component={DevicesAddScreen} />
     </DevicesStack.Navigator>
   );
