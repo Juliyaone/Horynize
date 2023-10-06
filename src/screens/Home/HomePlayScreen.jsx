@@ -25,6 +25,7 @@ import HumidityIcon from '../../img/humidity.png';
 import SpeedIcon from '../../img/speed.png';
 import ModeIcon from '../../img/mode.png';
 import TimerIcon from '../../img/timer.png';
+import SettingsIcon from '../../img/icons/settings';
 
 import TemperatureActiveIcon from '../../img/temperature-active.png';
 import HumidityActiveIcon from '../../img/humidity-active.png';
@@ -262,10 +263,16 @@ const styles = StyleSheet.create({
   disabledContainer: {
     display: 'none',
   },
+  boxIconSettings: {
+    width: '100%',
+    display: 'flex',
+    flexDirection: 'row',
+    justifyContent: 'space-between'
+  }
 });
 
-function HomePlayScreen({ navigation, route }) {
-  const { unitsId } = route.params;
+function HomePlayScreen({ navigation }) {
+  // const { unitsId } = route.params;
   const { userData, currentDayOfWeek } = useContext(UserContext);
 
   const { unitId } = useContext(AuthContext);
@@ -396,6 +403,12 @@ function HomePlayScreen({ navigation, route }) {
       </TouchableOpacity>
     )
   };
+  const handleSettings = () => {
+
+    if (unitId) {
+      navigation.navigate('HomeStack', { screen: 'HomeSchedule', params: { unitId: unitId } });
+    }
+  };
 
   const renderItem = ({ item, index }) => {
     const keyForRender = ['tempTarget', 'humRoomTarget', 'fanSpeedP', 'res', 'ZagrFiltr'];
@@ -420,6 +433,7 @@ function HomePlayScreen({ navigation, route }) {
           index !== Object.entries(unitParams?.data[0]).length - 1 && styles.itemMargin,
         ]}
       >
+        <View style={styles.boxIconSettings}>
         <LinearGradient
           colors={['#FEB84A', '#FF5204']}
           style={{
@@ -431,60 +445,69 @@ function HomePlayScreen({ navigation, route }) {
           </View>
         </LinearGradient>
 
+        {item[0] === 'ZagrFiltr' &&
+          <TouchableOpacity onPress={handleSettings}>
+            <SettingsIcon />
+          </TouchableOpacity>
+        }
+        </View>
+
         {(item[0] === 'tempTarget') && (
-        <>
-          <Text style={styles.boxPowerBtnTextName}>Температура</Text>
-          <Text style={styles.boxPowerBtnText}>
-            {temperature}
-            °
-          </Text>
-        </>
+          <>
+            <Text style={styles.boxPowerBtnTextName}>Температура</Text>
+            <Text style={styles.boxPowerBtnText}>
+              {temperature}
+              °
+            </Text>
+          </>
         )}
 
         {(item[0] === 'humRoomTarget') && (
-        <>
-          <Text style={styles.boxPowerBtnTextName}>Влажность</Text>
-          <Text style={styles.boxPowerBtnText}>
-            {humTarget}
-            %
-          </Text>
-        </>
+          <>
+            <Text style={styles.boxPowerBtnTextName}>Влажность</Text>
+            <Text style={styles.boxPowerBtnText}>
+              {humTarget}
+              %
+            </Text>
+          </>
         )}
 
         {(item[0] === 'fanSpeedP') && (
-        <>
-          <Text style={styles.boxPowerBtnTextName}>Скорость</Text>
-          <Text style={styles.boxPowerBtnText}>{fanTarget}</Text>
-        </>
+          <>
+            <Text style={styles.boxPowerBtnTextName}>Скорость</Text>
+            <Text style={styles.boxPowerBtnText}>{fanTarget}</Text>
+          </>
         )}
 
         {(item[0] === 'res') && (
-        <>
-          <Text style={styles.boxPowerBtnTextName}>Режим</Text>
-          <Text style={styles.boxPowerBtnText}>{(resMode != '0') ? resNames[resMode] : 'Не выбрано'}</Text>
-        </>
+          <>
+            <Text style={styles.boxPowerBtnTextName}>Режим</Text>
+            <Text style={styles.boxPowerBtnText}>{(resMode != '0') ? resNames[resMode] : 'Не выбрано'}</Text>
+          </>
         )}
 
         {(item[0] === 'ZagrFiltr') && (
-        <>
-          <Text style={styles.boxPowerBtnTextName}>Автозапуск</Text>
-          {timers.timers && (
           <>
-            <View style={styles.boxPowerBtnTextBox}>
-              <Text style={styles.boxPowerBtnText}>{timers?.timers[0].time}</Text>
-            </View>
-            {timers?.timers[1].fanSpeed === '255' && (
-              <>
-                <Text style={styles.boxPowerBtnText}>до</Text>
-                <View style={styles.boxPowerBtnTextBox}>
-                  <Text style={styles.boxPowerBtnText}>{timers?.timers[1].time}</Text>
-                </View>
+            <Text style={styles.boxPowerBtnTextName}>Автозапуск</Text>
 
+
+            {timers?.timers && (
+              <>
+                <View style={styles.boxPowerBtnTextBox}>
+                  <Text style={styles.boxPowerBtnText}>{timers?.timers[0].time}</Text>
+                </View>
+                {timers?.timers[1].fanSpeed === '255' && (
+                  <>
+                    <Text style={styles.boxPowerBtnText}>до</Text>
+                    <View style={styles.boxPowerBtnTextBox}>
+                      <Text style={styles.boxPowerBtnText}>{timers?.timers[1].time}</Text>
+                    </View>
+
+                  </>
+                )}
               </>
             )}
           </>
-          )}
-        </>
         )}
 
       </View>
@@ -605,7 +628,7 @@ function HomePlayScreen({ navigation, route }) {
     try {
       console.log(params, 'params')
       await sendParams(params);
-      refetchUnitParams();
+      await refetchUnitParams();
     } catch (error) {
       let errorMessage;
       if (error.data || error.data.message) {
@@ -659,51 +682,52 @@ function HomePlayScreen({ navigation, route }) {
   //   }
   // }, [refetchUnitParams, resMode, sendParams]);
 
-  const renderBoxPowerBtn = () => (
-    <View style={styles.boxPowerBtnBoxSmall}>
+  const renderBoxPowerBtn = () => {
+    return <View style={styles.boxPowerBtnBoxSmall}>
       <TouchableOpacity style={styles.powerBtnSmall} onPress={sendParamsOff}>
         <PowerBtnActiveIcon />
         <Text style={styles.boxPowerBtnTextSmall}>Питание</Text>
       </TouchableOpacity>
     </View>
-  );
+  }
+
 
   if (errorunitParamsDevices) {
     console.log(errorunitParamsDevices, errorunitParamsDevices);
   }
 
-  if (isLoadingGetDayTimers) {
-    return <Loader />;
-  }
+  // if (isLoadingGetDayTimers) {
+  //   return <Loader />;
+  // }
 
   return (
     <SafeAreaView style={{ flex: 1 }}>
       <ScrollView>
         {statusError
           && (
-          <ModalError
-            errorText={errorText}
-            visible={!!statusError}
-            onDismiss={() => setStatusError(null)}
-          />
+            <ModalError
+              errorText={errorText}
+              visible={!!statusError}
+              onDismiss={() => setStatusError(null)}
+            />
           )}
 
         {speedSuccess
           && (
-          <ModalSuccess
-            successText={successText}
-            visible={!!speedSuccess}
-            onDismiss={() => setSpeedSuccess(null)}
-          />
+            <ModalSuccess
+              successText={successText}
+              visible={!!speedSuccess}
+              onDismiss={() => setSpeedSuccess(null)}
+            />
           )}
 
         {isConnection
           && (
-          <ModalConnection
-            connectionText={connectionText}
-            visible={!!isConnection}
-            onDismiss={() => setIsConnection(null)}
-          />
+            <ModalConnection
+              connectionText={connectionText}
+              visible={!!isConnection}
+              onDismiss={() => setIsConnection(null)}
+            />
           )}
 
         <ScheduleModal
@@ -732,13 +756,13 @@ function HomePlayScreen({ navigation, route }) {
         />
 
         {modalVisibleSpeed && (
-        <SpeedModal
-          fanTarget={fanTarget}
-          setModalVisibleSpeed={setModalVisibleSpeed}
-          modalVisibleSpeed={modalVisibleSpeed}
-          unitId={unitId}
-          sendParamsData={sendParamsData}
-        />
+          <SpeedModal
+            fanTarget={fanTarget}
+            setModalVisibleSpeed={setModalVisibleSpeed}
+            modalVisibleSpeed={modalVisibleSpeed}
+            unitId={unitId}
+            sendParamsData={sendParamsData}
+          />
         )}
         {device ? (
           <View style={styles.container}>
@@ -807,61 +831,61 @@ function HomePlayScreen({ navigation, route }) {
             >
 
               {unitParams && (
-              <View style={styles.boxHomeDeviceFunctions}>
-                {Object.entries(unitParams?.data[0]).map((item, index) => {
-                  const keyForRender = ['humRoom', 'tempChannel', 'tempRoom', 'fanSpeedP', 'co2Room'];
+                <View style={styles.boxHomeDeviceFunctions}>
+                  {Object.entries(unitParams?.data[0]).map((item, index) => {
+                    const keyForRender = ['humRoom', 'tempChannel', 'tempRoom', 'fanSpeedP', 'co2Room'];
 
-                  if (!keyForRender.includes(item[0])) {
-                    return null;
-                  }
+                    if (!keyForRender.includes(item[0])) {
+                      return null;
+                    }
 
-                  return (
-                    <View style={styles.boxHomeDeviceFunctionsItem} key={index}>
-                      {(item[0] == 'humRoom') && <Text style={styles.boxDeviceFunctionsItemName}>Влажность</Text>}
-                      {(item[0] == 'humRoom') && (
-                      <Text style={styles.boxDeviceFunctionsItemText}>
-                        {Math.round(item[1])}
-                        %
-                      </Text>
-                      )}
+                    return (
+                      <View style={styles.boxHomeDeviceFunctionsItem} key={index}>
+                        {(item[0] == 'humRoom') && <Text style={styles.boxDeviceFunctionsItemName}>Влажность</Text>}
+                        {(item[0] == 'humRoom') && (
+                          <Text style={styles.boxDeviceFunctionsItemText}>
+                            {Math.round(item[1])}
+                            %
+                          </Text>
+                        )}
 
-                      {(item[0] == 'tempChannel')
-          && <Text style={styles.boxDeviceFunctionsItemName}>Температура на улице</Text>}
-                      {(item[0] == 'tempChannel') && (
-                      <Text style={styles.boxDeviceFunctionsItemText}>
-                        {Math.round(item[1])}
-                        °C
-                      </Text>
-                      )}
+                        {(item[0] == 'tempChannel')
+                          && <Text style={styles.boxDeviceFunctionsItemName}>Температура на улице</Text>}
+                        {(item[0] == 'tempChannel') && (
+                          <Text style={styles.boxDeviceFunctionsItemText}>
+                            {Math.round(item[1])}
+                            °C
+                          </Text>
+                        )}
 
-                      {(item[0] == 'tempRoom')
-          && <Text style={styles.boxDeviceFunctionsItemName}>Температура в помещении</Text>}
-                      {(item[0] == 'tempRoom') && (
-                      <Text style={styles.boxDeviceFunctionsItemText}>
-                        {Math.round(item[1])}
-                        °C
-                      </Text>
-                      )}
+                        {(item[0] == 'tempRoom')
+                          && <Text style={styles.boxDeviceFunctionsItemName}>Температура в помещении</Text>}
+                        {(item[0] == 'tempRoom') && (
+                          <Text style={styles.boxDeviceFunctionsItemText}>
+                            {Math.round(item[1])}
+                            °C
+                          </Text>
+                        )}
 
-                      {(item[0] == 'fanSpeedP')
-          && <Text style={styles.boxDeviceFunctionsItemName}>Скорость вращения</Text>}
-                      {(item[0] == 'fanSpeedP')
-          && <Text style={styles.boxDeviceFunctionsItemText}>{Math.round(item[1])}</Text>}
+                        {(item[0] == 'fanSpeedP')
+                          && <Text style={styles.boxDeviceFunctionsItemName}>Скорость вращения</Text>}
+                        {(item[0] == 'fanSpeedP')
+                          && <Text style={styles.boxDeviceFunctionsItemText}>{Math.round(item[1])}</Text>}
 
-                      {(item[0] == 'co2Room')
-          && <Text style={styles.boxDeviceFunctionsItemName}>СО2</Text>}
-                      {(item[0] == 'co2Room')
-          && <Text style={styles.boxDeviceFunctionsItemText}>{Math.round(item[1])}</Text>}
+                        {(item[0] == 'co2Room')
+                          && <Text style={styles.boxDeviceFunctionsItemName}>СО2</Text>}
+                        {(item[0] == 'co2Room')
+                          && <Text style={styles.boxDeviceFunctionsItemText}>{Math.round(item[1])}</Text>}
 
-                    </View>
-                  );
-                })}
-              </View>
+                      </View>
+                    );
+                  })}
+                </View>
               )}
             </LinearGradient>
 
           </View>
-        ) : <Text>Вы не выбрали установку</Text> }
+        ) : <Text>Вы не выбрали установку</Text>}
       </ScrollView>
     </SafeAreaView>
   );

@@ -183,7 +183,7 @@ const styles = StyleSheet.create({
 });
 
 function ModeModal({
-  modalVisible, setModalVisible, sendParamsData, unitId, resMode,
+  modalVisible, setModalVisible, sendParamsData, unitId, resMode
 }) {
   const [activeItem, setActiveItem] = useState(resMode);
 
@@ -231,7 +231,7 @@ function ModeModal({
   const handlePress = (itemId) => {
     if (activeItem === itemId) {
       setActiveItem(null);
-      // setResMode(0); // Обнуление res, если режим деактивирован
+      // setResMode(null); // Обнуление res, если режим деактивирован
     } else {
       setActiveItem(itemId);
       // setResMode(itemId); // Установка res в значение itemId (1, 2, 3 или 4)
