@@ -13,7 +13,6 @@ const styles = StyleSheet.create({
 function DefaultRadialSlider({ temperature, setTemperature, onComplete }) {
   const handleOnChange = (value) => {
     setTemperature(value);
-    return value;
   };
 
   return (
@@ -24,6 +23,7 @@ function DefaultRadialSlider({ temperature, setTemperature, onComplete }) {
         max={30}
         onChange={handleOnChange}
         onComplete={(value) => onComplete(value)}
+        isHideButtons
         thumbColor="#FF5204"
         thumbBorderWidth={3}
         thumbRadius={14}

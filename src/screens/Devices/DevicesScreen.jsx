@@ -5,10 +5,10 @@ import {
   StyleSheet, View, Text, FlatList, Image, TouchableOpacity,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 import { UserContext } from '../../components/providers/UserContext';
 import { AuthContext } from '../../components/providers/AuthContext';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 
 import { useGetParamsQuery, useGetUnitsAllQuery } from '../../redux/usersApi';
 
@@ -214,11 +214,13 @@ function DevicesScreen({ navigation }) {
 
   const { data: unitsAll, error: errorUnitsAll, isLoader: isLoaderGetUnits } = useGetUnitsAllQuery();
 
-  // useEffect(() => {
-  //   if (unitsAll && unitsAll?.models) {
-  //     setVentUnitsAll(unitsAll.models);
-  //   }
-  // }, [unitsAll]);
+  useEffect(() => {
+    if (unitsAll && unitsAll?.models) {
+      setVentUnitsAll(unitsAll.models);
+    }
+  }, [unitsAll]);
+
+  console.log(unitsAll, 'unitsAll')
 
   const sortedVentUnitsAll = unitsAll && unitsAll.models
     ? [...unitsAll.models].sort((a, _) => {
@@ -240,23 +242,34 @@ function DevicesScreen({ navigation }) {
     '': require('../../img/vav-active.png'),
   };
 
-  const onClickDevices = (item) => {
-    const { id_model } = item;
-    // await AsyncStorage.setItem('clickedDeviceAsyncStorage', id_model.toString())
-    setClickedDevice(item.id_model);
-    // Получаем значение "enabled" из первого объекта в массиве
-    const enabled = unitParamsDevices.data && unitParamsDevices.data[0] && unitParamsDevices.data[0].enabled;
-
-    if (enabled === '1') {
-      navigation.navigate('HomeStack', {
-        screen: 'HomePlay',
-        params: { clickedDevice: id_model },
+  const onClickDevices = (item, isSelected) => {
+    if (!unitId) {
+      navigation.navigate('Start');
+    } else if (!item.id_model || !isSelected) {
+      console.log('DevicesAdd');
+      navigation.navigate('DevicesStack', {
+        screen: 'DevicesAdd',
       });
     } else {
-      navigation.navigate('HomeStack', {
-        screen: 'Home',
-        params: { clickedDevice: id_model },
-      });
+      const { id_model } = item;
+      const setDeviceAsyncStorage = async () => {
+        await AsyncStorage.setItem('clickedDeviceAsyncStorage', id_model.toString())
+      }
+      setDeviceAsyncStorage();
+      setClickedDevice(item.id_model);
+      // Получаем значение "enabled" из первого объекта в массиве
+      const enabled = unitParamsDevices.data && unitParamsDevices.data[0] && unitParamsDevices.data[0].enabled;
+      if (enabled === '1') {
+        navigation.navigate('HomeStack', {
+          screen: 'HomePlay',
+          params: { clickedDevice: id_model },
+        });
+      } else {
+        navigation.navigate('HomeStack', {
+          screen: 'Home',
+          params: { clickedDevice: id_model },
+        });
+      }
     }
   };
 
@@ -274,7 +287,7 @@ function DevicesScreen({ navigation }) {
     return (
       <TouchableOpacity
         style={styles.containerCardDevices}
-        onPress={() => onClickDevices(item)}
+        onPress={() => onClickDevices(item, isSelectedUnit)}
       >
 
         <View style={{ flex: 1 }}>
@@ -350,22 +363,40 @@ function DevicesScreen({ navigation }) {
         </View>
 
         <Text style={styles.textLightGrey}>
-          {ventUnitsAll.length}
+          {ventUnitsAll?.length || 0}
           {' '}
-          {getDeviceWordForm(ventUnitsAll.length)}
+          {getDeviceWordForm(ventUnitsAll?.length || 0)}
         </Text>
-
-        <View style={styles.flatListContainer}>
-          <FlatList
-            data={sortedVentUnitsAll}
-            keyExtractor={(item, index) => index.toString()}
-            renderItem={renderItem}
-            showsVerticalScrollIndicator={false}
-            estimatedItemSize={33}
-            numColumns={2}
-          />
-        </View>
-        <CustomButton text="Добавить устройство" style={{ width: '100%' }} onPress={onClickAddDevices} />
+        {unitId
+          ? (
+            <>
+              <View style={styles.flatListContainer}>
+                <FlatList
+                  data={sortedVentUnitsAll}
+                  keyExtractor={(item, index) => index.toString()}
+                  renderItem={renderItem}
+                  showsVerticalScrollIndicator={false}
+                  estimatedItemSize={33}
+                  numColumns={2}
+                />
+              </View>
+              <CustomButton text="Добавить устройство" style={{ width: '100%' }} onPress={onClickAddDevices} />
+            </>
+          ) : (
+            <>
+              <View style={styles.flatListContainer}>
+                <FlatList
+                  data={unitsAll?.models}
+                  keyExtractor={(item, index) => index.toString()}
+                  renderItem={renderItem}
+                  showsVerticalScrollIndicator={false}
+                  estimatedItemSize={33}
+                  numColumns={2}
+                />
+              </View>
+              <CustomButton text="Добавить устройство" style={{ width: '100%' }} onPress={onClickAddDevices} />
+            </>
+          )}
       </View>
     </SafeAreaView>
   );

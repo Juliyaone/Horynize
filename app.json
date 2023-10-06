@@ -20,7 +20,6 @@
         "usesNonExemptEncryption": false
       }
     },
-    
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
@@ -30,6 +29,9 @@
     },
     "web": {
       "favicon": "./assets/favicon.png"
+    },
+    "expo": {
+      "jsEngine": "jsc"
     }
   }
 }

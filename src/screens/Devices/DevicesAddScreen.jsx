@@ -1,15 +1,16 @@
 import React, { useContext } from 'react';
 import {
-  View, Text, TextInput, StyleSheet, ScrollView,
+  View, Text, TextInput, StyleSheet, ScrollView, TouchableOpacity,
 } from 'react-native';
 import { Formik } from 'formik';
 import * as yup from 'yup';
+import ArrowLeft from '../../img/icons/ArrowLeft';
 
 import { AuthContext } from '../../components/providers/AuthContext'
 import ApplyIcon from '../../img/icons/apply';
 
 import CustomButton from '../../components/CustomButton';
-import GoBackComponent from '../../components/GoBack';
+// import GoBackComponent from '../../components/GoBack';
 
 const ServerSchema = yup.object({
   customName: yup.string().required('Custom Name is required'),
@@ -66,6 +67,14 @@ const styles = StyleSheet.create({
     marginTop: 0,
     marginBottom: 10,
   },
+  btnBack: {
+    display: 'flex',
+    flexDirection: 'row',
+    justifyContent: 'flex-start',
+    alignItems: 'center',
+    marginBottom: 'auto',
+    marginTop: 50,
+  },
 });
 
 export default function DevicesAddScreen({ navigation }) {
@@ -74,7 +83,11 @@ export default function DevicesAddScreen({ navigation }) {
   return (
     <ScrollView>
       <View style={styles.container}>
-        <GoBackComponent navigation={navigation} />
+        {/* <GoBackComponent navigation={navigation} /> */}
+        <TouchableOpacity style={styles.btnBack} onPress={() => navigation.navigate('Devices')}>
+          <ArrowLeft />
+          <Text>Назад</Text>
+        </TouchableOpacity>
 
         <Formik
           initialValues={{
