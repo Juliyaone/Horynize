@@ -1,12 +1,9 @@
 import React, {
   useEffect, useState, useContext, useCallback,
 } from 'react';
-import {
-  StyleSheet, View, Text, TouchableOpacity, ScrollView, FlatList, Image,
-} from 'react-native';
+import { View, Text, TouchableOpacity, ScrollView, FlatList, Image } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 
 import {
   useSendParamsMutation, useUnitsGetDayTimersQuery, useGetTimersUnitQuery, useGetParamsQuery,
@@ -44,236 +41,11 @@ import SpeedModal from '../Modal/SpeedModal';
 
 import ModeModal from '../Modal/ModeModal';
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    marginRight: 20,
-    marginLeft: 20,
-  },
-  flatListContainerHome: {
-    marginBottom: 23,
-    marginTop: 23,
-  },
-  btnSchedule: {
-    display: 'flex',
-    flexDirection: 'row',
-    justifyContent: 'center',
-    alignItems: 'center',
-    width: '40%',
-    borderWidth: 1,
-    borderRadius: 20,
-    borderColor: '#ED7635',
-    padding: 7,
-    marginLeft: 'auto',
-  },
-  btnScheduleText: {
-    color: '#ED7635',
-  },
-  btnScheduleIcon: {
-    marginRight: 5,
-  },
-  boxPowerBtn: {
-    flexDirection: 'column',
-    alignItems: 'center',
-    width: '20%',
-    padding: 10,
-    backgroundColor: '#FFFFFF',
-    borderRadius: 8,
-    marginBottom: 20,
-    marginTop: 10,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.12,
-    shadowRadius: 2,
-    elevation: 1, // для Android
-  },
-  boxPowerBtnBox: {
-    width: 130,
-    alignItems: 'flex-start',
-    justifyContent: 'flex-start',
-    padding: 16,
-    backgroundColor: '#FFFFFF',
-    borderRadius: 8,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.12,
-    shadowRadius: 2,
-    elevation: 1,
-    marginBottom: 15,
-    marginRight: 15,
-  },
-  boxPowerBtnBoxSmall: {
-    width: 79,
-    alignItems: 'center',
-    justifyContent: 'center',
-    padding: 16,
-    backgroundColor: '#FFFFFF',
-    borderRadius: 8,
-    borderWidth: 1,
-    borderColor: '#ED7635',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.12,
-    shadowRadius: 2,
-    elevation: 1,
-    marginBottom: 15,
-    marginRight: 10,
-  },
-  powerBtnSmall: {
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  boxPowerBtnTextSmall: {
-    fontFamily: 'SFProDisplay',
-    fontStyle: 'normal',
-    fontWeight: '600',
-    fontSize: 10,
-    lineHeight: 12,
-    textAlign: 'center',
-    letterSpacing: 0.374,
-    color: '#ED7635',
-    marginBottom: 4,
-  },
-  boxPowerBtnText: {
-    fontFamily: 'SFProDisplay',
-    fontStyle: 'normal',
-    fontWeight: '400',
-    fontSize: 10,
-    lineHeight: 12,
-    letterSpacing: 0.374,
-    color: '#212121',
-  },
-  boxPowerBtnTextBox: {
-    display: 'flex',
-    flexDirection: 'row',
-  },
-  titleText: {
-    fontFamily: 'SFProDisplay',
-    fontStyle: 'normal',
-    fontWeight: '600',
-    fontSize: 14,
-    lineHeight: 12,
-    textAlign: 'center',
-    letterSpacing: 0.374,
-    color: '#111111',
-    marginBottom: 4,
-  },
-  boxPowerBtnTextNameSmall: {
-    fontFamily: 'SFProDisplay',
-    fontStyle: 'normal',
-    fontWeight: '600',
-    fontSize: 10,
-    lineHeight: 12,
-    textAlign: 'center',
-    letterSpacing: 0.374,
-    color: '#ED7635',
-    marginBottom: 3,
-    marginTop: 3,
-  },
-  boxPowerBtnTextName: {
-    fontFamily: 'SFProDisplay',
-    fontStyle: 'normal',
-    fontWeight: '600',
-    fontSize: 12,
-    lineHeight: 14,
-    letterSpacing: 0.374,
-    color: '#787880',
-    marginBottom: 6,
-  },
-  boxFunctionDevices: {
-    width: 130,
-    alignItems: 'flex-start',
-    justifyContent: 'flex-start',
-    padding: 16,
-    backgroundColor: '#FFFFFF',
-    borderRadius: 8,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.12,
-    shadowRadius: 2,
-    elevation: 1,
-    marginBottom: 15,
-  },
-  boxFunctionDevicesSmall: {
-    width: 79,
-    heigh: 76,
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: '#FFFFFF',
-    borderRadius: 8,
-    borderWidth: 1,
-    borderColor: '#ED7635',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.12,
-    shadowRadius: 2,
-    elevation: 1,
-    marginBottom: 15,
-  },
-  itemMargin: {
-    marginRight: 12,
-  },
-  functionDevicesBtn: {
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  boxPowerTextName: {
-    fontFamily: 'SFProDisplay',
-    fontStyle: 'normal',
-    fontWeight: '400',
-    fontSize: 12,
-    lineHeight: 14,
-    textAlign: 'center',
-    letterSpacing: 0.374,
-    color: '#FFFFFF',
-  },
-  boxHomeDeviceFunctions: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    justifyContent: 'space-between',
-    alignItems: 'flex-start',
+import { styles } from './HomePlayScreenStyle';
 
-  },
-  boxHomeDeviceFunctionsItem: {
-    width: '30%',
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginBottom: 5,
-  },
-  boxDeviceFunctionsItemName: {
-    fontFamily: 'SFProDisplay',
-    fontStyle: 'normal',
-    fontWeight: '400',
-    fontSize: 12,
-    lineHeight: 14,
-    textAlign: 'center',
-    letterSpacing: 0.374,
-    color: '#FFFFFF',
-  },
-  boxDeviceFunctionsItemText: {
-    fontFamily: 'SFProDisplay',
-    fontStyle: 'normal',
-    fontWeight: '600',
-    fontSize: 32,
-    lineHeight: 38,
-    textAlign: 'center',
-    letterSpacing: 0.374,
-    color: '#FFFFFF',
-  },
-  disabledContainer: {
-    display: 'none',
-  },
-  boxIconSettings: {
-    width: '100%',
-    display: 'flex',
-    flexDirection: 'row',
-    justifyContent: 'space-between'
-  }
-});
-
-function HomePlayScreen({ navigation }) {
-  // const { unitsId } = route.params;
-  const { userData, currentDayOfWeek } = useContext(UserContext);
+function HomePlayScreen({ navigation, route }) {
+  const { clickedDevice } = route.params;
+  const { currentDayOfWeek } = useContext(UserContext);
 
   const { unitId } = useContext(AuthContext);
 
@@ -308,17 +80,14 @@ function HomePlayScreen({ navigation }) {
     Сб: 6,
     Вс: 0,
   };
-  const { data: dayTimers, isLoading: isLoadingGetDayTimers } = useUnitsGetDayTimersQuery({ controllerId: unitId });
+  const { data: dayTimers } = useUnitsGetDayTimersQuery({ controllerId: unitId });
   const {
     data: timers,
-    isLoading: isLoadingTimers,
-    refetch: refetchTimers,
   } = useGetTimersUnitQuery({ controllerId: unitId, day: dayMapping[currentDayOfWeek] });
-  console.log(timers, 'timers')
+
   const {
     data: unitParams,
     error: errorunitParamsDevices,
-    isLoading: isLoadingUnitParams,
     refetch: refetchUnitParams,
   } = useGetParamsQuery({ controllerId: unitId });
 
@@ -330,14 +99,7 @@ function HomePlayScreen({ navigation }) {
     }
   }
 
-  const [device, setDevice] = useState(null);
-
   useEffect(() => {
-    const getClickedDevice = async () => {
-      const res = await AsyncStorage.getItem('clickedDeviceAsyncStorage') || null;
-      setDevice(res);
-    }
-    getClickedDevice();
     setHumTarget(unitParams?.data[0].humRoomTarget);
     setTemperature(unitParams?.data[0].tempTarget);
     setFanTarget(unitParams?.data[0].fanSpeedP);
@@ -404,9 +166,8 @@ function HomePlayScreen({ navigation }) {
     )
   };
   const handleSettings = () => {
-
     if (unitId) {
-      navigation.navigate('HomeStack', { screen: 'HomeSchedule', params: { unitId: unitId } });
+      navigation.navigate('HomeStack', { screen: 'HomeSchedule', params: { unitId } });
     }
   };
 
@@ -434,22 +195,23 @@ function HomePlayScreen({ navigation }) {
         ]}
       >
         <View style={styles.boxIconSettings}>
-        <LinearGradient
-          colors={['#FEB84A', '#FF5204']}
-          style={{
-            borderRadius: 8, width: 40, height: 40, marginBottom: 5, alignItems: 'center', justifyContent: 'center',
-          }}
-        >
-          <View style={styles.functionDevicesBtn}>
-            <Image source={imageSrc} style={{ width: 30, height: 30 }} />
-          </View>
-        </LinearGradient>
+          <LinearGradient
+            colors={['#FEB84A', '#FF5204']}
+            style={{
+              borderRadius: 8, width: 40, height: 40, marginBottom: 5, alignItems: 'center', justifyContent: 'center',
+            }}
+          >
+            <View style={styles.functionDevicesBtn}>
+              <Image source={imageSrc} style={{ width: 30, height: 30 }} />
+            </View>
+          </LinearGradient>
 
-        {item[0] === 'ZagrFiltr' &&
+          {item[0] === 'ZagrFiltr'
+          && (
           <TouchableOpacity onPress={handleSettings}>
             <SettingsIcon />
           </TouchableOpacity>
-        }
+          )}
         </View>
 
         {(item[0] === 'tempTarget') && (
@@ -489,7 +251,6 @@ function HomePlayScreen({ navigation }) {
         {(item[0] === 'ZagrFiltr') && (
           <>
             <Text style={styles.boxPowerBtnTextName}>Автозапуск</Text>
-
 
             {timers?.timers && (
               <>
@@ -645,60 +406,18 @@ function HomePlayScreen({ navigation }) {
     }
   }, [refetchUnitParams, sendParams])
 
-  // api / vent - units / setparams res = 1(2, 3, 4) вентиляция, нагрев, охлаждение, климат - контроль
-  // const sendParamsRes = useCallback(async ({ id, mode }) => {
-  //   const resData = {
-  //     controllerId: String(id),
-  //     res: String(mode),
-  //   }
-  //   if (resMode == 1) {
-  //     setIsDisabled(true)
-  //   } else {
-  //     setIsDisabled(false)
-  //   }
-
-  //   // await AsyncStorage.removeItem('res');
-
-  //   // await AsyncStorage.setItem('res', String(resMode));
-
-  //   try {
-  //     await sendParams(resData)
-  //     refetchUnitParams();
-  //     setModalVisibleMode(false);
-  //   } catch (error) {
-  //     console.log('error', error);
-  //     let errorMessage;
-  //     if (error.data || error.data.message) {
-  //       errorMessage = error.data.message;
-  //     } else if (error.message) {
-  //       errorMessage = error.message;
-  //     } else if (error.data) {
-  //       errorMessage = error.data;
-  //     } else if (error) {
-  //       errorMessage = error;
-  //     }
-  //     setErrorText(errorMessage);
-  //     setStatusError(true);
-  //   }
-  // }, [refetchUnitParams, resMode, sendParams]);
-
-  const renderBoxPowerBtn = () => {
-    return <View style={styles.boxPowerBtnBoxSmall}>
+  const renderBoxPowerBtn = () => (
+    <View style={styles.boxPowerBtnBoxSmall}>
       <TouchableOpacity style={styles.powerBtnSmall} onPress={sendParamsOff}>
         <PowerBtnActiveIcon />
         <Text style={styles.boxPowerBtnTextSmall}>Питание</Text>
       </TouchableOpacity>
     </View>
-  }
-
+  )
 
   if (errorunitParamsDevices) {
     console.log(errorunitParamsDevices, errorunitParamsDevices);
   }
-
-  // if (isLoadingGetDayTimers) {
-  //   return <Loader />;
-  // }
 
   return (
     <SafeAreaView style={{ flex: 1 }}>
@@ -764,7 +483,7 @@ function HomePlayScreen({ navigation }) {
             sendParamsData={sendParamsData}
           />
         )}
-        {device ? (
+        {clickedDevice ? (
           <View style={styles.container}>
 
             <View style={styles.flatListContainerHome}>

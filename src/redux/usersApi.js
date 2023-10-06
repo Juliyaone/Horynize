@@ -4,6 +4,9 @@ import * as urls from './urls';
 import { getTokenFromStorage, saveTokenToStorage, deleteTokenFromStorage } from '../components/providers/tokenStorage';
 
 import { getStoredCredentials } from '../components/providers/SecureStore';
+import { setUser, setUserControllers } from './slices/usersSlice';
+import { setContacts } from './slices/contactsSlice';
+import { setControllers } from './slices/controllersSlice';
 
 const baseQuery = fetchBaseQuery({
   baseUrl: urls.BASE_URL,
@@ -45,7 +48,7 @@ const baseQueryWithReauth = async (args, api, extraOptions) => {
 
 export const usersApi = createApi({
   // reducerPath: 'usersApi',
-  tagTypes: ['MetaInfo', 'User', 'Units', 'Unit', 'Params'],
+  // tagTypes: ['MetaInfo', 'User', 'Units', 'Unit', 'Params'],
   // baseQuery: fetchBaseQuery({
   //   baseUrl: urls.BASE_URL,
   //   prepareHeaders: async (headers) => {
@@ -91,12 +94,24 @@ export const usersApi = createApi({
         url: urls.GET_UNITS,
         method: 'POST',
       }),
+      async onQueryStarted(_args, { dispatch, queryFulfilled }) {
+        try {
+          const result = await queryFulfilled;
+          dispatch(setControllers(result.data.models));
+        } catch (error) { /* empty */ }
+      },
     }),
     getContacts: builder.query({
       query: () => ({
         url: urls.GET_CONTACTS,
         method: 'POST',
       }),
+      async onQueryStarted(_args, { dispatch, queryFulfilled }) {
+        try {
+          const result = await queryFulfilled;
+          dispatch(setContacts(result.data.contacts[0]));
+        } catch (error) { /* empty */ }
+      },
     }),
     loginUser: builder.mutation({
       query: (body) => ({
@@ -104,6 +119,14 @@ export const usersApi = createApi({
         method: 'POST',
         body,
       }),
+      // transformResponse: (result) => result.data,
+      async onQueryStarted(_args, { dispatch, queryFulfilled }) {
+        try {
+          const result = await queryFulfilled;
+          dispatch(setUser(result.data['0']));
+          dispatch(setUserControllers(result.data.controllers));
+        } catch (error) { /* empty */ }
+      },
     }),
     registerUser: builder.mutation({
       query: (body) => ({
@@ -113,6 +136,12 @@ export const usersApi = createApi({
           ...body,
         },
       }),
+      async onQueryStarted(_args, { dispatch, queryFulfilled }) {
+        try {
+          const result = await queryFulfilled;
+          dispatch(setUser(result.data['0']));
+        } catch (error) { /* empty */ }
+      },
     }),
     changePassword: builder.mutation({
       query: (body) => ({

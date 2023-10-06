@@ -183,7 +183,7 @@ const styles = StyleSheet.create({
 });
 
 function ModeModal({
-  modalVisible, setModalVisible, sendParamsData, unitId, resMode
+  modalVisible, setModalVisible, sendParamsData, unitId, resMode,
 }) {
   const [activeItem, setActiveItem] = useState(resMode);
 

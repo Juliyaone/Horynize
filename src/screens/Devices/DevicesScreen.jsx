@@ -7,6 +7,7 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
+import { useSelector } from 'react-redux';
 import { UserContext } from '../../components/providers/UserContext';
 import { AuthContext } from '../../components/providers/AuthContext';
 
@@ -202,6 +203,8 @@ function DevicesScreen({ navigation }) {
 
   const [clickedDevice, setClickedDevice] = useState(unitId);
 
+  // const models = useSelector((state) => state.controllers.models);
+
   // TODO: add to toolkit
   const allControllersOfUser = allControllers?.map(({ id_controller }) => id_controller);
 
@@ -212,18 +215,18 @@ function DevicesScreen({ navigation }) {
     refetch: refetchunitParamsDevices,
   } = useGetParamsQuery({ controllerId: unitId });
 
-  const { data: unitsAll, error: errorUnitsAll, isLoader: isLoaderGetUnits } = useGetUnitsAllQuery();
+  const { error: errorUnitsAll, isLoader: isLoaderGetUnits } = useGetUnitsAllQuery();
+
+  const models = useSelector((state) => state.contollers.models);
 
   useEffect(() => {
-    if (unitsAll && unitsAll?.models) {
-      setVentUnitsAll(unitsAll.models);
+    if (models) {
+      setVentUnitsAll(models);
     }
-  }, [unitsAll]);
+  }, [models]);
 
-  console.log(unitsAll, 'unitsAll')
-
-  const sortedVentUnitsAll = unitsAll && unitsAll.models
-    ? [...unitsAll.models].sort((a, _) => {
+  const sortedVentUnitsAll = models
+    ? [...models].sort((a, _) => {
       if (allControllersOfUser?.includes(a.id_model)) {
         return -1; // Добавленная установка пользователя идет первой
       }
@@ -246,7 +249,6 @@ function DevicesScreen({ navigation }) {
     if (!unitId) {
       navigation.navigate('Start');
     } else if (!item.id_model || !isSelected) {
-      console.log('DevicesAdd');
       navigation.navigate('DevicesStack', {
         screen: 'DevicesAdd',
       });
@@ -320,24 +322,11 @@ function DevicesScreen({ navigation }) {
   };
 
   const onClickAddDevices = () => {
-    // if (userId === '') {
-    //   setUserDevicesError(true)
-    //   setErrorText('Зарегистрируйте вашу установку или войдите в личный кабинет');
-    // }
-
     navigation.navigate('DevicesAdd')
   }
 
   if (isLoaderGetUnits || isLoadingUnitParams) {
     return <Loader />;
-  }
-
-  if (errorUnitsAll) {
-    console.log('errorUnitsAll', errorUnitsAll);
-  }
-
-  if (errorunitParamsDevices) {
-    console.log('errorunitParamsDevices', errorunitParamsDevices);
   }
 
   return (
@@ -386,7 +375,7 @@ function DevicesScreen({ navigation }) {
             <>
               <View style={styles.flatListContainer}>
                 <FlatList
-                  data={unitsAll?.models}
+                  data={models}
                   keyExtractor={(item, index) => index.toString()}
                   renderItem={renderItem}
                   showsVerticalScrollIndicator={false}

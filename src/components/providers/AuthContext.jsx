@@ -16,8 +16,9 @@ export function AuthProvider({ children }) {
 
   const [isLoading, setIsLoading] = useState(true);
 
-  const signIn = async (token, controllerId, userId, controllers, email, userName) => {
+  const signIn = async (data) => {
     try {
+      const { token, controllerId, userId, controllers, email, userName } = data;
       await AsyncStorage.setItem('userToken', token);
       await AsyncStorage.setItem('idControllerAsyncStorage', controllerId);
       await AsyncStorage.setItem('userIdAsyncStorage', userId);

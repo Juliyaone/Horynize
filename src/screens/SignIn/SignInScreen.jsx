@@ -52,8 +52,11 @@ function SignInScreen({ navigation }) {
           const userName = String(answer['0'].username);
 
           await saveCredentials(values.username, values.password);
+          const data = {
+            token, controllerId, userId, controllers, email, userName
+          };
 
-          await signIn(token, controllerId, userId, controllers, email, userName);
+          await signIn(data);
         }
 
         setUserId(answer['0'].id_user);
