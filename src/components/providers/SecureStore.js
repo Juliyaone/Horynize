@@ -2,13 +2,9 @@ import * as SecureStore from 'expo-secure-store';
 
 export const saveCredentials = async (username, password) => {
   try {
-    const usernameSS = await SecureStore.setItemAsync('username', username);
-    const passwordSS = await SecureStore.setItemAsync('password', password);
-    console.log('usernameSS', usernameSS);
-    console.log('passwordSS', passwordSS);
-  } catch (error) {
-    console.error('Could not save credentials', error);
-  }
+    await SecureStore.setItemAsync('username', username);
+    await SecureStore.setItemAsync('password', password);
+  } catch (error) { /* empty */ }
 };
 
 export const getStoredCredentials = async () => {
@@ -21,6 +17,7 @@ export const getStoredCredentials = async () => {
     }
     return null;
   } catch (error) {
+    // eslint-disable-next-line no-console
     console.error('Could not retrieve credentials', error);
     return null;
   }
