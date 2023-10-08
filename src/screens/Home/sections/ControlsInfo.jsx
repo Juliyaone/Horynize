@@ -31,12 +31,12 @@ const resNames = {
 
 function ControlsInfoImp(props) {
   const {
-    params, id, entriesUnitParams, timers, navigation, temperature, resMode, humTarget, fanTarget,
+    params, id, entriesUnitParams, timers, navigation,
   } = props;
 
-  // const {
-  //   tempTarget: temperature, res: resMode, humRoomTarget: humTarget, fanSpeedP: fanTarget,
-  // } = params;
+  const {
+    tempTarget: temperature, res: resMode, humRoomTarget: humTarget, fanSpeedP: fanTarget,
+  } = params;
 
   const keyForRender = useMemo(() => ['tempTarget', 'humRoomTarget', 'fanSpeedP', 'res', 'ZagrFiltr'], []);
 

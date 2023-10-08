@@ -1,15 +1,17 @@
 import React, {
-  useEffect, useState, useContext, useCallback, useMemo,
+  useState, useContext, useCallback, useMemo,
 } from 'react';
 import {
   View, Text, ScrollView,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-import { useSelector } from 'react-redux';
+import { useSelector, useDispatch } from 'react-redux';
 import {
   useSendParamsMutation, useUnitsGetDayTimersQuery, useGetTimersUnitQuery, useGetParamsQuery,
 } from '../../redux/usersApi';
+
+import { changeParams } from '../../redux/slices/currentControllerSlice';
 
 import Loader from '../../components/Loader';
 import ModalError from '../../components/ModalError';
@@ -29,6 +31,16 @@ import { Controls } from './sections/Controls';
 import { ControlsInfo } from './sections/ControlsInfo';
 
 import { styles } from './HomePlayScreenStyle';
+
+const dayMapping = {
+  Пн: 1,
+  Вт: 2,
+  Ср: 3,
+  Чт: 4,
+  Пт: 5,
+  Сб: 6,
+  Вс: 0,
+};
 
 function HomePlayScreen({ navigation, route }) {
   const clickedControllerId = route?.params?.clickedControllerId ?? undefined;
@@ -55,28 +67,16 @@ function HomePlayScreenActive({ navigation, clickedControllerId }) {
   const [modalVisibleMode, setModalVisibleMode] = useState(false);
   const [modalVisibleSpeed, setModalVisibleSpeed] = useState(false);
 
-  const [humTarget, setHumTarget] = useState(0);
-  const [temperature, setTemperature] = useState();
-  const [fanTarget, setFanTarget] = useState();
-  const [resMode, setResMode] = useState();
-
   const [statusError, setStatusError] = useState(false);
   const [speedSuccess, setSpeedSuccess] = useState(false);
   const [isConnection, setIsConnection] = useState(false);
 
   const [errorText, setErrorText] = useState('');
-  const [successText, setSuccessText] = useState('');
   const [connectionText, setConnectionText] = useState('');
   const [sendParams] = useSendParamsMutation();
-  const dayMapping = {
-    Пн: 1,
-    Вт: 2,
-    Ср: 3,
-    Чт: 4,
-    Пт: 5,
-    Сб: 6,
-    Вс: 0,
-  };
+
+  const dispatch = useDispatch();
+
   const { data: dayTimers } = useUnitsGetDayTimersQuery({ controllerId: clickedControllerId });
   const {
     data: timers,
@@ -84,21 +84,22 @@ function HomePlayScreenActive({ navigation, clickedControllerId }) {
 
   const {
     isLoading: isCurrentControllerParamsLoading,
-    refetch,
   } = useGetParamsQuery({ controllerId: clickedControllerId });
 
   const currentContoller = useSelector((state) => state.currentContoller);
 
   const entriesUnitParams = useMemo(() => Object.entries(currentContoller?.params ?? {}), [currentContoller]);
 
-  useEffect(() => {
-    if (currentContoller?.params) {
-      setHumTarget(currentContoller?.params?.humRoomTarget);
-      setTemperature(currentContoller?.params?.tempTarget);
-      setFanTarget(currentContoller?.params?.fanSpeedP);
-      setResMode(currentContoller.params?.res);
-    }
-  }, [currentContoller])
+  // useEffect(() => {
+  //   if (currentContoller?.params) {
+  //     setHumTarget(currentContoller?.params?.humRoomTarget);
+  //     setTemperature(currentContoller?.params?.tempTarget);
+  //     setFanTarget(currentContoller?.params?.fanSpeedP);
+  //     setResMode(currentContoller.params?.res);
+  //   }
+  // }, [currentContoller]);
+
+  const changeParamsHandler = useCallback((params) => dispatch(changeParams(params)), [dispatch]);
 
   const openModal = useCallback((itemName) => {
     if (itemName === 'humRoomTarget') {
@@ -145,7 +146,6 @@ function HomePlayScreenActive({ navigation, clickedControllerId }) {
   const sendParamsData = useCallback(async (params) => {
     try {
       await sendParams(params);
-      await refetch();
     } catch (error) {
       let errorMessage;
       if (error.data || error.data.message) {
@@ -158,7 +158,7 @@ function HomePlayScreenActive({ navigation, clickedControllerId }) {
       setErrorText(errorMessage);
       setStatusError(true);
     }
-  }, [refetch, sendParams])
+  }, [sendParams])
 
   if (isCurrentControllerParamsLoading) {
     return <Loader />;
@@ -178,7 +178,6 @@ function HomePlayScreenActive({ navigation, clickedControllerId }) {
       {speedSuccess
           && (
             <ModalSuccess
-              successText={successText}
               visible={!!speedSuccess}
               onDismiss={() => setSpeedSuccess(null)}
             />
@@ -205,8 +204,9 @@ function HomePlayScreenActive({ navigation, clickedControllerId }) {
         modalVisible={modalVisibleHumidity}
         setModalVisible={setModalVisibleHumidity}
         sendParamsData={sendParamsData}
-        humTarget={humTarget}
+        humRoomTarget={currentContoller?.params?.humRoomTarget}
         unitId={clickedControllerId}
+        changeParams={changeParamsHandler}
       />
       )}
       {modalVisibleMode && (
@@ -214,23 +214,24 @@ function HomePlayScreenActive({ navigation, clickedControllerId }) {
         modalVisible={modalVisibleMode}
         setModalVisible={setModalVisibleMode}
         sendParamsData={sendParamsData}
-        resMode={resMode}
-        setResMode={setResMode}
+        resMode={currentContoller?.params?.res}
+        changeParams={changeParamsHandler}
         unitId={clickedControllerId}
       />
       )}
 
       {modalVisibleSpeed && (
       <SpeedModal
-        fanTarget={fanTarget}
+        fanTarget={currentContoller?.params?.fanSpeedP}
         setModalVisibleSpeed={setModalVisibleSpeed}
         modalVisibleSpeed={modalVisibleSpeed}
         unitId={clickedControllerId}
         sendParamsData={sendParamsData}
+        changeParams={changeParamsHandler}
       />
       )}
       <View style={styles.container}>
-        {currentContoller.params && (
+        {currentContoller?.params && (
           <>
             {entriesUnitParams?.length && (
               <>
@@ -248,10 +249,6 @@ function HomePlayScreenActive({ navigation, clickedControllerId }) {
                     entriesUnitParams={entriesUnitParams}
                     timers={timers}
                     navigation={navigation}
-                    humTarget={humTarget}
-                    temperature={temperature}
-                    fanTarget={fanTarget}
-                    resMode={resMode}
                   />
                 </View>
               </>
@@ -259,8 +256,7 @@ function HomePlayScreenActive({ navigation, clickedControllerId }) {
             <Temperature
               {...currentContoller}
               sendParams={sendParams}
-              setTemperature={setTemperature}
-              temperature={temperature}
+              changeParams={changeParamsHandler}
             />
             <DetailedInfo {...currentContoller} />
           </>

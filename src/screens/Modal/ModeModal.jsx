@@ -221,7 +221,7 @@ const arr = [
 const keyForRender = ['Temp', 'Vent', 'Cooling', 'Auto'];
 
 function ModeModal({
-  modalVisible, setModalVisible, sendParamsData, unitId, resMode, setResMode,
+  modalVisible, setModalVisible, sendParamsData, unitId, resMode, changeParams,
 }) {
   const [activeItem, setActiveItem] = useState(resMode);
 
@@ -241,19 +241,21 @@ function ModeModal({
       setActiveItem(null);
     } else {
       setActiveItem(itemId);
-      setResMode(itemId);
     }
   };
 
   const onPress = useCallback(() => {
     if (activeItem) {
+      changeParams({
+        res: String(activeItem),
+      })
       sendParamsData({
         controllerId: String(unitId),
         res: String(activeItem),
       });
     }
     setModalVisible(false);
-  }, [activeItem, sendParamsData, setModalVisible, unitId]);
+  }, [activeItem, changeParams, sendParamsData, setModalVisible, unitId]);
 
   if (resMode === undefined) {
     return null;
@@ -265,7 +267,7 @@ function ModeModal({
       transparent
       visible={modalVisible}
       onRequestClose={() => {
-        setModalVisible(!modalVisible);
+        setModalVisible(false);
       }}
     >
       <View style={styles.centeredView}>

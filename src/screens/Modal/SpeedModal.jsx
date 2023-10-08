@@ -143,6 +143,7 @@ function SpeedModal({
   fanTarget,
   unitId,
   sendParamsData,
+  changeParams,
 }) {
   const [valueSliderSpeed, setValueSliderSpeed] = useState(fanTarget);
 
@@ -153,8 +154,9 @@ function SpeedModal({
         fanTarget: valueSliderSpeed.toString(),
       });
     }
+    changeParams({ fanSpeedP: valueSliderSpeed });
     setModalVisibleSpeed(false);
-  }, [sendParamsData, setModalVisibleSpeed, unitId, valueSliderSpeed]);
+  }, [changeParams, sendParamsData, setModalVisibleSpeed, unitId, valueSliderSpeed]);
 
   const panResponder = useRef(
     PanResponder.create({
@@ -177,7 +179,7 @@ function SpeedModal({
       transparent
       visible={modalVisibleSpeed}
       onRequestClose={() => {
-        setModalVisibleSpeed(!modalVisibleSpeed);
+        setModalVisibleSpeed(false);
       }}
     >
       <View style={styles.centeredView}>

@@ -9,18 +9,21 @@ import { styles } from '../HomePlayScreenStyle';
 
 function TemperatureImp(props) {
   const {
-    params, id, sendParams, setTemperature, temperature,
+    params, id, sendParams, changeParams,
   } = props;
 
   const sendParamsTemperature = useCallback(async (newTemperature) => {
-    const data = {
-      controllerId: id,
-      tempTarget: String(newTemperature),
-    }
     try {
-      await sendParams(data);
+      if (!newTemperature.isNaN && typeof newTemperature === 'number' && id) {
+        const data = {
+          controllerId: String(id),
+          tempTarget: String(newTemperature),
+        }
+        changeParams({ tempTarget: newTemperature });
+        await sendParams(data);
+      }
     } catch (error) { /* empty */ }
-  }, [id, sendParams])
+  }, [changeParams, id, sendParams])
 
   const isDisabled = Number(params.res) === 1;
 
@@ -32,8 +35,7 @@ function TemperatureImp(props) {
       </View>
       <View style={isDisabled ? styles.disabledContainer : null}>
         <DefaultRadialSlider
-          temperature={temperature}
-          setTemperature={setTemperature}
+          temperature={params?.tempTarget}
           onComplete={sendParamsTemperature}
         />
       </View>

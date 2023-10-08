@@ -17,11 +17,11 @@ export const currentControllerSlice = createSlice({
       // eslint-disable-next-line no-param-reassign
       state.id = action.payload
     },
-    setTemperature: (state, action) => {
+    changeParams: (state, action) => {
       // eslint-disable-next-line no-param-reassign
-      state.tempTarget = action.payload
+      state.params = { ...state.params, ...action.payload }
     },
   },
 });
 
-export const { setCurrentParams, setCurrentId } = currentControllerSlice.actions;
+export const { setCurrentParams, setCurrentId, changeParams } = currentControllerSlice.actions;
