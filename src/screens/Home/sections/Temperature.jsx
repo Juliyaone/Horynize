@@ -8,7 +8,9 @@ import TimeIcon from '../../../img/icons/time';
 import { styles } from '../HomePlayScreenStyle';
 
 function TemperatureImp(props) {
-  const { params, id, sendParams } = props;
+  const {
+    params, id, sendParams, setTemperature, temperature,
+  } = props;
 
   const sendParamsTemperature = useCallback(async (newTemperature) => {
     const data = {
@@ -30,9 +32,8 @@ function TemperatureImp(props) {
       </View>
       <View style={isDisabled ? styles.disabledContainer : null}>
         <DefaultRadialSlider
-          temperature={params.tempTarget}
-          // TODO: temp
-          setTemperature={() => {}}
+          temperature={temperature}
+          setTemperature={setTemperature}
           onComplete={sendParamsTemperature}
         />
       </View>

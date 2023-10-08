@@ -45,8 +45,8 @@ function DevicesScreen({ navigation }) {
         const getModelsOfUserAsync = async () => {
           if (userId) {
             const modelsOfUser = await getModelsOfUser({ userId, status: 1 });
-            if (modelsOfUser?.data['vent-units']) {
-              const userModelsResult = modelsOfUser?.data['vent-units'];
+            if (modelsOfUser?.data?.['vent-units']) {
+              const userModelsResult = modelsOfUser.data['vent-units'];
               setUserModels(userModelsResult);
               const promises = userModelsResult
                 .map(({ id_controller }) => getParamsModelsOfUser({ controllerId: String(id_controller) }));
