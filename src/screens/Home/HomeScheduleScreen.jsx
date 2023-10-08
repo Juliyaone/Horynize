@@ -19,7 +19,7 @@ const styles = StyleSheet.create({
 })
 
 export default function HomeScheduleScreen({ navigation, route }) {
-  const { unitId } = route.params;
+  const { clickedControllerId } = route.params;
 
   // const [dayTimers, setDayTimers] = useState(null);
 
@@ -44,7 +44,7 @@ export default function HomeScheduleScreen({ navigation, route }) {
         style={styles.btnBack}
         onPress={() => navigation.navigate('HomeStack', {
           screen: 'HomePlay',
-          params: { clickedDevice: unitId },
+          params: { clickedControllerId },
         })}
       >
         <ArrowLeft />

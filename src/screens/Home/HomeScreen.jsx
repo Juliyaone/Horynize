@@ -1,5 +1,5 @@
 /* eslint-disable global-require */
-import React, { useState, useContext, useEffect } from 'react';
+import React, { useState, useContext } from 'react';
 import {
   View, Text, TouchableOpacity, ScrollView, Image,
 } from 'react-native';
@@ -17,8 +17,23 @@ import Loader from '../../components/Loader';
 import { styles } from './HomeScreenStyle';
 
 function HomeScreen({ navigation, route }) {
-  const { clickedDevice } = route.params;
+  const clickedControllerId = route?.params?.clickedControllerId;
 
+  return (
+    <SafeAreaView style={{ flex: 1 }}>
+      <ScrollView>
+        {clickedControllerId !== undefined ? (
+          <HomeScreenInAcive
+            navigation={navigation}
+            clickedControllerId={clickedControllerId}
+          />
+        ) : <Text>Вы не выбрали установку</Text>}
+      </ScrollView>
+    </SafeAreaView>
+  );
+}
+
+function HomeScreenInAcive({ navigation, clickedControllerId }) {
   const [userStartError, setUserStartError] = useState(false);
   const [errorText, setErrorText] = useState('');
   const [connectionText, setConnectionText] = useState('Устройство отключено');
@@ -34,10 +49,10 @@ function HomeScreen({ navigation, route }) {
   const { isConnection, setIsConnection, unitId } = useContext(UserContext);
 
   const findUnitById = (id) => {
-    const model = models?.find((model) => model.id_model === id);
+    const model = models?.find((item) => item.id_model == id);
     return model ? { img: model.img, name: model.name } : { img: null, name: null };
   };
-  const unit = findUnitById(clickedDevice);
+  const unit = findUnitById(clickedControllerId);
 
   const images = {
     'http://95.142.39.79/images/models/Horynize.CF-500.png': require('../../img/devices/Horynize.CF-500.png'),
@@ -60,9 +75,8 @@ function HomeScreen({ navigation, route }) {
       start,
     }
     try {
-      const answerSend = await sendParams(params);
-      console.log('answerSend', answerSend);
-      navigation.navigate('HomeStack', { screen: 'HomePlay', params: { unitsId: unitId } });
+      await sendParams(params);
+      navigation.navigate('HomeStack', { screen: 'HomePlay', params: { clickedControllerId: unitId } });
     } catch (error) {
       setErrorText(error.data.message);
       setUserStartError(true);
@@ -75,9 +89,7 @@ function HomeScreen({ navigation, route }) {
 
   return (
     <SafeAreaView style={{ flex: 1 }}>
-
       <ScrollView>
-
         {userStartError
           && (
           <ModalError
@@ -86,7 +98,6 @@ function HomeScreen({ navigation, route }) {
             onDismiss={() => setUserStartError(null)}
           />
           )}
-
         {isConnection
           && (
           <ModalConnection
@@ -95,7 +106,6 @@ function HomeScreen({ navigation, route }) {
             onDismiss={() => setIsConnection(null)}
           />
           )}
-
         <View style={styles.container}>
           <View style={styles.boxPowerBtnBox}>
             <TouchableOpacity style={styles.boxPowerBtn} onPress={sendParamsData}>
@@ -103,11 +113,9 @@ function HomeScreen({ navigation, route }) {
               <Text style={styles.boxPowerBtnText}>Питание</Text>
             </TouchableOpacity>
           </View>
-
           <Image source={localImage} />
           <Text>{unit?.name}</Text>
         </View>
-
       </ScrollView>
     </SafeAreaView>
   );

@@ -1,4 +1,4 @@
-import * as React from 'react';
+import React from 'react';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 
 import DevicesAddScreen from '../../screens/Devices/DevicesAddScreen';

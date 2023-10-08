@@ -1,20 +1,70 @@
 import React, { useState, useContext } from 'react';
-import { StyleSheet, View, Text, TextInput, TouchableOpacity } from 'react-native';
+import {
+  StyleSheet, View, Text, TextInput, TouchableOpacity,
+} from 'react-native';
 import { Formik } from 'formik';
 import * as yup from 'yup';
-
 
 import { UserContext } from '../../components/providers/UserContext';
 
 import { useRegisterUserMutation } from '../../redux/usersApi';
-import ModalError from "../../components/ModalError";
-import GoBackComponent from "../../components/GoBack";
+import ModalError from '../../components/ModalError';
+import GoBackComponent from '../../components/GoBack';
 import Loader from '../../components/Loader';
 
 import ApplyIcon from '../../img/icons/apply';
 
 import CustomButton from '../../components/CustomButton';
 
+const styles = StyleSheet.create({
+  container: {
+    padding: 10,
+    justifyContent: 'center',
+  },
+  title: {
+    textAlign: 'center',
+    fontFamily: 'SFProDisplay',
+    fontStyle: 'normal',
+    fontWeight: '600',
+    fontSize: 20,
+    lineHeight: 28,
+    letterSpacing: 0.35,
+    color: '#212121',
+    marginBottom: 30,
+  },
+  inputContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    borderWidth: 0,
+    backgroundColor: '#DDDDDD',
+    borderRadius: 16,
+    marginBottom: 10,
+  },
+  lastInputContainer: {
+    marginBottom: 30,
+  },
+  input: {
+    flex: 1,
+    borderWidth: 0,
+    backgroundColor: '#DDDDDD',
+    borderRadius: 16,
+    padding: 15,
+    color: '#212121',
+    fontSize: 16,
+  },
+  inputIcon: {
+    width: 15,
+    height: 15,
+    marginRight: 10,
+    marginLeft: 10,
+  },
+  errorText: {
+    color: '#FF5204',
+    padding: 0,
+    marginTop: 0,
+    marginBottom: 10,
+  },
+});
 
 const validationSchema = yup.object().shape({
   username: yup
@@ -39,29 +89,23 @@ const validationSchema = yup.object().shape({
   // "key" => " F8DF",
 });
 
-const SignUp = ({ navigation }) => {
+function SignUp({ navigation }) {
   const [registrationError, setRegistrationError] = useState(false);
   const [errorText, setErrorText] = useState('');
 
   const [registerUser, { isLoader }] = useRegisterUserMutation();
   const { setUserId, setUserData } = useContext(UserContext);
 
-
   const sendRegisterData = async (values) => {
-
-
     if (values.username !== '' && values.password !== '' && values.email !== ''
       && values.id !== '' && values.key !== '') {
-
-
       try {
         const answer = await registerUser(values).unwrap();
 
         if (answer && answer.data) {
           setUserId(answer.data.user[0]['user-id']);
 
-          navigation.navigate("MainApp");
-
+          navigation.navigate('MainApp');
         }
       } catch (error) {
         console.log('error', error);
@@ -79,12 +123,10 @@ const SignUp = ({ navigation }) => {
           errorMessage = JSON.stringify(error);
         }
 
-
         setErrorText(errorMessage);
         setRegistrationError(true);
       }
     }
-
   }
 
   const handleSubmit = async (values) => {
@@ -98,13 +140,14 @@ const SignUp = ({ navigation }) => {
   return (
     <View style={styles.container}>
 
-      {registrationError &&
+      {registrationError
+        && (
         <ModalError
           errorText={errorText}
           visible={!!registrationError}
           onDismiss={() => setRegistrationError(null)}
         />
-      }
+        )}
       <GoBackComponent navigation={navigation} />
 
       <Text style={styles.title}>Регистрация</Text>
@@ -114,7 +157,9 @@ const SignUp = ({ navigation }) => {
         onSubmit={handleSubmit}
         validationSchema={validationSchema}
       >
-        {({ handleChange, handleBlur, handleSubmit, values, errors }) => (
+        {({
+          handleChange, handleBlur, handleSubmit, values, errors,
+        }) => (
           <View>
             {errors.username && <Text style={styles.errorText}>{errors.username}</Text>}
 
@@ -175,64 +220,17 @@ const SignUp = ({ navigation }) => {
                 placeholder="Ключ"
               />
             </View>
-
-            <CustomButton onPress={handleSubmit} text={'Зарегистрироваться'} IconComponent={false} style={{ width: "100%" }} />
-
+            <CustomButton
+              onPress={handleSubmit}
+              text="Зарегистрироваться"
+              IconComponent={false}
+              style={{ width: '100%' }}
+            />
           </View>
         )}
       </Formik>
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    padding: 10,
-    justifyContent: 'center',
-  },
-  title: {
-    textAlign: "center",
-    fontFamily: "SFProDisplay",
-    fontStyle: "normal",
-    fontWeight: '600',
-    fontSize: 20,
-    lineHeight: 28,
-    letterSpacing: 0.35,
-    color: "#212121",
-    marginBottom: 30
-  },
-  inputContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    borderWidth: 0,
-    backgroundColor: '#DDDDDD',
-    borderRadius: 16,
-    marginBottom: 10,
-  },
-  lastInputContainer: {
-    marginBottom: 30
-  },
-  input: {
-    flex: 1,
-    borderWidth: 0,
-    backgroundColor: '#DDDDDD',
-    borderRadius: 16,
-    padding: 15,
-    color: '#212121',
-    fontSize: 16,
-  },
-  inputIcon: {
-    width: 15,
-    height: 15,
-    marginRight: 10,
-    marginLeft: 10
-  },
-  errorText: {
-    color: '#FF5204',
-    padding: 0,
-    marginTop: 0,
-    marginBottom: 10
-  },
-});
 
 export default SignUp;

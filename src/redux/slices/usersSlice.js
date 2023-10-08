@@ -15,10 +15,6 @@ export const authSlice = createSlice({
       // eslint-disable-next-line no-param-reassign
       state.user = action.payload
     },
-    setUserControllers: (state, action) => {
-      // eslint-disable-next-line no-param-reassign
-      state.userControllers = action.payload
-    },
     logout: () => initialState,
     // Save the user's info
     getUser: (state, action) => {
@@ -29,5 +25,5 @@ export const authSlice = createSlice({
 });
 
 export const {
-  logout, userInfo, setUser, setUserControllers,
+  logout, userInfo, setUser,
 } = authSlice.actions;
