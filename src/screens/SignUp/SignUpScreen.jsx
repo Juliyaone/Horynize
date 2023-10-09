@@ -1,11 +1,9 @@
 import React, { useState, useContext } from 'react';
 import {
-  StyleSheet, View, Text, TextInput, TouchableOpacity,
+  StyleSheet, View, Text, TextInput,
 } from 'react-native';
 import { Formik } from 'formik';
 import * as yup from 'yup';
-
-import { UserContext } from '../../components/providers/UserContext';
 
 import { useRegisterUserMutation } from '../../redux/usersApi';
 import ModalError from '../../components/ModalError';
@@ -15,6 +13,7 @@ import Loader from '../../components/Loader';
 import ApplyIcon from '../../img/icons/apply';
 
 import CustomButton from '../../components/CustomButton';
+import { AuthContext } from '../../components/providers/AuthContext';
 
 const styles = StyleSheet.create({
   container: {
@@ -94,7 +93,7 @@ function SignUp({ navigation }) {
   const [errorText, setErrorText] = useState('');
 
   const [registerUser, { isLoader }] = useRegisterUserMutation();
-  const { setUserId, setUserData } = useContext(UserContext);
+  const { setUserId } = useContext(AuthContext);
 
   const sendRegisterData = async (values) => {
     if (values.username !== '' && values.password !== '' && values.email !== ''

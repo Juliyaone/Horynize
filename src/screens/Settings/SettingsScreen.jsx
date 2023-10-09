@@ -19,10 +19,8 @@ import { styles } from './SettingsStyle';
 import { getDeviceWordForm } from '../../utils';
 
 function SettingsScreen({ navigation }) {
-  const { setUserId, setUserData } = useContext(UserContext);
-
   const {
-    signOut, userName, allControllers, userToken,
+    signOut, userName, userControllers, userToken,
   } = useContext(AuthContext);
 
   const handleLogout = () => {
@@ -33,8 +31,6 @@ function SettingsScreen({ navigation }) {
       }),
     );
     signOut();
-    setUserId('');
-    setUserData('');
     navigation.navigate('Start');
   }
   const handleLogin = () => {
@@ -61,7 +57,7 @@ function SettingsScreen({ navigation }) {
             </View>
             <View style={styles.cardUserNumberOfDevicesBox}>
               <Text style={styles.cardUserNumberOfDevicesText}>
-                {allControllers?.length}
+                {userControllers?.length || 0}
                 {' '}
                 {getDeviceWordForm(1)}
               </Text>

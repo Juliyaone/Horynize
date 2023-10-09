@@ -8,17 +8,19 @@ export const AuthContext = createContext();
 
 export function AuthProvider({ children }) {
   const [userToken, setUserToken] = useState(null);
-  const [unitId, setUnitId] = useState('');
   const [userId, setUserId] = useState('');
+  const [unitId, setUnitId] = useState('');
   const [userName, setUserName] = useState('');
-  const [allControllers, setAllControllers] = useState();
-  const [emailAuthContext, setEmailAuthContext] = useState('');
+  const [userControllers, setAllControllers] = useState();
+  const [userEmail, setUserEmail] = useState('');
 
   const [isLoading, setIsLoading] = useState(true);
 
-  const signIn = async (data) => {
+  const signIn = useCallback(async (data) => {
     try {
-      const { token, controllerId, userId, controllers, email, userName } = data;
+      const {
+        token, controllerId, userId, controllers, email, userName,
+      } = data;
       await AsyncStorage.setItem('userToken', token);
       await AsyncStorage.setItem('idControllerAsyncStorage', controllerId);
       await AsyncStorage.setItem('userIdAsyncStorage', userId);
@@ -28,19 +30,20 @@ export function AuthProvider({ children }) {
 
       setUserName(userName);
       setUserToken(token);
+      setUserId(userId);
       setUnitId(controllerId);
       setAllControllers(controllers);
+      setUserEmail(userName);
       console.log('Записали новый токен в AsyncStorage', token);
     } catch (error) {
       console.log(`Не удалось сохранить токен в AsyncStorage: ${error}`);
     }
-  };
+  }, []);
 
   const getUserToken = async () => {
     try {
       const userToken = await AsyncStorage.getItem('userToken');
       setUserToken(userToken);
-      return userToken;
     } catch (err) {
       console.log(`Токен не получен ${err}`);
     } finally {
@@ -89,7 +92,7 @@ export function AuthProvider({ children }) {
   const getEmail = async () => {
     try {
       const email = await AsyncStorage.getItem('emailAsyncStorage');
-      setEmailAuthContext(email);
+      setUserEmail(email);
       console.log('email', email);
       return email;
     } catch (err) {
@@ -141,7 +144,7 @@ export function AuthProvider({ children }) {
       setUnitId(null);
       setUserToken(null);
       setAllControllers(null);
-      setEmailAuthContext(null);
+      setUserEmail(null);
       setIsLoading(false);
       setUserName(null);
       console.log(`токен удален, UserId удален,  UserName удален, 
@@ -158,10 +161,11 @@ export function AuthProvider({ children }) {
     signOut,
     unitId,
     userId,
-    allControllers,
-    emailAuthContext,
+    userControllers,
+    userEmail,
     userName,
-  }), [allControllers, emailAuthContext, isLoading, signOut, unitId, userId, userName, userToken]);
+    setUserId,
+  }), [userToken, isLoading, signIn, signOut, unitId, userId, userControllers, userEmail, userName]);
 
   return (
     <AuthContext.Provider value={value}>

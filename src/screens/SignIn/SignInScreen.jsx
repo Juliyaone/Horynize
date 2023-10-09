@@ -6,7 +6,6 @@ import {
 import { Formik } from 'formik';
 import * as yup from 'yup';
 
-import { UserContext } from '../../components/providers/UserContext';
 import { AuthContext } from '../../components/providers/AuthContext';
 import { saveCredentials } from '../../components/providers/SecureStore';
 
@@ -18,6 +17,57 @@ import Loader from '../../components/Loader';
 
 import CustomButton from '../../components/CustomButton';
 import { useLoginUserMutation } from '../../redux/usersApi';
+
+const styles = StyleSheet.create({
+  container: {
+    padding: 10,
+    justifyContent: 'center',
+  },
+  title: {
+    textAlign: 'center',
+    fontFamily: 'SFProDisplay',
+    fontStyle: 'normal',
+    fontWeight: '600',
+    fontSize: 20,
+    lineHeight: 28,
+    letterSpacing: 0.35,
+    color: '#212121',
+    marginBottom: 30,
+  },
+  inputContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    borderWidth: 0,
+    backgroundColor: '#DDDDDD',
+    borderRadius: 16,
+    marginBottom: 10,
+  },
+  lastInputContainer: {
+    marginBottom: 30,
+  },
+  input: {
+    flex: 1,
+    borderWidth: 0,
+    backgroundColor: '#DDDDDD',
+    borderRadius: 16,
+    padding: 15,
+    color: '#212121',
+    fontSize: 16,
+  },
+  inputIcon: {
+    width: 15,
+    height: 15,
+    marginRight: 10,
+    marginLeft: 10,
+  },
+  errorText: {
+    color: '#FF5204',
+    padding: 0,
+    marginTop: 0,
+    marginBottom: 10,
+  },
+
+});
 
 const validationSchema = yup.object().shape({
   username: yup
@@ -32,7 +82,6 @@ function SignInScreen({ navigation }) {
   const [errorText, setErrorText] = useState('');
   const [authorizationError, setAuthorizationError] = useState(false);
 
-  const { setUserId, setUserData } = useContext(UserContext);
   const { signIn } = useContext(AuthContext);
 
   const [loginUser, { isLoading }] = useLoginUserMutation();
@@ -41,7 +90,6 @@ function SignInScreen({ navigation }) {
     if (values.username !== '' && values.password !== '') {
       try {
         const answer = await loginUser(values).unwrap();
-        console.log('answerSignIn', answer);
 
         if (answer['0']?.jwt) {
           const token = answer['0'].jwt;
@@ -58,19 +106,6 @@ function SignInScreen({ navigation }) {
 
           await signIn(data);
         }
-
-        setUserId(answer['0'].id_user);
-
-        setUserData({
-          username: answer['0'].username,
-          email: answer['0'].email,
-          id: answer['0'].id_user,
-          units: answer.controllers,
-          jwt: answer['0'].jwt,
-          id_model: answer.controllers[0].id_model,
-          name_model: answer.controllers[0].name,
-        });
-
         navigation.navigate('MainApp');
       } catch (error) {
         console.log('error', error);
@@ -163,56 +198,5 @@ function SignInScreen({ navigation }) {
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    padding: 10,
-    justifyContent: 'center',
-  },
-  title: {
-    textAlign: 'center',
-    fontFamily: 'SFProDisplay',
-    fontStyle: 'normal',
-    fontWeight: '600',
-    fontSize: 20,
-    lineHeight: 28,
-    letterSpacing: 0.35,
-    color: '#212121',
-    marginBottom: 30,
-  },
-  inputContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    borderWidth: 0,
-    backgroundColor: '#DDDDDD',
-    borderRadius: 16,
-    marginBottom: 10,
-  },
-  lastInputContainer: {
-    marginBottom: 30,
-  },
-  input: {
-    flex: 1,
-    borderWidth: 0,
-    backgroundColor: '#DDDDDD',
-    borderRadius: 16,
-    padding: 15,
-    color: '#212121',
-    fontSize: 16,
-  },
-  inputIcon: {
-    width: 15,
-    height: 15,
-    marginRight: 10,
-    marginLeft: 10,
-  },
-  errorText: {
-    color: '#FF5204',
-    padding: 0,
-    marginTop: 0,
-    marginBottom: 10,
-  },
-
-});
 
 export default SignInScreen;

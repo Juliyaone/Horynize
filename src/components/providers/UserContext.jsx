@@ -1,27 +1,11 @@
 import React, {
-  createContext, useState, useEffect, useContext, useMemo,
+  createContext, useState, useEffect, useMemo,
 } from 'react';
-import { AuthContext } from './AuthContext';
 
 export const UserContext = createContext();
 
 export function UserProvider({ children }) {
-  const [userId, setUserId] = useState('');
-  const [isConnection, setIsConnection] = useState(false);
-
-  const [userData, setUserData] = useState({
-    username: '',
-    email: '',
-    id: '',
-    units: '',
-    jwt: '',
-    id_model: '',
-    name_model: '',
-  });
-
   const [currentDayOfWeek, setCurrentDayOfWeek] = useState(null);
-
-  const { unitId } = useContext(AuthContext);
 
   useEffect(() => {
     const today = new Date(); // Получаем текущую дату
@@ -30,8 +14,8 @@ export function UserProvider({ children }) {
   }, []);
 
   const value = useMemo(() => ({
-    userId, setUserId, userData, setUserData, setIsConnection, isConnection, currentDayOfWeek, unitId,
-  }), [currentDayOfWeek, isConnection, unitId, userData, userId])
+    currentDayOfWeek,
+  }), [currentDayOfWeek])
 
   return (
     <UserContext.Provider value={value}>
