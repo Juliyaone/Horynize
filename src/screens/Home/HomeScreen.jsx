@@ -9,6 +9,7 @@ import { useSelector } from 'react-redux';
 import { useSendParamsMutation, useGetUnitsAllQuery } from '../../redux/usersApi';
 import PowerBtnIcon from '../../img/icons/powerBtn';
 import ModalError from '../../components/ModalError';
+import ModalNotControllers from '../../components/ModalNotControllers';
 
 import Loader from '../../components/Loader';
 
@@ -25,7 +26,12 @@ function HomeScreen({ navigation, route }) {
             navigation={navigation}
             clickedControllerId={clickedControllerId}
           />
-        ) : <Text>Вы не выбрали установку</Text>}
+        ) : (
+          <ModalNotControllers
+            text="Вы не выбрали установку"
+            navigation={navigation}
+          />
+        )}
       </ScrollView>
     </SafeAreaView>
   );
