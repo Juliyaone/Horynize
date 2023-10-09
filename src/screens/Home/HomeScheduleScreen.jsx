@@ -23,7 +23,9 @@ export default function HomeScheduleScreen({ navigation, route }) {
 
   // const [dayTimers, setDayTimers] = useState(null);
 
-  // const { data, isLoading: isLoadingGetDayTimers } = useUnitsGetDayTimersQuery({ controllerId: unitId });
+  // const { data,
+  //   isLoading: isLoadingGetDayTimers
+  // } = useUnitsGetDayTimersQuery({ controllerId: clickedControllerId });
   // console.log(data?.timers, 'data');
 
   // useEffect(() => {

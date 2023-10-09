@@ -27,9 +27,7 @@ export function Devices({ navigation, userId, devices }) {
     if (!userId) {
       navigation.navigate('Start');
     } else if (!item?.id_model || !item.isAvailable) {
-      navigation.navigate('DevicesStack', {
-        screen: 'DevicesAdd',
-      });
+      navigation.navigate('DevicesAdd');
     } else if (item.isEnabled === '1') {
       navigation.navigate('HomeStack', {
         screen: 'HomePlay',
@@ -63,7 +61,7 @@ export function Devices({ navigation, userId, devices }) {
         </View>
       </View>
       {item.isAvailable ? renderEnabled(item.isEnabled) : (
-        <TouchableOpacity style={styles.textAddBox} onPress={() => navigation.navigate('Start')}>
+        <TouchableOpacity style={styles.textAddBox} onPress={() => onClickDevices(item)}>
           <Text style={styles.textAdd}>Добавить</Text>
           <View style={styles.iconPlusBgSmall}>
             <PlusIconSmall />
