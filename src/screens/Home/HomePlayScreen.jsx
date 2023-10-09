@@ -2,7 +2,7 @@ import React, {
   useState, useContext, useCallback, useMemo,
 } from 'react';
 import {
-  View, Text, ScrollView,
+  View, ScrollView,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
@@ -17,6 +17,7 @@ import Loader from '../../components/Loader';
 import ModalError from '../../components/ModalError';
 import ModalSuccess from '../../components/ModalSuccess';
 import ModalConnection from '../../components/ModalConnection';
+import ModalNotControllers from '../../components/ModalNotControllers';
 
 import { UserContext } from '../../components/providers/UserContext';
 
@@ -53,7 +54,12 @@ function HomePlayScreen({ navigation, route }) {
             navigation={navigation}
             clickedControllerId={clickedControllerId}
           />
-        ) : <Text>Вы не выбрали установку</Text>}
+        ) : (
+          <ModalNotControllers
+            text="Вы не выбрали установку"
+            navigation={navigation}
+          />
+        )}
       </ScrollView>
     </SafeAreaView>
   );
