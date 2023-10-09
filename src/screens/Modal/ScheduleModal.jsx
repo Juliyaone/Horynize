@@ -39,8 +39,6 @@ function ScheduleModal({
   const [modalVisibleFinishTime, setModalVisibleFinishTime] = useState(false);
   const [modalVisibleTemperature, setModalVisibleTemperature] = useState(false);
 
-  const [selectedDay, setSelectedDay] = useState(null);
-
   const [selectedDays, setSelectedDays] = useState([]);
 
   const [startTime, setStartTime] = useState(new Date());
@@ -97,63 +95,99 @@ function ScheduleModal({
     0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10,
   ];
 
+  // const daysOrder = ['Вс', 'Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб'];
+
+  const serverDaysOrder = ['Сб', 'Пт', 'Чт', 'Ср', 'Вт', 'Пн', 'Вс'];
+  const getWeekString = () => serverDaysOrder.map((day) => (selectedDays.includes(day) ? '1' : '0'));
+
   const displayDays = ['Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб', 'Вс'];
-  const serverDay = {
-    0: '0000001',
-    1: '0000010',
-    2: '0000100',
-    3: '0001000',
-    4: '0010000',
-    5: '0100000',
-    6: '1000000',
-  }
+  // const serverDay = {
+  //   0: '0000001',
+  //   1: '0000010',
+  //   2: '0000100',
+  //   3: '0001000',
+  //   4: '0010000',
+  //   5: '0100000',
+  //   6: '1000000',
+  // }
 
   const handleDayPressDay = (day) => {
-    setSelectedDay(dayMapping[day]);
     if (selectedDays.includes(day)) {
       setSelectedDays(selectedDays.filter((d) => d !== day));
     } else {
-      setSelectedDays([day]);
+      setSelectedDays((prev) => [...prev, day]);
     }
   };
 
+  const data = {
+    num1: {
+      time: '00:00',
+      tempTarget: '10',
+      fanSpeed: '255',
+    },
+    num2: {
+      time: '00:00',
+      tempTarget: '10',
+      fanSpeed: '255',
+    },
+    num3: {
+      time: '00:00',
+      tempTarget: '10',
+      fanSpeed: '255',
+    },
+    num4: {
+      time: '00:00',
+      tempTarget: '10',
+      fanSpeed: '255',
+    },
+  }
+
+  const dataSelected = {
+    num1: {
+      time: String(`${startHours}:${startMinutes}`),
+      tempTarget: String(temperatureSchedule),
+      fanSpeed: String(fanTargetSchedule),
+    },
+    num2: {
+      time: String(`${finishHours}:${finishMinutes}`),
+      tempTarget: String(temperatureSchedule),
+      fanSpeed: '255',
+    },
+    num3: {
+      time: '00:00',
+      tempTarget: '10',
+      fanSpeed: '255',
+    },
+    num4: {
+      time: '00:00',
+      tempTarget: '10',
+      fanSpeed: '255',
+    },
+  }
+
   const sendDayTimersData = async () => {
     setModalVisible(false);
-
-    const data = {
-      controllerId: unitId,
-      day: selectedDay,
-      timers: {
-        num1: {
-          time: String(`${startHours}:${startMinutes}`),
-          tempTarget: String(temperatureSchedule),
-          fanSpeed: String(fanTargetSchedule),
-        },
-        num2: {
-          time: String(`${finishHours}:${finishMinutes}`),
-          tempTarget: String(temperatureSchedule),
-          fanSpeed: String(fanTargetSchedule),
-        },
-        num3: {
-          time: '0',
-          tempTarget: '0',
-          fanSpeed: '255',
-        },
-        num4: {
-          time: '0',
-          tempTarget: '0',
-          fanSpeed: '255',
-        },
-      },
-    }
     try {
-      if (data && selectedDay) {
-        await sendTimers(data);
+      if (selectedDays?.length) {
+        const days = getWeekString().join('');
         await sendDayTimers({
           controllerId: unitId,
-          days: serverDay[selectedDay],
+          days,
         });
-        setSelectedDay(null);
+
+        const timersPromises = Object.keys(dayMapping)
+          .map((day) => {
+            let result = data;
+            if (selectedDays.includes(day)) {
+              result = dataSelected
+            }
+            return sendTimers({
+              controllerId: unitId,
+              day: dayMapping[day],
+              timers: result,
+            })
+          })
+        await Promise.all(timersPromises);
       }
     } catch (error) {
       console.log('error', error);
@@ -208,9 +242,7 @@ function ScheduleModal({
       <View style={styles.centeredView}>
         <View style={styles.modalView} {...panResponder.panHandlers}>
           <Text style={styles.modalText}>График работы</Text>
-
           <View style={styles.boxBtnSchedule}>
-
             <View style={styles.boxBtnLabelSchedule}>
               <Text style={styles.labelSchedule}>Начало работы</Text>
               <TouchableOpacity
@@ -236,14 +268,11 @@ function ScheduleModal({
                 <BtnScheduleIcon />
               </TouchableOpacity>
             </View>
-
           </View>
 
           <View style={styles.boxDaysContainers}>
             <Text style={styles.boxDaysHeader}>Дни недели</Text>
-
             <View style={styles.boxDays}>
-
               {displayDays.map((day) => (
                 <TouchableOpacity
                   key={day}
@@ -263,12 +292,10 @@ function ScheduleModal({
               ))}
             </View>
           </View>
-
           <View style={styles.boxAutoRunContainer}>
             <View style={styles.boxAutoRun}>
               <Text style={styles.autoRunHeader}>Выбрать скорость</Text>
               <Text style={styles.autoRunHeaderValue}>{fanTargetSchedule}</Text>
-
               <Switch
                 trackColor={{ false: '#F7F7F7', true: '#34C759' }}
                 thumbColor={isEnabledSpeed ? '#ffffff' : '#ffffff'}
@@ -277,14 +304,12 @@ function ScheduleModal({
                 value={isEnabledSpeed}
               />
             </View>
-
             {isEnabledSpeed
               && (
               <View>
                 <View style={styles.boxDays}>
                   {numbers.map((item) => <Text key={item} style={styles.dayText}>{item}</Text>)}
                 </View>
-
                 <View style={styles.boxDays}>
                   <Slider
                     style={{ width: '100%', height: 40 }}
@@ -302,17 +327,13 @@ function ScheduleModal({
               </View>
               )}
           </View>
-
           <View style={styles.boxAutoRunContainer}>
-
             <View style={styles.boxAutoRun}>
-
               <Text style={styles.autoRunHeader}>Выбрать температуру</Text>
               <Text style={styles.autoRunHeaderValue}>
                 {temperatureSchedule}
                 °
               </Text>
-
               <Switch
                 trackColor={{ false: '#F7F7F7', true: '#34C759' }}
                 thumbColor={isEnabledTemp ? '#ffffff' : '#ffffff'}
@@ -321,9 +342,7 @@ function ScheduleModal({
                 value={isEnabledTemp}
               />
             </View>
-
           </View>
-
           <TouchableOpacity activeOpacity={0.8} style={styles.button} onPress={sendDayTimersData}>
             <LinearGradient
               colors={['#FEB84A', '#FF5204']}
@@ -335,7 +354,6 @@ function ScheduleModal({
               </View>
             </LinearGradient>
           </TouchableOpacity>
-
         </View>
       </View>
     </Modal>
