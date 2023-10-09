@@ -1,5 +1,5 @@
 import React, {
-  useState, useContext, useCallback, useMemo,
+  useState, useContext, useCallback, useMemo
 } from 'react';
 import {
   View, ScrollView,
