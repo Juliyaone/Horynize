@@ -18,7 +18,8 @@
       "supportsTablet": true,
       "config": {
         "usesNonExemptEncryption": false
-      }
+      },
+      "bundleIdentifier": "com.Horynize.Horynize"
     },
     "android": {
       "adaptiveIcon": {
@@ -30,8 +31,10 @@
     "web": {
       "favicon": "./assets/favicon.png"
     },
-    "expo": {
-      "jsEngine": "jsc"
+    "extra": {
+      "eas": {
+        "projectId": "1a9eb81c-0f46-4c9f-8ecb-9f848e63b4a1"
+      }
     }
   }
 }

@@ -146,12 +146,12 @@ function ScheduleModal({
     num1: {
       time: String(`${startHours}:${startMinutes}`),
       tempTarget: String(temperatureSchedule),
-      fanSpeed: String(fanTargetSchedule),
+      fanSpeed: '255', // поменяла местами скорость num2
     },
     num2: {
       time: String(`${finishHours}:${finishMinutes}`),
       tempTarget: String(temperatureSchedule),
-      fanSpeed: '255',
+      fanSpeed: String(fanTargetSchedule), // поменяла местами скорость num1
     },
     num3: {
       time: '00:00',
@@ -170,24 +170,38 @@ function ScheduleModal({
     try {
       if (selectedDays?.length) {
         const days = getWeekString().join('');
-        await sendDayTimers({
+
+        const responseDayTimers = await sendDayTimers({
           controllerId: unitId,
           days,
         });
 
-        const timersPromises = Object.keys(dayMapping)
-          .map((day) => {
+        if (responseDayTimers.data.message === ' command send ') {
+          const delay = 500; // 1 секунда
+          for (const day of Object.keys(dayMapping)) {
             let result = data;
             if (selectedDays.includes(day)) {
-              result = dataSelected
+              result = dataSelected;
             }
-            return sendTimers({
+
+            // Используем setTimeout для задержки
+            await new Promise((resolve) => setTimeout(resolve, delay));
+
+            const response = await sendTimers({
               controllerId: unitId,
               day: dayMapping[day],
               timers: result,
-            })
-          })
-        await Promise.all(timersPromises);
+            });
+
+            console.log('response', JSON.stringify(response, null, 2));
+
+            if (response.data.message === ' command send ') {
+              continue;
+            }
+          }
+        } else {
+          console.log('Сервер не подтвердил отправку дней');
+        }
       }
     } catch (error) {
       console.log('error', error);

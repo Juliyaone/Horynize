@@ -1,12 +1,10 @@
-import React, { useState, useContext } from 'react';
+import React, { useState } from 'react';
 import {
-  StyleSheet, View, Text, TextInput, TouchableOpacity,
+  StyleSheet, View, Text, TextInput,
 } from 'react-native';
 import { Formik } from 'formik';
 import * as yup from 'yup';
-
-import { UserContext } from '../../components/providers/UserContext';
-
+import { saveCredentials } from '../../components/providers/SecureStore';
 import { useRegisterUserMutation } from '../../redux/usersApi';
 import ModalError from '../../components/ModalError';
 import GoBackComponent from '../../components/GoBack';
@@ -94,7 +92,6 @@ function SignUp({ navigation }) {
   const [errorText, setErrorText] = useState('');
 
   const [registerUser, { isLoader }] = useRegisterUserMutation();
-  const { setUserId, setUserData } = useContext(UserContext);
 
   const sendRegisterData = async (values) => {
     if (values.username !== '' && values.password !== '' && values.email !== ''
@@ -103,12 +100,11 @@ function SignUp({ navigation }) {
         const answer = await registerUser(values).unwrap();
 
         if (answer && answer.data) {
-          setUserId(answer.data.user[0]['user-id']);
+          await saveCredentials(values.username, values.password);
 
           navigation.navigate('MainApp');
         }
       } catch (error) {
-        console.log('error', error);
         let errorMessage;
 
         if (error.data) {
@@ -158,6 +154,7 @@ function SignUp({ navigation }) {
         validationSchema={validationSchema}
       >
         {({
+          // eslint-disable-next-line no-shadow
           handleChange, handleBlur, handleSubmit, values, errors,
         }) => (
           <View>

@@ -15,18 +15,22 @@ import { styles } from '../HomePlayScreenStyle';
 const FunctionsIconSmall = {
   tempTarget: TemperatureActiveIcon,
   humRoomTarget: HumidityActiveIcon,
-  fanSpeedP: SpeedActiveIcon,
+  fanSpeedPTarget: SpeedActiveIcon,
   res: ModeIcon,
   ZagrFiltr: TimerIcon,
 };
+
+const keyForRenderSmall = ['tempTarget', 'humRoomTarget', 'fanSpeedPTarget', 'res', 'ZagrFiltr'];
+
 
 function ControlsImp(props) {
   const {
     params, entriesUnitParams, openModal, sendParamsOff,
   } = props;
-  const keyForRenderSmall = useMemo(() => ['tempTarget', 'humRoomTarget', 'fanSpeedP', 'res', 'ZagrFiltr'], []);
 
   const openModalHandler = useCallback((itemName) => {
+
+    console.log('itemName', itemName);
     openModal(itemName)
   }, [openModal]);
 
@@ -46,7 +50,7 @@ function ControlsImp(props) {
         <Image source={imageSrc} style={{ width: 30, height: 30 }} />
         {(item[0] === 'tempTarget') && <Text style={styles.boxPowerBtnTextNameSmall}>Температура</Text>}
         {(item[0] === 'humRoomTarget') && <Text style={styles.boxPowerBtnTextNameSmall}>Влажность</Text>}
-        {(item[0] === 'fanSpeedP') && <Text style={styles.boxPowerBtnTextNameSmall}>Скорость вращения</Text>}
+        {(item[0] === 'fanSpeedPTarget') && <Text style={styles.boxPowerBtnTextNameSmall}>Скорость вращения</Text>}
         {(item[0] === 'res') && <Text style={styles.boxPowerBtnTextNameSmall}>Режим</Text>}
         {(item[0] === 'ZagrFiltr') && <Text style={styles.boxPowerBtnTextNameSmall}>Автозапуск</Text>}
       </TouchableOpacity>

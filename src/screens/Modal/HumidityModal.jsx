@@ -173,9 +173,9 @@ const styles = StyleSheet.create({
 });
 
 function HumidityModal({
-  modalVisible, setModalVisible, unitId, sendParamsData, humRoomTarget, changeParams,
+  modalVisible, setModalVisible, unitId, sendParamsData, humTarget, changeParams,
 }) {
-  const [valueSliderHumidity, setValueSliderHumidity] = useState(humRoomTarget);
+  const [valueSliderHumidity, setValueSliderHumidity] = useState(humTarget);
 
   const onPress = useCallback(() => {
     if (valueSliderHumidity !== undefined && valueSliderHumidity !== null) {
@@ -186,7 +186,7 @@ function HumidityModal({
       });
       changeParams({
         CO2Target: '0',
-        HumTarget: valueSliderHumidity,
+        humRoomTarget: valueSliderHumidity,
       });
     }
     setModalVisible(false);

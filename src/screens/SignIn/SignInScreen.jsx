@@ -19,6 +19,57 @@ import Loader from '../../components/Loader';
 import CustomButton from '../../components/CustomButton';
 import { useLoginUserMutation } from '../../redux/usersApi';
 
+const styles = StyleSheet.create({
+  container: {
+    padding: 10,
+    justifyContent: 'center',
+  },
+  title: {
+    textAlign: 'center',
+    fontFamily: 'SFProDisplay',
+    fontStyle: 'normal',
+    fontWeight: '600',
+    fontSize: 20,
+    lineHeight: 28,
+    letterSpacing: 0.35,
+    color: '#212121',
+    marginBottom: 30,
+  },
+  inputContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    borderWidth: 0,
+    backgroundColor: '#DDDDDD',
+    borderRadius: 16,
+    marginBottom: 10,
+  },
+  lastInputContainer: {
+    marginBottom: 30,
+  },
+  input: {
+    flex: 1,
+    borderWidth: 0,
+    backgroundColor: '#DDDDDD',
+    borderRadius: 16,
+    padding: 15,
+    color: '#212121',
+    fontSize: 16,
+  },
+  inputIcon: {
+    width: 15,
+    height: 15,
+    marginRight: 10,
+    marginLeft: 10,
+  },
+  errorText: {
+    color: '#FF5204',
+    padding: 0,
+    marginTop: 0,
+    marginBottom: 10,
+  },
+
+});
+
 const validationSchema = yup.object().shape({
   username: yup
     .string()
@@ -53,7 +104,7 @@ function SignInScreen({ navigation }) {
 
           await saveCredentials(values.username, values.password);
           const data = {
-            token, controllerId, userId, controllers, email, userName
+            token, controllerId, userId, controllers, email, userName,
           };
 
           await signIn(data);
@@ -125,6 +176,7 @@ function SignInScreen({ navigation }) {
       >
 
         {({
+          // eslint-disable-next-line no-shadow
           handleChange, handleBlur, handleSubmit, values, errors,
         }) => (
 
@@ -163,56 +215,5 @@ function SignInScreen({ navigation }) {
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    padding: 10,
-    justifyContent: 'center',
-  },
-  title: {
-    textAlign: 'center',
-    fontFamily: 'SFProDisplay',
-    fontStyle: 'normal',
-    fontWeight: '600',
-    fontSize: 20,
-    lineHeight: 28,
-    letterSpacing: 0.35,
-    color: '#212121',
-    marginBottom: 30,
-  },
-  inputContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    borderWidth: 0,
-    backgroundColor: '#DDDDDD',
-    borderRadius: 16,
-    marginBottom: 10,
-  },
-  lastInputContainer: {
-    marginBottom: 30,
-  },
-  input: {
-    flex: 1,
-    borderWidth: 0,
-    backgroundColor: '#DDDDDD',
-    borderRadius: 16,
-    padding: 15,
-    color: '#212121',
-    fontSize: 16,
-  },
-  inputIcon: {
-    width: 15,
-    height: 15,
-    marginRight: 10,
-    marginLeft: 10,
-  },
-  errorText: {
-    color: '#FF5204',
-    padding: 0,
-    marginTop: 0,
-    marginBottom: 10,
-  },
-
-});
 
 export default SignInScreen;

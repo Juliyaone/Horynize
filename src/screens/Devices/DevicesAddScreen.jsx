@@ -105,7 +105,7 @@ export default function DevicesAddScreen({ navigation }) {
           }}
           validationSchema={ServerSchema}
           onSubmit={(values, actions) => {
-            console.log(values);
+            // console.log(values);
             // Здесь отправить значения на сервер
             actions.resetForm();
           }}

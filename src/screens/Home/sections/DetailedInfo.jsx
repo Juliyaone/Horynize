@@ -8,7 +8,7 @@ import { styles } from '../HomePlayScreenStyle';
 
 function DetailedInfoImp(props) {
   const { params } = props;
-  const keyForRender = useMemo(() => ['humRoom', 'tempChannel', 'tempRoom', 'fanSpeedP', 'co2Room'], []);
+  const keyForRender = useMemo(() => ['humRoom', 'tempChannel', 'tempRoom', 'fanSpeedPTarget', 'co2Room'], []);
 
   const result = useMemo(() => Object.entries(params).map((item) => {
     if (!keyForRender.includes(item[0])) {
@@ -19,33 +19,33 @@ function DetailedInfoImp(props) {
       <View style={styles.boxHomeDeviceFunctionsItem} key={item[0]}>
         {(item[0] === 'humRoom') && <Text style={styles.boxDeviceFunctionsItemName}>Влажность</Text>}
         {(item[0] === 'humRoom') && (
-        <Text style={styles.boxDeviceFunctionsItemText}>
-          {Math.round(item[1])}
-          %
-        </Text>
+          <Text style={styles.boxDeviceFunctionsItemText}>
+            {Math.round(item[1])}
+            %
+          </Text>
         )}
 
         {(item[0] === 'tempChannel')
-        && <Text style={styles.boxDeviceFunctionsItemName}>Температура на улице</Text>}
+          && <Text style={styles.boxDeviceFunctionsItemName}>Температура на улице</Text>}
         {(item[0] === 'tempChannel') && (
-        <Text style={styles.boxDeviceFunctionsItemText}>
-          {Math.round(item[1])}
-          °C
-        </Text>
+          <Text style={styles.boxDeviceFunctionsItemText}>
+            {Math.round(item[1])}
+            °C
+          </Text>
         )}
 
         {(item[0] === 'tempRoom')
-        && <Text style={styles.boxDeviceFunctionsItemName}>Температура в помещении</Text>}
+          && <Text style={styles.boxDeviceFunctionsItemName}>Температура в помещении</Text>}
         {(item[0] === 'tempRoom') && (
-        <Text style={styles.boxDeviceFunctionsItemText}>
-          {Math.round(item[1])}
-          °C
-        </Text>
+          <Text style={styles.boxDeviceFunctionsItemText}>
+            {Math.round(item[1])}
+            °C
+          </Text>
         )}
 
-        {(item[0] === 'fanSpeedP') && <Text style={styles.boxDeviceFunctionsItemName}>Скорость вращения</Text>}
-        {(item[0] === 'fanSpeedP')
-        && <Text style={styles.boxDeviceFunctionsItemText}>{Math.round(item[1])}</Text>}
+        {(item[0] === 'fanSpeedPTarget') && <Text style={styles.boxDeviceFunctionsItemName}>Скорость вращения</Text>}
+        {(item[0] === 'fanSpeedPTarget')
+          && <Text style={styles.boxDeviceFunctionsItemText}>{Math.round(item[1])}</Text>}
 
         {(item[0] === 'co2Room') && <Text style={styles.boxDeviceFunctionsItemName}>СО2</Text>}
         {(item[0] === 'co2Room') && <Text style={styles.boxDeviceFunctionsItemText}>{Math.round(item[1])}</Text>}

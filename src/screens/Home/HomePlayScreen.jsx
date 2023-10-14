@@ -1,5 +1,5 @@
 import React, {
-  useState, useContext, useCallback, useMemo,
+  useState, useContext, useCallback, useMemo, useEffect,
 } from 'react';
 import {
   View, ScrollView,
@@ -45,7 +45,11 @@ const dayMapping = {
 
 function HomePlayScreen({ navigation, route }) {
   const clickedControllerId = route?.params?.clickedControllerId ?? undefined;
+  console.log('clickedControllerId', clickedControllerId);
 
+  if (!clickedControllerId) {
+    return <Loader />;
+  }
   return (
     <SafeAreaView style={{ flex: 1 }}>
       <ScrollView>
@@ -77,6 +81,11 @@ function HomePlayScreenActive({ navigation, clickedControllerId }) {
   const [speedSuccess, setSpeedSuccess] = useState(false);
   const [isConnection, setIsConnection] = useState(false);
 
+  const [humTarget, setHumTarget] = useState(false);
+  const [temperature, setTemperature] = useState(false);
+  const [fanTarget, setFanTarget] = useState(false);
+  const [resMode, setResMode] = useState(false);
+
   const [errorText, setErrorText] = useState('');
   const [connectionText, setConnectionText] = useState('');
   const [sendParams] = useSendParamsMutation();
@@ -89,21 +98,27 @@ function HomePlayScreenActive({ navigation, clickedControllerId }) {
   } = useGetTimersUnitQuery({ controllerId: clickedControllerId, day: dayMapping?.[currentDayOfWeek] });
 
   const {
+    data: paramsContoller,
     isLoading: isCurrentControllerParamsLoading,
   } = useGetParamsQuery({ controllerId: clickedControllerId });
 
   const currentContoller = useSelector((state) => state.currentContoller);
 
+  console.log('currentContoller', currentContoller);
+
   const entriesUnitParams = useMemo(() => Object.entries(currentContoller?.params ?? {}), [currentContoller]);
 
-  // useEffect(() => {
-  //   if (currentContoller?.params) {
-  //     setHumTarget(currentContoller?.params?.humRoomTarget);
-  //     setTemperature(currentContoller?.params?.tempTarget);
-  //     setFanTarget(currentContoller?.params?.fanSpeedP);
-  //     setResMode(currentContoller.params?.res);
-  //   }
-  // }, [currentContoller]);
+  useEffect(() => {
+    if (paramsContoller) {
+      console.log('paramsContoller', paramsContoller);
+    }
+    if (currentContoller?.params) {
+      setHumTarget(currentContoller?.params?.humRoomTarget);
+      setTemperature(currentContoller?.params?.tempTarget);
+      setFanTarget(currentContoller?.params?.fanSpeedP);
+      setResMode(currentContoller.params?.res);
+    }
+  }, [currentContoller, paramsContoller]);
 
   const changeParamsHandler = useCallback((params) => dispatch(changeParams(params)), [dispatch]);
 
@@ -166,10 +181,6 @@ function HomePlayScreenActive({ navigation, clickedControllerId }) {
     }
   }, [sendParams])
 
-  if (isCurrentControllerParamsLoading) {
-    return <Loader />;
-  }
-
   return (
     <>
       {statusError
@@ -210,7 +221,7 @@ function HomePlayScreenActive({ navigation, clickedControllerId }) {
         modalVisible={modalVisibleHumidity}
         setModalVisible={setModalVisibleHumidity}
         sendParamsData={sendParamsData}
-        humRoomTarget={currentContoller?.params?.humRoomTarget}
+        humTarget={currentContoller?.params?.humRoomTarget}
         unitId={clickedControllerId}
         changeParams={changeParamsHandler}
       />
