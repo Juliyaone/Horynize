@@ -16,7 +16,7 @@ import { styles } from '../HomePlayScreenStyle';
 const FunctionsIcon = {
   tempTarget: TemperatureIcon,
   humRoomTarget: HumidityIcon,
-  fanSpeedP: SpeedIcon,
+  fanSpeedPTarget: SpeedIcon,
   res: ModeActiveIcon,
   ZagrFiltr: TimerActiveIcon,
 };
@@ -35,10 +35,10 @@ function ControlsInfoImp(props) {
   } = props;
 
   const {
-    tempTarget: temperature, res: resMode, humRoomTarget: humTarget, fanSpeedP: fanTarget,
+    tempTarget: temperature, res: resMode, humRoomTarget: humTarget, fanSpeedPTarget: fanTarget,
   } = params;
 
-  const keyForRender = useMemo(() => ['tempTarget', 'humRoomTarget', 'fanSpeedP', 'res', 'ZagrFiltr'], []);
+  const keyForRender = useMemo(() => ['tempTarget', 'humRoomTarget', 'fanSpeedPTarget', 'res', 'ZagrFiltr'], []);
 
   const handleSettings = useCallback(() => {
     if (id) {
@@ -72,19 +72,21 @@ function ControlsInfoImp(props) {
           </LinearGradient>
 
           {item[0] === 'ZagrFiltr'
-          && (
-          <TouchableOpacity onPress={handleSettings}>
-            <SettingsIcon />
-          </TouchableOpacity>
-          )}
+            && (
+              <TouchableOpacity onPress={handleSettings}>
+                <SettingsIcon />
+              </TouchableOpacity>
+            )}
         </View>
 
         {(item[0] === 'tempTarget') && (
           <>
             <Text style={styles.boxPowerBtnTextName}>Температура</Text>
             <Text style={styles.boxPowerBtnText}>
-              {temperature}
-              °
+
+              {resMode == '1'
+                ? '0' : `${temperature} °`}
+
             </Text>
           </>
         )}
@@ -99,7 +101,7 @@ function ControlsInfoImp(props) {
           </>
         )}
 
-        {(item[0] === 'fanSpeedP') && (
+        {(item[0] === 'fanSpeedPTarget') && (
           <>
             <Text style={styles.boxPowerBtnTextName}>Скорость</Text>
             <Text style={styles.boxPowerBtnText}>{fanTarget}</Text>

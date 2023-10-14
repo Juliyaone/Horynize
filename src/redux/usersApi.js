@@ -14,7 +14,7 @@ const baseQuery = fetchBaseQuery({
   prepareHeaders: async (headers) => {
     const token = await getTokenFromStorage();
 
-    console.log('старый token из usersApi', token);
+    // console.log('старый token из usersApi', token);
     if (token) {
       headers.set('Authorization', `Bearer ${token}`);
     }

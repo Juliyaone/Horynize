@@ -27,6 +27,8 @@ function DevicesScreen({ navigation }) {
 
   const memoModels = useMemo(() => models, [models]);
   const memoUserModelsID = useMemo(() => userModels?.map(({ id_controller }) => id_controller), [userModels]);
+  
+  console.log('memoUserModelsID', memoUserModelsID);
 
   const memoUserModelsParams = useMemo(() => {
     const controllerParams = {};
@@ -51,6 +53,7 @@ function DevicesScreen({ navigation }) {
               const promises = userModelsResult
                 .map(({ id_controller }) => getParamsModelsOfUser({ controllerId: String(id_controller) }));
               const params = await Promise.all(promises);
+              console.log('params', params);
               if (params) {
                 setUserModelsParams(params)
               }

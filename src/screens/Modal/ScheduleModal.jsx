@@ -185,7 +185,7 @@ function ScheduleModal({
             }
 
             // Используем setTimeout для задержки
-            await new Promise(resolve => setTimeout(resolve, delay));
+            await new Promise((resolve) => setTimeout(resolve, delay));
 
             const response = await sendTimers({
               controllerId: unitId,
@@ -193,7 +193,7 @@ function ScheduleModal({
               timers: result,
             });
 
-            console.log("response", JSON.stringify(response, null, 2));
+            console.log('response', JSON.stringify(response, null, 2));
 
             if (response.data.message === ' command send ') {
               continue;
@@ -219,8 +219,6 @@ function ScheduleModal({
       }
     }
   };
-
-
 
   if (isLoadingSetDayTimers || isLoadingSetTimers) {
     return <Loader />;

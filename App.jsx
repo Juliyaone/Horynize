@@ -43,8 +43,11 @@ function App() {
     async function loadFonts() {
       try {
         await Font.loadAsync({
+          // eslint-disable-next-line global-require
           SFProDisplay: require('./assets/fonts/SF-Pro-Display-Medium.otf'),
+          // eslint-disable-next-line global-require
           SFProDisplayLight: require('./assets/fonts/SF-Pro-Display-Light.otf'),
+          // eslint-disable-next-line global-require
           SFProDisplayBold: require('./assets/fonts/SF-Pro-Display-Bold.otf'),
         });
       } catch (e) {

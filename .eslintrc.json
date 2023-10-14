@@ -19,7 +19,7 @@
     "rules": {
         "max-len": ["error", { "code": 120 }],
         "semi": "off",
-        "linebreak-style": ["error", "windows"],
+        "linebreak-style": ["error", "unix"],
         "react/prop-types": "off",
         "react/jsx-props-no-spreading": "off",
         "import/prefer-default-export": "off" 

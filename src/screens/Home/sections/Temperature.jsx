@@ -14,11 +14,12 @@ function TemperatureImp(props) {
 
   const sendParamsTemperature = useCallback(async (newTemperature) => {
     try {
-      if (!newTemperature.isNaN && typeof newTemperature === 'number' && id) {
+      if (typeof newTemperature === 'number' && id) {
         const data = {
           controllerId: String(id),
           tempTarget: String(newTemperature),
         }
+
         changeParams({ tempTarget: newTemperature });
         await sendParams(data);
       }

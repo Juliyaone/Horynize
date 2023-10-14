@@ -19,7 +19,7 @@ export function AuthProvider({ children }) {
   const signIn = async (data) => {
     try {
       const { token, controllerId, userId, controllers, email, userName } = data;
-      await AsyncStorage.setItem('userToken', token);
+      await AsyncStorage.setItem('userTokenAsyncStorage', token);
       await AsyncStorage.setItem('idControllerAsyncStorage', controllerId);
       await AsyncStorage.setItem('userIdAsyncStorage', userId);
       await AsyncStorage.setItem('controllersAsyncStorage', JSON.stringify(controllers));
@@ -38,9 +38,9 @@ export function AuthProvider({ children }) {
 
   const getUserToken = async () => {
     try {
-      const userToken = await AsyncStorage.getItem('userToken');
-      setUserToken(userToken);
-      return userToken;
+      const userTokenData = await AsyncStorage.getItem('userTokenAsyncStorage');
+      setUserToken(userTokenData);
+      return userTokenData;
     } catch (err) {
       console.log(`Токен не получен ${err}`);
     } finally {
@@ -101,7 +101,7 @@ export function AuthProvider({ children }) {
     try {
       const userNameData = await AsyncStorage.getItem('userNameAsyncStorage');
       setUserName(userNameData);
-      console.log('userNameAuthContext', userName);
+      // console.log('userNameAuthContext', userName);
       return userNameData;
     } catch (err) {
       console.log(`логин пользльзователя не получен ${err}`);

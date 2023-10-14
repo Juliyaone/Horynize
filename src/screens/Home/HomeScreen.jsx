@@ -54,7 +54,7 @@ function HomeScreenInAcive({ navigation, clickedControllerId }) {
 
   const [sendParams, { isLoading: isLoadingSendParams }] = useSendParamsMutation();
 
-  const { isLoader: isLoaderGetUnits } = useGetUnitsAllQuery();
+  // const { isLoader: isLoaderGetUnits } = useGetUnitsAllQuery();
 
   const models = useSelector((state) => state.contollers.models);
   const findUnitById = (id) => {
@@ -79,7 +79,7 @@ function HomeScreenInAcive({ navigation, clickedControllerId }) {
     }
   }
 
-  if (isLoadingSendParams || isLoaderGetUnits) {
+  if (isLoadingSendParams) {
     return <Loader />;
   }
 

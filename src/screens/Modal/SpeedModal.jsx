@@ -154,7 +154,7 @@ function SpeedModal({
         fanTarget: valueSliderSpeed.toString(),
       });
     }
-    changeParams({ fanSpeedP: valueSliderSpeed });
+    changeParams({ fanSpeedPTarget: valueSliderSpeed });
     setModalVisibleSpeed(false);
   }, [changeParams, sendParamsData, setModalVisibleSpeed, unitId, valueSliderSpeed]);
 

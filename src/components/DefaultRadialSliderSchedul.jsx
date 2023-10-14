@@ -93,7 +93,6 @@ function DefaultRadialSliderSchedul({
 
   const handleOnChange = (value) => {
     setTemperatureSchedule(value);
-    console.log('temperatureSchedule', temperatureSchedule);
     return value;
   };
 
