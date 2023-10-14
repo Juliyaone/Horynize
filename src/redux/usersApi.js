@@ -4,6 +4,10 @@ import * as urls from './urls';
 import { getTokenFromStorage, saveTokenToStorage, deleteTokenFromStorage } from '../components/providers/tokenStorage';
 
 import { getStoredCredentials } from '../components/providers/SecureStore';
+import { setUser } from './slices/usersSlice';
+import { setContacts } from './slices/contactsSlice';
+import { setControllers, setUserContollers } from './slices/controllersSlice';
+import { setCurrentParams, setCurrentId } from './slices/currentControllerSlice';
 
 const baseQuery = fetchBaseQuery({
   baseUrl: urls.BASE_URL,
@@ -45,7 +49,7 @@ const baseQueryWithReauth = async (args, api, extraOptions) => {
 
 export const usersApi = createApi({
   // reducerPath: 'usersApi',
-  tagTypes: ['MetaInfo', 'User', 'Units', 'Unit', 'Params'],
+// tagTypes: ['MetaInfo', 'User', 'Units', 'Unit', 'Params'],
   // baseQuery: fetchBaseQuery({
   //   baseUrl: urls.BASE_URL,
   //   prepareHeaders: async (headers) => {
@@ -91,12 +95,24 @@ export const usersApi = createApi({
         url: urls.GET_UNITS,
         method: 'POST',
       }),
+      async onQueryStarted(_args, { dispatch, queryFulfilled }) {
+        try {
+          const result = await queryFulfilled;
+          dispatch(setControllers(result.data.models));
+        } catch (error) { /* empty */ }
+      },
     }),
     getContacts: builder.query({
       query: () => ({
         url: urls.GET_CONTACTS,
         method: 'POST',
       }),
+      async onQueryStarted(_args, { dispatch, queryFulfilled }) {
+        try {
+          const result = await queryFulfilled;
+          dispatch(setContacts(result.data.contacts[0]));
+        } catch (error) { /* empty */ }
+      },
     }),
     loginUser: builder.mutation({
       query: (body) => ({
@@ -104,6 +120,13 @@ export const usersApi = createApi({
         method: 'POST',
         body,
       }),
+      // transformResponse: (result) => result.data,
+      async onQueryStarted(_args, { dispatch, queryFulfilled }) {
+        try {
+          const result = await queryFulfilled;
+          dispatch(setUser(result.data['0']));
+        } catch (error) { /* empty */ }
+      },
     }),
     registerUser: builder.mutation({
       query: (body) => ({
@@ -113,6 +136,12 @@ export const usersApi = createApi({
           ...body,
         },
       }),
+      async onQueryStarted(_args, { dispatch, queryFulfilled }) {
+        try {
+          const result = await queryFulfilled;
+          dispatch(setUser(result.data['0']));
+        } catch (error) { /* empty */ }
+      },
     }),
     changePassword: builder.mutation({
       query: (body) => ({
@@ -131,6 +160,12 @@ export const usersApi = createApi({
           ...body,
         },
       }),
+      async onQueryStarted(_args, { dispatch, queryFulfilled }) {
+        try {
+          const result = await queryFulfilled;
+          dispatch(setUserContollers(result.data['vent-units']));
+        } catch (error) { /* empty */ }
+      },
     }),
     sendParams: builder.mutation({
       query: (body) => ({
@@ -147,8 +182,17 @@ export const usersApi = createApi({
         method: 'POST',
         body: {
           ...body,
+          controllerId: String(body.controllerId),
         },
       }),
+      // providesTags: ['Params'],
+      async onQueryStarted(_args, { dispatch, queryFulfilled }) {
+        try {
+          const result = await queryFulfilled;
+          dispatch(setCurrentParams(result.data.data[0]));
+          dispatch(setCurrentId(result.data['vent-unit'][0]['id_vent-unit']));
+        } catch (error) { /* empty */ }
+      },
     }),
     bind: builder.mutation({
       query: (body) => ({
@@ -195,9 +239,33 @@ export const usersApi = createApi({
         },
       }),
     }),
-
+    // new api
+    getModelsOfUser: builder.mutation({
+      query: (body) => ({
+        url: urls.UNITS_ALL,
+        method: 'POST',
+        body: {
+          ...body,
+        },
+      }),
+    }),
+    getParamsModelsOfUser: builder.mutation({
+      query: (body) => ({
+        url: urls.UNITS_GET_PARAMS,
+        method: 'POST',
+        body: {
+          ...body,
+          controllerId: String(body.controllerId),
+        },
+      }),
+    }),
+    getModels: builder.query({
+      query: () => ({
+        url: urls.GET_UNITS,
+        method: 'POST',
+      }),
+    }),
   }),
-
 });
 
 export const {
@@ -214,4 +282,8 @@ export const {
   useSendDayTimersMutation,
   useSendTimersMutation,
   useChangePasswordMutation,
+  // new api
+  useGetModelsOfUserMutation,
+  useGetParamsModelsOfUserMutation,
+  useGetModelsQuery,
 } = usersApi;

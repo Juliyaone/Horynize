@@ -83,8 +83,12 @@ export default function DevicesAddScreen({ navigation }) {
   return (
     <ScrollView>
       <View style={styles.container}>
-        {/* <GoBackComponent navigation={navigation} /> */}
-        <TouchableOpacity style={styles.btnBack} onPress={() => navigation.navigate('Devices')}>
+        <TouchableOpacity
+          style={styles.btnBack}
+          onPress={() => navigation.navigate('DevicesStack', {
+            screen: 'Devices',
+          })}
+        >
           <ArrowLeft />
           <Text>Назад</Text>
         </TouchableOpacity>

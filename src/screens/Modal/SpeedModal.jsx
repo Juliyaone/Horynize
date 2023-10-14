@@ -1,22 +1,10 @@
-import React, { useRef, useState, useEffect, useCallback } from 'react';
+import React, { useRef, useState, useCallback } from 'react';
 import {
-  StyleSheet, View, Text, Modal, TouchableOpacity, PanResponder, Switch, Image, Dimensions,
+  StyleSheet, View, Text, Modal, TouchableOpacity, PanResponder, Dimensions,
 } from 'react-native';
 import Slider from '@react-native-community/slider';
 
 import { LinearGradient } from 'expo-linear-gradient';
-
-import { useSendParamsMutation } from '../../redux/usersApi';
-
-import Loader from '../../components/Loader';
-
-import HumidityDeactivateIcon from '../../img/humidity-deactive.png';
-import Co2DeactiveIcon from '../../img/co2-deactive.png';
-import VavDectiveIcon from '../../img/vav-deactive.png';
-
-import HumidityActiveIcon from '../../img/humidity-active.png';
-import Co2ActiveIcon from '../../img/co2-active.png';
-import VavActiveIcon from '../../img/vav-active.png';
 
 import SpeedBtnIcon from '../../img/icons/btnSpeed';
 
@@ -155,10 +143,9 @@ function SpeedModal({
   fanTarget,
   unitId,
   sendParamsData,
+  changeParams,
 }) {
   const [valueSliderSpeed, setValueSliderSpeed] = useState(fanTarget);
-  console.log(fanTarget, 'fanTargetfanTarget');
-  console.log(valueSliderSpeed, 'valueSliderSpeedvalueSliderSpeed');
 
   const onPress = useCallback(() => {
     if (valueSliderSpeed !== undefined && valueSliderSpeed !== null) {
@@ -167,47 +154,9 @@ function SpeedModal({
         fanTarget: valueSliderSpeed.toString(),
       });
     }
+    changeParams({ fanSpeedP: valueSliderSpeed });
     setModalVisibleSpeed(false);
-  }, [sendParamsData, setModalVisibleSpeed, unitId, valueSliderSpeed]);
-
-  // const sendParamsFan = async () => {
-  //   setModalVisibleSpeed(false);
-
-  //   const data = {
-  //     controllerId: unitsId,
-  //     fanTarget: valueSliderSpeed.toString(),
-  //   }
-
-  //   try {
-  //     const answer = await sendParams(data);
-  //     await refetchUnitParams();
-  //     setRefresh(!refresh); // Обновляем состояние только после выполнения refetch
-
-  //     if (answer.data && answer.data[0]) {
-  //       setFanTarget(answer.data[0].fanSpeedPTarget);
-  //     }
-  //     setModalVisibleSpeed(false);
-  //     setSuccessText('Данные изменены');
-  //     setSpeedSuccess(true);
-  //   } catch (error) {
-  //     console.log('error', error);
-  //     let errorMessage;
-  //     if (error.data) {
-  //       if (error.data.message) {
-  //         errorMessage = error.data.message;
-  //       } else {
-  //         errorMessage = JSON.stringify(error.data);
-  //       }
-  //     } else if (error.message) {
-  //       errorMessage = error.message;
-  //     } else {
-  //       errorMessage = JSON.stringify(error);
-  //     }
-
-  //     setErrorText(errorMessage);
-  //     setStatusError(true);
-  //   }
-  // }
+  }, [changeParams, sendParamsData, setModalVisibleSpeed, unitId, valueSliderSpeed]);
 
   const panResponder = useRef(
     PanResponder.create({
@@ -224,56 +173,13 @@ function SpeedModal({
     0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10,
   ];
 
-  // const iconSelector = (imageKeyIcon, active) => {
-  //   if (active) {
-  //     switch (imageKeyIcon) {
-  //       case 'humidity':
-  //         return HumidityActiveIcon;
-  //       case 'Vav':
-  //         return VavActiveIcon;
-  //       case 'Co2':
-  //         return Co2ActiveIcon;
-  //       default:
-  //         return null;
-  //     }
-  //   } else {
-  //     switch (imageKeyIcon) {
-  //       case 'humidity':
-  //         return HumidityDeactivateIcon;
-  //       case 'Vav':
-  //         return VavDectiveIcon;
-  //       case 'Co2':
-  //         return Co2DeactiveIcon;
-  //       default:
-  //         return null;
-  //     }
-  //   }
-  // };
-
-  // const handlePress = (itemId) => {
-  //   if (activeItems.includes(itemId)) {
-  //     setActiveItems(activeItems.filter((item) => item !== itemId));
-  //   } else {
-  //     setActiveItems([...activeItems, itemId]);
-  //   }
-  // };
-
-  // const closeModalSuccess = () => {
-  //   setSpeedSuccess(null)
-  //   setModalVisibleSpeed(null);
-  // }
-
-  // if (isLoadingsenSpeed) {
-  //   return <Loader />;
-  // }
-
   return (
     <Modal
       animationType="slide"
       transparent
       visible={modalVisibleSpeed}
       onRequestClose={() => {
-        setModalVisibleSpeed(!modalVisibleSpeed);
+        setModalVisibleSpeed(false);
       }}
     >
       <View style={styles.centeredView}>
@@ -282,7 +188,7 @@ function SpeedModal({
 
           <View style={styles.sliderBox}>
             <View style={styles.boxDays}>
-              {numbers.map((item, index) => <Text key={index} style={styles.dayText}>{item}</Text>)}
+              {numbers.map((item) => <Text key={item} style={styles.dayText}>{item}</Text>)}
             </View>
 
             <View style={styles.boxDays}>

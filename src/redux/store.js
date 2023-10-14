@@ -1,20 +1,18 @@
 import { configureStore } from '@reduxjs/toolkit';
 import { usersApi } from './usersApi';
-import usersReducer from './slices/usersSlice';
-// import someOtherReducer from './slices/someOtherSlice';
+import { authSlice } from './slices/usersSlice';
+import { contactsSlice } from './slices/contactsSlice';
+import { controllersSlice } from './slices/controllersSlice';
+import { currentControllerSlice } from './slices/currentControllerSlice';
 
-const store = configureStore({
+export const store = configureStore({
   reducer: {
-    // Добавьте users: usersReducer в объект reducer
-    users: usersReducer,
-    // Добавьте сюда все остальные reducers, которые у вас есть
-    // someOther: someOtherReducer
     [usersApi.reducerPath]: usersApi.reducer,
+    auth: authSlice.reducer,
+    contacts: contactsSlice.reducer,
+    contollers: controllersSlice.reducer,
+    currentContoller: currentControllerSlice.reducer,
   },
-  middleware: (getDefaultMiddleware) =>
-    getDefaultMiddleware({
-      serializableCheck: false,
-    }).concat(usersApi.middleware),
+  middleware: (getDefaultMiddleware) => getDefaultMiddleware().concat(usersApi.middleware),
+  devTools: true,
 });
-
-export default store;

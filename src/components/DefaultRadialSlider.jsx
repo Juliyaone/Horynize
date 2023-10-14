@@ -10,10 +10,10 @@ const styles = StyleSheet.create({
   },
 });
 
-function DefaultRadialSlider({ temperature, setTemperature, onComplete }) {
-  const handleOnChange = (value) => {
-    setTemperature(value);
-  };
+function DefaultRadialSlider({ temperature, onComplete }) {
+  // const handleOnChange = (value) => {
+  //   onComplete(value);
+  // };
 
   return (
     <View style={styles.containerRadialSlider}>
@@ -21,9 +21,9 @@ function DefaultRadialSlider({ temperature, setTemperature, onComplete }) {
         value={temperature}
         min={15}
         max={30}
-        onChange={handleOnChange}
+        // onChange={handleOnChange}
         onComplete={(value) => onComplete(value)}
-        isHideButtons
+        // isHideButtons
         thumbColor="#FF5204"
         thumbBorderWidth={3}
         thumbRadius={14}

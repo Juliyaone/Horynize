@@ -1,13 +1,29 @@
-import { createSlice } from "@reduxjs/toolkit";
-import { usersApi } from "../usersApi";
+import { createSlice } from '@reduxjs/toolkit';
 
-const usersSlice = createSlice({
-  name: "users",
-  initialState: {},
-  reducers: {},
-  extraReducers: (builder) => {
-  
-  }
+const initialState = {
+  user: undefined,
+  userControllers: undefined,
+  error: undefined,
+  isLoading: undefined,
+};
+
+export const authSlice = createSlice({
+  name: 'authSlice',
+  initialState,
+  reducers: {
+    setUser: (state, action) => {
+      // eslint-disable-next-line no-param-reassign
+      state.user = action.payload
+    },
+    logout: () => initialState,
+    // Save the user's info
+    getUser: (state, action) => {
+      // eslint-disable-next-line no-param-reassign
+      state.user = action.payload;
+    },
+  },
 });
 
-export default usersSlice.reducer;
+export const {
+  logout, userInfo, setUser,
+} = authSlice.actions;

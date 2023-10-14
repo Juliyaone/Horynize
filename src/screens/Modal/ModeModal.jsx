@@ -179,11 +179,49 @@ const styles = StyleSheet.create({
     letterSpacing: 0.374,
     color: '#787880',
   },
-
 });
 
+const iconSelector = (imageKeyIcon, active) => {
+  if (active) {
+    switch (imageKeyIcon) {
+      case 'Cooling':
+        return CoolingActiveIcon;
+      case 'Temp':
+        return TempActiveIcon;
+      case 'Vent':
+        return VentActiveIcon;
+      case 'Auto':
+        return 'auto';
+      default:
+        return null;
+    }
+  } else {
+    switch (imageKeyIcon) {
+      case 'Cooling':
+        return CoolingDeactiveIcon;
+      case 'Temp':
+        return TempDeactiveIcon;
+      case 'Vent':
+        return VentDeactiveIcon;
+      case 'Auto':
+        return 'auto';
+      default:
+        return null;
+    }
+  }
+};
+
+const arr = [
+  { id: 1, name: 'Вентиляция', imageKeyIcon: 'Vent' },
+  { id: 2, name: 'Hагрев', imageKeyIcon: 'Temp' },
+  { id: 3, name: 'Oхлаждение', imageKeyIcon: 'Cooling' },
+  { id: 4, name: 'Климат-контроль', imageKeyIcon: 'Auto' },
+];
+
+const keyForRender = ['Temp', 'Vent', 'Cooling', 'Auto'];
+
 function ModeModal({
-  modalVisible, setModalVisible, sendParamsData, unitId, resMode
+  modalVisible, setModalVisible, sendParamsData, unitId, resMode, changeParams,
 }) {
   const [activeItem, setActiveItem] = useState(resMode);
 
@@ -198,62 +236,30 @@ function ModeModal({
     }),
   ).current;
 
-  const iconSelector = (imageKeyIcon, active) => {
-    if (active) {
-      switch (imageKeyIcon) {
-        case 'Cooling':
-          return CoolingActiveIcon;
-        case 'Temp':
-          return TempActiveIcon;
-        case 'Vent':
-          return VentActiveIcon;
-        case 'Auto':
-          return 'auto';
-        default:
-          return null;
-      }
-    } else {
-      switch (imageKeyIcon) {
-        case 'Cooling':
-          return CoolingDeactiveIcon;
-        case 'Temp':
-          return TempDeactiveIcon;
-        case 'Vent':
-          return VentDeactiveIcon;
-        case 'Auto':
-          return 'auto';
-        default:
-          return null;
-      }
-    }
-  };
-
   const handlePress = (itemId) => {
     if (activeItem === itemId) {
       setActiveItem(null);
-      // setResMode(null); // Обнуление res, если режим деактивирован
     } else {
       setActiveItem(itemId);
-      // setResMode(itemId); // Установка res в значение itemId (1, 2, 3 или 4)
     }
   };
 
-  const arr = [
-    { id: 1, name: 'Вентиляция', imageKeyIcon: 'Vent' },
-    { id: 2, name: 'Hагрев', imageKeyIcon: 'Temp' },
-    { id: 3, name: 'Oхлаждение', imageKeyIcon: 'Cooling' },
-    { id: 4, name: 'Климат-контроль', imageKeyIcon: 'Auto' },
-  ];
-
   const onPress = useCallback(() => {
     if (activeItem) {
+      changeParams({
+        res: String(activeItem),
+      })
       sendParamsData({
         controllerId: String(unitId),
         res: String(activeItem),
       });
     }
     setModalVisible(false);
-  }, [activeItem, sendParamsData, setModalVisible, unitId]);
+  }, [activeItem, changeParams, sendParamsData, setModalVisible, unitId]);
+
+  if (resMode === undefined) {
+    return null;
+  }
 
   return (
     <Modal
@@ -261,7 +267,7 @@ function ModeModal({
       transparent
       visible={modalVisible}
       onRequestClose={() => {
-        setModalVisible(!modalVisible);
+        setModalVisible(false);
       }}
     >
       <View style={styles.centeredView}>
@@ -270,8 +276,6 @@ function ModeModal({
           <View style={styles.boxAutoMode}>
             {arr.map((item) => {
               const iconOrText = iconSelector(item.imageKeyIcon, activeItem === item.id);
-
-              const keyForRender = ['Temp', 'Vent', 'Cooling', 'Auto'];
               if (!keyForRender.includes(item.imageKeyIcon)) {
                 return null;
               }
