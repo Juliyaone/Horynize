@@ -1,5 +1,7 @@
 /* eslint-disable camelcase */
-import React, { useEffect, useMemo, useState, useContext } from 'react';
+import React, {
+  useEffect, useMemo, useState, useContext,
+} from 'react';
 import { View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
@@ -27,7 +29,7 @@ function DevicesScreen({ navigation }) {
 
   const memoModels = useMemo(() => models, [models]);
   const memoUserModelsID = useMemo(() => userModels?.map(({ id_controller }) => id_controller), [userModels]);
-  
+
   console.log('memoUserModelsID', memoUserModelsID);
 
   const memoUserModelsParams = useMemo(() => {

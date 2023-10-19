@@ -6,10 +6,13 @@ import {
 
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useSelector } from 'react-redux';
+import TimeIcon from '../../img/icons/time';
 import { useSendParamsMutation, useGetUnitsAllQuery } from '../../redux/usersApi';
 import PowerBtnIcon from '../../img/icons/powerBtn';
 import ModalError from '../../components/ModalError';
 import ModalNotControllers from '../../components/ModalNotControllers';
+
+import DetailedInfoImp from './sections/DetailedInfoImp';
 
 import Loader from '../../components/Loader';
 
@@ -17,12 +20,15 @@ import { styles } from './HomeScreenStyle';
 
 function HomeScreen({ navigation, route }) {
   const clickedControllerId = route?.params?.clickedControllerId;
-
+  const currentContoller = useSelector((state) => state.currentContoller);
+  console.log('currentContoller', currentContoller);
+  
   return (
     <SafeAreaView style={{ flex: 1 }}>
       <ScrollView>
         {clickedControllerId !== undefined ? (
           <HomeScreenInAcive
+            currentContoller={currentContoller}
             navigation={navigation}
             clickedControllerId={clickedControllerId}
           />
@@ -48,9 +54,12 @@ const images = {
   '': require('../../img/vav-active.png'),
 };
 
-function HomeScreenInAcive({ navigation, clickedControllerId }) {
+function HomeScreenInAcive({ navigation, clickedControllerId, currentContoller }) {
   const [userStartError, setUserStartError] = useState(false);
   const [errorText, setErrorText] = useState('');
+
+  console.log('currentContoller', currentContoller);
+  // const isDisabled = Number(params.res) === 1;
 
   const [sendParams, { isLoading: isLoadingSendParams }] = useSendParamsMutation();
 
@@ -63,7 +72,7 @@ function HomeScreenInAcive({ navigation, clickedControllerId }) {
   };
   const unit = findUnitById(Number(clickedControllerId));
 
-  const localImage = images[unit?.img];
+  // const localImage = images[unit?.img];
 
   const sendParamsData = async () => {
     const params = {
@@ -71,7 +80,7 @@ function HomeScreenInAcive({ navigation, clickedControllerId }) {
       start: '1',
     }
     try {
-      await sendParams(params);
+      // await sendParams(params);
       navigation.navigate('HomeStack', { screen: 'HomePlay', params: { clickedControllerId } });
     } catch (error) {
       setErrorText(error.data.message);
@@ -101,8 +110,15 @@ function HomeScreenInAcive({ navigation, clickedControllerId }) {
               <Text style={styles.boxPowerBtnText}>Питание</Text>
             </TouchableOpacity>
           </View>
-          <Image source={localImage} />
-          <Text>{unit?.name}</Text>
+          <View style={styles.btnSchedule}>
+            <TimeIcon style={styles.btnScheduleIcon} />
+            <Text style={styles.btnScheduleText}>Часы работы</Text>
+          </View>
+
+          <DetailedInfoImp currentContoller={currentContoller} />
+
+          {/* <Image source={localImage} /> */}
+          {/* <Text>{unit?.name}</Text> */}
         </View>
       </ScrollView>
     </SafeAreaView>

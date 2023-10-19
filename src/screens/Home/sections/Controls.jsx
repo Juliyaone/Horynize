@@ -1,4 +1,4 @@
-import React, { memo, useMemo, useCallback } from 'react';
+import React, { memo, useCallback } from 'react';
 import {
   View, Text, TouchableOpacity, FlatList, Image,
 } from 'react-native';
@@ -6,6 +6,7 @@ import TemperatureActiveIcon from '../../../img/temperature-active.png';
 import HumidityActiveIcon from '../../../img/humidity-active.png';
 import SpeedActiveIcon from '../../../img/speed-active.png';
 import TimerIcon from '../../../img/timer.png';
+import Microphone from '../../../img/microphone.png';
 
 import ModeIcon from '../../../img/mode.png';
 import PowerBtnActiveIcon from '../../../img/icons/powerBtnActive';
@@ -13,15 +14,14 @@ import PowerBtnActiveIcon from '../../../img/icons/powerBtnActive';
 import { styles } from '../HomePlayScreenStyle';
 
 const FunctionsIconSmall = {
-  tempTarget: TemperatureActiveIcon,
   humRoomTarget: HumidityActiveIcon,
   fanSpeedPTarget: SpeedActiveIcon,
   res: ModeIcon,
   ZagrFiltr: TimerIcon,
+  tempChannel: Microphone,
 };
 
-const keyForRenderSmall = ['tempTarget', 'humRoomTarget', 'fanSpeedPTarget', 'res', 'ZagrFiltr'];
-
+const keyForRenderSmall = ['humRoomTarget', 'fanSpeedPTarget', 'res', 'ZagrFiltr', 'tempChannel'];
 
 function ControlsImp(props) {
   const {
@@ -29,8 +29,6 @@ function ControlsImp(props) {
   } = props;
 
   const openModalHandler = useCallback((itemName) => {
-
-    console.log('itemName', itemName);
     openModal(itemName)
   }, [openModal]);
 
@@ -38,6 +36,7 @@ function ControlsImp(props) {
     if (!keyForRenderSmall.includes(item[0])) {
       return null;
     }
+
     const imageSrc = FunctionsIconSmall[item[0]];
     return (
       <TouchableOpacity
@@ -48,11 +47,13 @@ function ControlsImp(props) {
         onPress={() => openModalHandler(item[0])}
       >
         <Image source={imageSrc} style={{ width: 30, height: 30 }} />
-        {(item[0] === 'tempTarget') && <Text style={styles.boxPowerBtnTextNameSmall}>Температура</Text>}
+
         {(item[0] === 'humRoomTarget') && <Text style={styles.boxPowerBtnTextNameSmall}>Влажность</Text>}
         {(item[0] === 'fanSpeedPTarget') && <Text style={styles.boxPowerBtnTextNameSmall}>Скорость вращения</Text>}
         {(item[0] === 'res') && <Text style={styles.boxPowerBtnTextNameSmall}>Режим</Text>}
         {(item[0] === 'ZagrFiltr') && <Text style={styles.boxPowerBtnTextNameSmall}>Автозапуск</Text>}
+        {(item[0] === 'tempChannel') && <Text style={styles.boxPowerBtnTextNameSmall}>Голослвые ассистенты</Text>}
+
       </TouchableOpacity>
     )
   };

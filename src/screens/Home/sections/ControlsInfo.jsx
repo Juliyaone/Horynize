@@ -1,4 +1,4 @@
-import React, { memo, useMemo, useCallback } from 'react';
+import React, { memo, useCallback } from 'react';
 import {
   View, Text, TouchableOpacity, FlatList, Image,
 } from 'react-native';
@@ -10,6 +10,7 @@ import SpeedIcon from '../../../img/speed.png';
 import SettingsIcon from '../../../img/icons/settings';
 import ModeActiveIcon from '../../../img/modeActive.png';
 import TimerActiveIcon from '../../../img/timerActive.png';
+import MicrophoneActiveIcon from '../../../img/microphone_white.png';
 
 import { styles } from '../HomePlayScreenStyle';
 
@@ -19,6 +20,7 @@ const FunctionsIcon = {
   fanSpeedPTarget: SpeedIcon,
   res: ModeActiveIcon,
   ZagrFiltr: TimerActiveIcon,
+  tempChannel: MicrophoneActiveIcon,
 };
 
 const resNames = {
@@ -31,14 +33,16 @@ const resNames = {
 
 function ControlsInfoImp(props) {
   const {
-    params, id, entriesUnitParams, timers, navigation,
+    params, id, entriesUnitParams, timers, navigation, temperature,
   } = props;
 
+  console.log('entriesUnitParams', entriesUnitParams);
+
   const {
-    tempTarget: temperature, res: resMode, humRoomTarget: humTarget, fanSpeedPTarget: fanTarget,
+    res: resMode, humRoomTarget: humTarget, fanSpeedPTarget: fanTarget,
   } = params;
 
-  const keyForRender = useMemo(() => ['tempTarget', 'humRoomTarget', 'fanSpeedPTarget', 'res', 'ZagrFiltr'], []);
+  const keyForRender = ['tempTarget', 'humRoomTarget', 'fanSpeedPTarget', 'res', 'ZagrFiltr', 'tempChannel'];
 
   const handleSettings = useCallback(() => {
     if (id) {
@@ -48,6 +52,10 @@ function ControlsInfoImp(props) {
 
   const renderItem = ({ item, index }) => {
     if (!keyForRender.includes(item[0])) {
+      return null;
+    }
+
+    if (item[0] === 'tempTarget' && resMode === '1') {
       return null;
     }
     const imageSrc = FunctionsIcon[item[0]];
@@ -84,7 +92,7 @@ function ControlsInfoImp(props) {
             <Text style={styles.boxPowerBtnTextName}>Температура</Text>
             <Text style={styles.boxPowerBtnText}>
 
-              {resMode == '1'
+              {resMode === '1'
                 ? '0' : `${temperature} °`}
 
             </Text>
@@ -105,6 +113,16 @@ function ControlsInfoImp(props) {
           <>
             <Text style={styles.boxPowerBtnTextName}>Скорость</Text>
             <Text style={styles.boxPowerBtnText}>{fanTarget}</Text>
+          </>
+        )}
+
+
+        {(item[0] === 'tempChannel') && (
+          <>
+            <Text style={styles.boxPowerBtnTextName}>Голослвые ассистенты</Text>
+            <Text style={styles.boxPowerBtnText}>Не подключены</Text>
+            {/* <Text style={styles.boxPowerBtnText}>Алиса</Text>
+            <Text style={styles.boxPowerBtnText}>Сбер</Text> */}
           </>
         )}
 

@@ -10,10 +10,33 @@ const styles = StyleSheet.create({
   },
 });
 
-function DefaultRadialSlider({ temperature, onComplete }) {
-  // const handleOnChange = (value) => {
-  //   onComplete(value);
-  // };
+function DefaultRadialSlider({
+  temperature, setIsScrollEnabled, sendParamsData, changeParams, id,
+}) {
+  const sendParamsTemperature = async (newTemperature) => {
+    try {
+      if (id) {
+        const data = {
+          controllerId: String(id),
+          tempTarget: String(newTemperature),
+        }
+
+        await sendParamsData(data);
+      }
+    } catch (error) {
+      console.log('errornewTemperature', error);
+    }
+  }
+
+  const handleOnChange = () => {
+    setIsScrollEnabled(false);
+  };
+
+  const handleOnComplete = (value) => {
+    sendParamsTemperature(value);
+    setIsScrollEnabled(true);
+    changeParams({ tempTarget: value });
+  };
 
   return (
     <View style={styles.containerRadialSlider}>
@@ -21,9 +44,8 @@ function DefaultRadialSlider({ temperature, onComplete }) {
         value={temperature}
         min={15}
         max={30}
-        // onChange={handleOnChange}
-        onComplete={(value) => onComplete(value)}
-        // isHideButtons
+        onChange={handleOnChange}
+        onComplete={(value) => handleOnComplete(value)}
         thumbColor="#FF5204"
         thumbBorderWidth={3}
         thumbRadius={14}

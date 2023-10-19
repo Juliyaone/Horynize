@@ -18,6 +18,8 @@
     "@react-navigation/native-stack": "^6.9.13",
     "@reduxjs/toolkit": "^1.9.5",
     "expo": "~49.0.7",
+    "expo-auth-session": "~5.0.2",
+    "expo-crypto": "~12.4.1",
     "expo-font": "~11.4.0",
     "expo-linear-gradient": "~12.3.0",
     "expo-secure-store": "~12.3.1",
@@ -44,5 +46,17 @@
     "eslint-plugin-react-hooks": "^4.6.0",
     "eslint-plugin-react-native": "^4.1.0"
   },
-  "private": true
+  "private": true,
+  "description": "Horynize",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Juliyaone/Horynize.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Juliyaone/Horynize/issues"
+  },
+  "homepage": "https://github.com/Juliyaone/Horynize#readme"
 }

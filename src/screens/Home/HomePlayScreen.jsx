@@ -24,9 +24,10 @@ import { UserContext } from '../../components/providers/UserContext';
 import HumidityModal from '../Modal/HumidityModal';
 import ScheduleModal from '../Modal/ScheduleModal';
 import SpeedModal from '../Modal/SpeedModal';
+import AlisaModal from '../Modal/AlisaModal';
 
 import ModeModal from '../Modal/ModeModal';
-import { DetailedInfo } from './sections/DetailedInfo';
+// import { DetailedInfo } from './sections/DetailedInfo';
 import { Temperature } from './sections/Temperature';
 import { Controls } from './sections/Controls';
 import { ControlsInfo } from './sections/ControlsInfo';
@@ -44,19 +45,22 @@ const dayMapping = {
 };
 
 function HomePlayScreen({ navigation, route }) {
+  const [isScrollEnabled, setIsScrollEnabled] = useState(true);
   const clickedControllerId = route?.params?.clickedControllerId ?? undefined;
-  console.log('clickedControllerId', clickedControllerId);
+  // console.log('clickedControllerId', clickedControllerId);
+  console.log('isScrollEnabled', isScrollEnabled);
 
   if (!clickedControllerId) {
     return <Loader />;
   }
   return (
     <SafeAreaView style={{ flex: 1 }}>
-      <ScrollView>
+      <ScrollView scrollEnabled={isScrollEnabled}>
         {clickedControllerId !== undefined && clickedControllerId !== null ? (
           <HomePlayScreenActive
             navigation={navigation}
             clickedControllerId={clickedControllerId}
+            setIsScrollEnabled={setIsScrollEnabled}
           />
         ) : (
           <ModalNotControllers
@@ -69,13 +73,14 @@ function HomePlayScreen({ navigation, route }) {
   );
 }
 
-function HomePlayScreenActive({ navigation, clickedControllerId }) {
+function HomePlayScreenActive({ navigation, clickedControllerId, setIsScrollEnabled }) {
   const { currentDayOfWeek } = useContext(UserContext);
 
   const [modalVisibleHumidity, setModalVisibleHumidity] = useState(false);
   const [modalVisibleSchedule, setModalVisibleSchedule] = useState(false);
   const [modalVisibleMode, setModalVisibleMode] = useState(false);
   const [modalVisibleSpeed, setModalVisibleSpeed] = useState(false);
+  const [modalVisibleAlisa, setModalVisibleAlisa] = useState(false);
 
   const [statusError, setStatusError] = useState(false);
   const [speedSuccess, setSpeedSuccess] = useState(false);
@@ -98,27 +103,21 @@ function HomePlayScreenActive({ navigation, clickedControllerId }) {
   } = useGetTimersUnitQuery({ controllerId: clickedControllerId, day: dayMapping?.[currentDayOfWeek] });
 
   const {
-    data: paramsContoller,
     isLoading: isCurrentControllerParamsLoading,
   } = useGetParamsQuery({ controllerId: clickedControllerId });
 
   const currentContoller = useSelector((state) => state.currentContoller);
 
-  console.log('currentContoller', currentContoller);
-
   const entriesUnitParams = useMemo(() => Object.entries(currentContoller?.params ?? {}), [currentContoller]);
 
   useEffect(() => {
-    if (paramsContoller) {
-      console.log('paramsContoller', paramsContoller);
-    }
     if (currentContoller?.params) {
       setHumTarget(currentContoller?.params?.humRoomTarget);
       setTemperature(currentContoller?.params?.tempTarget);
-      setFanTarget(currentContoller?.params?.fanSpeedP);
+      setFanTarget(currentContoller?.params?.fanSpeedPTarget);
       setResMode(currentContoller.params?.res);
     }
-  }, [currentContoller, paramsContoller]);
+  }, [currentContoller]);
 
   const changeParamsHandler = useCallback((params) => dispatch(changeParams(params)), [dispatch]);
 
@@ -129,11 +128,15 @@ function HomePlayScreenActive({ navigation, clickedControllerId }) {
     if (itemName === 'res') {
       setModalVisibleMode(true);
     }
-    if (itemName === 'fanSpeedP') {
+    if (itemName === 'fanSpeedPTarget') {
       setModalVisibleSpeed(true);
     }
     if (itemName === 'ZagrFiltr') {
       setModalVisibleSchedule(true);
+    }
+
+    if (itemName === 'tempChannel') {
+      setModalVisibleAlisa(true);
     }
   }, []);
 
@@ -143,7 +146,7 @@ function HomePlayScreenActive({ navigation, clickedControllerId }) {
       start: '0',
     }
     try {
-      await sendParams(params)
+      // await sendParams(params)
       setConnectionText('Устройство отключено');
       setIsConnection(true);
       navigation.navigate('HomeStack', {
@@ -208,6 +211,12 @@ function HomePlayScreenActive({ navigation, clickedControllerId }) {
               onDismiss={() => setIsConnection(null)}
             />
           )}
+      {modalVisibleAlisa && (
+        <AlisaModal
+          modalVisible={modalVisibleAlisa}
+          setModalVisible={setModalVisibleAlisa}
+        />
+      )}
       {modalVisibleSchedule && (
       <ScheduleModal
         modalVisible={modalVisibleSchedule}
@@ -221,7 +230,8 @@ function HomePlayScreenActive({ navigation, clickedControllerId }) {
         modalVisible={modalVisibleHumidity}
         setModalVisible={setModalVisibleHumidity}
         sendParamsData={sendParamsData}
-        humTarget={currentContoller?.params?.humRoomTarget}
+        // humTarget={currentContoller?.params?.humRoomTarget}
+        humTarget={humTarget}
         unitId={clickedControllerId}
         changeParams={changeParamsHandler}
       />
@@ -231,7 +241,8 @@ function HomePlayScreenActive({ navigation, clickedControllerId }) {
         modalVisible={modalVisibleMode}
         setModalVisible={setModalVisibleMode}
         sendParamsData={sendParamsData}
-        resMode={currentContoller?.params?.res}
+        // resMode={currentContoller?.params?.res}
+        resMode={resMode}
         changeParams={changeParamsHandler}
         unitId={clickedControllerId}
       />
@@ -239,7 +250,8 @@ function HomePlayScreenActive({ navigation, clickedControllerId }) {
 
       {modalVisibleSpeed && (
       <SpeedModal
-        fanTarget={currentContoller?.params?.fanSpeedP}
+        // fanTarget={currentContoller?.params?.fanSpeedP}
+        fanTarget={fanTarget}
         setModalVisibleSpeed={setModalVisibleSpeed}
         modalVisibleSpeed={modalVisibleSpeed}
         unitId={clickedControllerId}
@@ -263,6 +275,7 @@ function HomePlayScreenActive({ navigation, clickedControllerId }) {
                 <View style={styles.flatListContainerHome}>
                   <ControlsInfo
                     {...currentContoller}
+                    temperature={temperature}
                     entriesUnitParams={entriesUnitParams}
                     timers={timers}
                     navigation={navigation}
@@ -272,10 +285,12 @@ function HomePlayScreenActive({ navigation, clickedControllerId }) {
             )}
             <Temperature
               {...currentContoller}
-              sendParams={sendParams}
+              temperature={temperature}
+              sendParamsData={sendParamsData}
               changeParams={changeParamsHandler}
+              setIsScrollEnabled={setIsScrollEnabled}
             />
-            <DetailedInfo {...currentContoller} />
+            {/* <DetailedInfo {...currentContoller} /> */}
           </>
         )}
       </View>

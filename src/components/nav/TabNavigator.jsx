@@ -63,7 +63,7 @@ function TabNavigator() {
       )}
       <Tab.Screen
         name="SettingsStack"
-        options={{ headerShown: false }}
+        options={{ unmountOnBlur: true, headerShown: false }}
         component={SettingsStackNavigator}
       />
     </Tab.Navigator>

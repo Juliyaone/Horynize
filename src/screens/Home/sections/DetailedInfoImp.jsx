@@ -1,16 +1,19 @@
-import React, { memo, useMemo } from 'react';
+import React from 'react';
 import {
   View, Text,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 
-import { styles } from '../HomePlayScreenStyle';
+import { styles } from '../HomeScreenStyle';
 
-function DetailedInfoImp(props) {
-  const { params } = props;
-  const keyForRender = useMemo(() => ['humRoom', 'tempChannel', 'tempRoom', 'fanSpeedPTarget', 'co2Room'], []);
+function DetailedInfoImp({ currentContoller }) {
+  const { params } = currentContoller;
 
-  const result = useMemo(() => Object.entries(params).map((item) => {
+  console.log('paramsDetailedInfoImp', params);
+
+  const keyForRender = ['humRoom', 'tempChannel', 'tempRoom', 'fanSpeedPTarget', 'co2Room'];
+
+  const result = () => Object.entries(params).map((item) => {
     if (!keyForRender.includes(item[0])) {
       return null;
     }
@@ -51,7 +54,7 @@ function DetailedInfoImp(props) {
         {(item[0] === 'co2Room') && <Text style={styles.boxDeviceFunctionsItemText}>{Math.round(item[1])}</Text>}
       </View>
     );
-  }), [params, keyForRender]);
+  });
 
   return (
     <LinearGradient
@@ -66,10 +69,10 @@ function DetailedInfoImp(props) {
       }}
     >
       <View style={styles.boxHomeDeviceFunctions}>
-        {result}
+        {result()}
       </View>
     </LinearGradient>
   );
 }
 
-export const DetailedInfo = memo(DetailedInfoImp);
+export default DetailedInfoImp;

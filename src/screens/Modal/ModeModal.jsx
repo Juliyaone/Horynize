@@ -223,8 +223,7 @@ const keyForRender = ['Temp', 'Vent', 'Cooling', 'Auto'];
 function ModeModal({
   modalVisible, setModalVisible, sendParamsData, unitId, resMode, changeParams,
 }) {
-  const [activeItem, setActiveItem] = useState(resMode);
-
+  const [activeItem, setActiveItem] = useState(Number(resMode));
   const panResponder = useRef(
     PanResponder.create({
       onStartShouldSetPanResponder: () => true,
