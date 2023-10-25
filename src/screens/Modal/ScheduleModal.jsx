@@ -193,7 +193,6 @@ function ScheduleModal({
               timers: result,
             });
 
-            console.log('response', JSON.stringify(response, null, 2));
 
             if (response.data.message === ' command send ') {
               continue;

@@ -12,8 +12,6 @@ import LockIcon from '../../img/icons/lock';
 export function PersonalData({ navigation }) {
   const auth = useSelector((state) => state.auth);
 
-  console.log(auth)
-
   const onChangePassword = () => {
     navigation.navigate('ChangeUserData');
   }

@@ -108,7 +108,6 @@ function SignInScreen({ navigation }) {
         }
         navigation.navigate('MainApp');
       } catch (error) {
-        console.log('error', error);
         let errorMessage;
 
         if (error.data) {

@@ -1,18 +1,110 @@
-import React, { memo, useCallback } from 'react';
+import React, {
+  useCallback, useEffect, useState, useLayoutEffect,
+} from 'react';
 import {
-  View, Text, TouchableOpacity, FlatList, Image,
+  View, Text, TouchableOpacity, FlatList, Image, StyleSheet, Dimensions,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 
-import TemperatureIcon from '../../../img/temperature.png';
-import HumidityIcon from '../../../img/humidity.png';
-import SpeedIcon from '../../../img/speed.png';
-import SettingsIcon from '../../../img/icons/settings';
-import ModeActiveIcon from '../../../img/modeActive.png';
-import TimerActiveIcon from '../../../img/timerActive.png';
-import MicrophoneActiveIcon from '../../../img/microphone_white.png';
+import TemperatureIcon from '../../../img/temp-white.png';
+import HumidityIcon from '../../../img/hum-white.png';
+import SpeedIcon from '../../../img/fan-white.png';
+import TimerActiveIcon from '../../../img/time-white.png';
+import MicrophoneActiveIcon from '../../../img/microfon-white.png';
+import ModeActiveIcon from '../../../img/mode-white.png';
 
-import { styles } from '../HomePlayScreenStyle';
+// import SettingsIcon from '../../../img/icons/settings';
+
+const screenWidth = Dimensions.get('window').width;
+const gap = 10;
+const totalGaps = gap * 4;
+const controlsInfoWidth = (screenWidth + totalGaps * 7) / 5;
+const fontSizeHeader = controlsInfoWidth * 0.10;
+const fontSizeText = fontSizeHeader - 2;
+const calculatedLineHeight = controlsInfoWidth * 0.12 + 0.1;
+
+const controlsInfoBgWidth = controlsInfoWidth / 3;
+const controlsInfoBgIconWidth = controlsInfoWidth / 5;
+
+const styles = StyleSheet.create({
+  controlsInfoBox: {
+    width: controlsInfoWidth,
+    height: controlsInfoWidth,
+    marginRight: gap,
+    alignItems: 'flex-start',
+    justifyContent: 'flex-start',
+    padding: 10,
+    backgroundColor: '#FFFFFF',
+    borderRadius: 8,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.12,
+    shadowRadius: 2,
+    elevation: 1,
+    marginBottom: 5,
+  },
+
+  controlsInfoBoxActive: {
+    width: controlsInfoWidth,
+    height: controlsInfoWidth,
+    marginRight: gap,
+    alignItems: 'flex-start',
+    justifyContent: 'flex-start',
+    padding: 10,
+    backgroundColor: '#DDDDDD',
+    borderRadius: 8,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.12,
+    shadowRadius: 2,
+    elevation: 1,
+    marginBottom: 5,
+  },
+  controlsInfoBoxIconSettings: {
+    width: '100%',
+    display: 'flex',
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+  },
+  controlsInfoBg: {
+    borderRadius: 8,
+    width: controlsInfoBgWidth,
+    height: controlsInfoBgWidth,
+    marginBottom: 10,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  controlsInfoBgIcon: {
+    width: controlsInfoBgIconWidth,
+    height: controlsInfoBgIconWidth,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  controlsInfoBtnTextName: {
+    fontFamily: 'SFProDisplay',
+    fontStyle: 'normal',
+    fontWeight: '600',
+    fontSize: fontSizeHeader,
+    lineHeight: calculatedLineHeight,
+    letterSpacing: 0.374,
+    color: '#787880',
+    marginBottom: 10,
+  },
+  controlsInfoBtnText: {
+    fontFamily: 'SFProDisplay',
+    fontStyle: 'normal',
+    fontWeight: '600',
+    fontSize: fontSizeText,
+    lineHeight: calculatedLineHeight,
+    letterSpacing: 0.374,
+    color: '#787880',
+    marginBottom: 4,
+  },
+  controlsInfoBtnTextBox: {
+    display: 'flex',
+    flexDirection: 'row',
+  },
+})
 
 const FunctionsIcon = {
   tempTarget: TemperatureIcon,
@@ -31,12 +123,10 @@ const resNames = {
   4: 'Климат-контроль',
 };
 
-function ControlsInfoImp(props) {
+function ControlsInfo(props) {
   const {
-    params, id, entriesUnitParams, timers, navigation, temperature,
+    params, id, entriesUnitParams, timers, navigation, temperature, indexActive, flatListRef,
   } = props;
-
-  console.log('entriesUnitParams', entriesUnitParams);
 
   const {
     res: resMode, humRoomTarget: humTarget, fanSpeedPTarget: fanTarget,
@@ -44,53 +134,51 @@ function ControlsInfoImp(props) {
 
   const keyForRender = ['tempTarget', 'humRoomTarget', 'fanSpeedPTarget', 'res', 'ZagrFiltr', 'tempChannel'];
 
-  const handleSettings = useCallback(() => {
-    if (id) {
-      navigation.navigate('HomeStack', { screen: 'HomeSchedule', params: { clickedControllerId: String(id) } });
-    }
-  }, [id, navigation]);
+  
+  const filteredEntries = entriesUnitParams.filter(([key]) => keyForRender.includes(key));
+
+  // const handleSettings = useCallback(() => {
+  //   if (id) {
+  //     navigation.navigate('HomeStack', { screen: 'HomeSchedule', params: { clickedControllerId: String(id) } });
+  //   }
+  // }, [id, navigation]);
 
   const renderItem = ({ item, index }) => {
-    if (!keyForRender.includes(item[0])) {
-      return null;
-    }
+    // console.log('renderItem', index);
+    // console.log('indexActive', indexActive);
 
     if (item[0] === 'tempTarget' && resMode === '1') {
       return null;
     }
+
     const imageSrc = FunctionsIcon[item[0]];
 
     return (
       <View
         style={[
-          styles.boxFunctionDevices,
-          index !== Object.entries(params).length - 1 && styles.itemMargin,
+          (index === indexActive) ? styles.controlsInfoBoxActive : styles.controlsInfoBox,
         ]}
       >
-        <View style={styles.boxIconSettings}>
+        <View style={styles.controlsInfoBoxIconSettings}>
           <LinearGradient
             colors={['#FEB84A', '#FF5204']}
-            style={{
-              borderRadius: 8, width: 40, height: 40, marginBottom: 5, alignItems: 'center', justifyContent: 'center',
-            }}
+            style={styles.controlsInfoBg}
           >
-            <View style={styles.functionDevicesBtn}>
-              <Image source={imageSrc} style={{ width: 30, height: 30 }} />
-            </View>
+            <Image source={imageSrc} style={styles.controlsInfoBgIcon} />
           </LinearGradient>
 
-          {item[0] === 'ZagrFiltr'
+          {/* {item[0] === 'ZagrFiltr'
             && (
               <TouchableOpacity onPress={handleSettings}>
                 <SettingsIcon />
               </TouchableOpacity>
-            )}
+            )} */}
         </View>
 
         {(item[0] === 'tempTarget') && (
           <>
-            <Text style={styles.boxPowerBtnTextName}>Температура</Text>
-            <Text style={styles.boxPowerBtnText}>
+            <Text style={styles.controlsInfoBtnTextName}>Температура</Text>
+            <Text style={styles.controlsInfoBtnText}>
 
               {resMode === '1'
                 ? '0' : `${temperature} °`}
@@ -101,8 +189,8 @@ function ControlsInfoImp(props) {
 
         {(item[0] === 'humRoomTarget') && (
           <>
-            <Text style={styles.boxPowerBtnTextName}>Влажность</Text>
-            <Text style={styles.boxPowerBtnText}>
+            <Text style={styles.controlsInfoBtnTextName}>Влажность</Text>
+            <Text style={styles.controlsInfoBtnText}>
               {humTarget}
               %
             </Text>
@@ -111,42 +199,41 @@ function ControlsInfoImp(props) {
 
         {(item[0] === 'fanSpeedPTarget') && (
           <>
-            <Text style={styles.boxPowerBtnTextName}>Скорость</Text>
-            <Text style={styles.boxPowerBtnText}>{fanTarget}</Text>
+            <Text style={styles.controlsInfoBtnTextName}>Скорость</Text>
+            <Text style={styles.controlsInfoBtnText}>{fanTarget}</Text>
           </>
         )}
 
-
         {(item[0] === 'tempChannel') && (
           <>
-            <Text style={styles.boxPowerBtnTextName}>Голослвые ассистенты</Text>
-            <Text style={styles.boxPowerBtnText}>Не подключены</Text>
-            {/* <Text style={styles.boxPowerBtnText}>Алиса</Text>
-            <Text style={styles.boxPowerBtnText}>Сбер</Text> */}
+            <Text style={styles.controlsInfoBtnTextName}>Голосовые ассистенты</Text>
+            <Text style={styles.controlsInfoBtnText}>Не подключены</Text>
+            {/* <Text style={styles.controlsInfoBtnText}>Алиса</Text>
+            <Text style={styles.controlsInfoBtnText}>Сбер</Text> */}
           </>
         )}
 
         {(item[0] === 'res') && (
           <>
-            <Text style={styles.boxPowerBtnTextName}>Режим</Text>
-            <Text style={styles.boxPowerBtnText}>{(String(resMode) !== '0') ? resNames[resMode] : 'Не выбрано'}</Text>
+            <Text style={styles.controlsInfoBtnTextName}>Режим</Text>
+            <Text style={styles.controlsInfoBtnText}>{resNames[resMode]}</Text>
           </>
         )}
 
         {(item[0] === 'ZagrFiltr') && (
           <>
-            <Text style={styles.boxPowerBtnTextName}>Автозапуск</Text>
+            <Text style={styles.controlsInfoBtnTextName}>Автозапуск</Text>
 
             {timers?.timers && (
               <>
-                <View style={styles.boxPowerBtnTextBox}>
-                  <Text style={styles.boxPowerBtnText}>{timers?.timers[0].time}</Text>
+                <View style={styles.controlsInfoBtnTextBox}>
+                  <Text style={styles.controlsInfoBtnText}>{timers?.timers[0].time}</Text>
                 </View>
                 {timers?.timers[1].fanSpeed === '255' && (
                   <>
-                    <Text style={styles.boxPowerBtnText}>до</Text>
-                    <View style={styles.boxPowerBtnTextBox}>
-                      <Text style={styles.boxPowerBtnText}>{timers?.timers[1].time}</Text>
+                    <Text style={styles.controlsInfoBtnText}>до</Text>
+                    <View style={styles.controlsInfoBtnTextBox}>
+                      <Text style={styles.controlsInfoBtnText}>{timers?.timers[1].time}</Text>
                     </View>
 
                   </>
@@ -161,9 +248,11 @@ function ControlsInfoImp(props) {
 
   return (
     <FlatList
-      data={entriesUnitParams}
-      keyExtractor={(item) => item[0]}
+      ref={flatListRef}
+      initialScrollIndex={indexActive}
+      data={filteredEntries}
       renderItem={renderItem}
+      keyExtractor={(item) => item[0]}
       horizontal
       showsVerticalScrollIndicator={false}
       estimatedItemSize={33}
@@ -172,4 +261,4 @@ function ControlsInfoImp(props) {
   );
 }
 
-export const ControlsInfo = memo(ControlsInfoImp);
+export default ControlsInfo;

@@ -6,12 +6,13 @@ const styles = StyleSheet.create({
   containerRadialSlider: {
     alignItems: 'center',
     justifyContent: 'center',
-    marginBottom: 23,
+    marginBottom: 0,
+    paddingBottom: 0,
   },
 });
 
 function DefaultRadialSlider({
-  temperature, setIsScrollEnabled, sendParamsData, changeParams, id,
+  temperature, sendParamsData, changeParams, id,
 }) {
   const sendParamsTemperature = async (newTemperature) => {
     try {
@@ -29,12 +30,10 @@ function DefaultRadialSlider({
   }
 
   const handleOnChange = () => {
-    setIsScrollEnabled(false);
   };
 
   const handleOnComplete = (value) => {
     sendParamsTemperature(value);
-    setIsScrollEnabled(true);
     changeParams({ tempTarget: value });
   };
 

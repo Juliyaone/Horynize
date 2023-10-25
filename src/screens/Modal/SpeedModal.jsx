@@ -144,19 +144,22 @@ function SpeedModal({
   unitId,
   sendParamsData,
   changeParams,
+  scrollToIndex,
 }) {
   const [valueSliderSpeed, setValueSliderSpeed] = useState(fanTarget);
 
   const onPress = useCallback(() => {
     if (valueSliderSpeed !== undefined && valueSliderSpeed !== null) {
-      sendParamsData({
-        controllerId: String(unitId),
-        fanTarget: valueSliderSpeed.toString(),
-      });
+      // sendParamsData({
+      //   controllerId: String(unitId),
+      //   fanTarget: valueSliderSpeed.toString(),
+      // });
     }
     changeParams({ fanSpeedPTarget: valueSliderSpeed });
+    scrollToIndex(5);// прокрутка к 3-му элементу (индексация с 0)
+
     setModalVisibleSpeed(false);
-  }, [changeParams, sendParamsData, setModalVisibleSpeed, unitId, valueSliderSpeed]);
+  }, [changeParams, scrollToIndex, setModalVisibleSpeed, valueSliderSpeed]);
 
   const panResponder = useRef(
     PanResponder.create({

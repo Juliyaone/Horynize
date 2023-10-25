@@ -151,7 +151,6 @@ function AlisaModal({
 
   useEffect(() => {
     if (response?.type === 'success') {
-      console.log('response.params.code', response.params.code);
       const { code } = response.params;
       // Используйте код для получения токена доступа (через ваш сервер)
       setModalVisible(false);

@@ -1,5 +1,6 @@
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
+
 import { LinearGradient } from 'expo-linear-gradient';
 
 const styles = StyleSheet.create({
@@ -40,14 +41,12 @@ const styles = StyleSheet.create({
     color: '#FFFFFF',
   },
 });
+function DetailedInfoActive({ currentContoller }) {
+  const { params } = currentContoller;
 
-function DetailedInfoImp({ currentContoller }) {
-  const { data } = currentContoller;
-
-  if (!data || !data.length || !data[0]) {
+  if (!params) {
     return null;
   }
-
   const keyForRender = ['humRoom', 'tempChannel', 'tempRoom'];
 
   const getTextAndUnit = (key, value) => {
@@ -64,7 +63,7 @@ function DetailedInfoImp({ currentContoller }) {
     return [texts[key][0], `${Math.round(value)}${texts[key][1]}`];
   };
 
-  const result = Object.entries(data[0])
+  const result = Object.entries(params)
     .filter(([key]) => keyForRender.includes(key))
     .map(([key, value]) => {
       const [text, unit] = getTextAndUnit(key, value);
@@ -94,4 +93,5 @@ function DetailedInfoImp({ currentContoller }) {
   );
 }
 
-export default DetailedInfoImp;
+export default DetailedInfoActive;
+

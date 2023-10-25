@@ -1,7 +1,9 @@
-import React, { useEffect, useState } from 'react'
+import React, { useState } from 'react'
 import {
   StyleSheet, View, Text, TouchableOpacity,
 } from 'react-native'
+import { useSelector } from 'react-redux';
+
 import ArrowLeft from '../../img/icons/ArrowLeft';
 // import { useUnitsGetDayTimersQuery } from '../../redux/usersApi';
 
@@ -20,6 +22,7 @@ const styles = StyleSheet.create({
 
 export default function HomeScheduleScreen({ navigation, route }) {
   const { clickedControllerId } = route.params;
+  const currentContoller = useSelector((state) => state.currentContoller);
 
   // const [dayTimers, setDayTimers] = useState(null);
 
@@ -44,10 +47,19 @@ export default function HomeScheduleScreen({ navigation, route }) {
 
       <TouchableOpacity
         style={styles.btnBack}
-        onPress={() => navigation.navigate('HomeStack', {
-          screen: 'HomePlay',
-          params: { clickedControllerId },
-        })}
+        onPress={() => {
+          if (currentContoller?.params?.enabled === '1') {
+            navigation.navigate('HomeStack', {
+              screen: 'HomePlay',
+              params: { clickedControllerId },
+            })
+          } else {
+            navigation.navigate('HomeStack', {
+              screen: 'Home',
+              params: { clickedControllerId },
+            })
+          }
+        }}
       >
         <ArrowLeft />
         <Text>Назад</Text>

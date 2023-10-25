@@ -32,7 +32,6 @@ export function AuthProvider({ children }) {
       setUnitId(controllerId);
       setAllControllers(controllers);
       setUserEmail(userName);
-      console.log('Записали новый токен в AsyncStorage', token);
     } catch (error) {
       console.log(`Не удалось сохранить токен в AsyncStorage: ${error}`);
     }
@@ -54,7 +53,6 @@ export function AuthProvider({ children }) {
     try {
       const id = await AsyncStorage.getItem('idControllerAsyncStorage');
       setUnitId(id);
-      console.log('текущий id установки', id);
       return id;
     } catch (err) {
       console.log(`текущий id установки не получен ${err}`);
@@ -65,7 +63,6 @@ export function AuthProvider({ children }) {
     try {
       const id = await AsyncStorage.getItem('userIdAsyncStorage');
       setUserId(id);
-      console.log('текущий id юзера', id);
       return id;
     } catch (err) {
       console.log(`текущий id юзера не получен ${err}`);
@@ -75,11 +72,9 @@ export function AuthProvider({ children }) {
   const getAllControllers = async () => {
     try {
       let allControllersData = await AsyncStorage.getItem('controllersAsyncStorage');
-      console.log('allControllersData', allControllersData);
       if (allControllersData !== null) {
         allControllersData = JSON.parse(allControllersData);
         setAllControllers(allControllersData);
-        console.log('allControllersData', allControllersData);
         return allControllersData;
       }
       return allControllersData;
@@ -92,7 +87,6 @@ export function AuthProvider({ children }) {
     try {
       const email = await AsyncStorage.getItem('emailAsyncStorage');
       setUserEmail(email);
-      console.log('email', email);
       return email;
     } catch (err) {
       console.log(`email не получен ${err}`);
@@ -103,7 +97,6 @@ export function AuthProvider({ children }) {
     try {
       const userNameData = await AsyncStorage.getItem('userNameAsyncStorage');
       setUserName(userNameData);
-      // console.log('userNameAuthContext', userName);
       return userNameData;
     } catch (err) {
       console.log(`логин пользльзователя не получен ${err}`);

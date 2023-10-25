@@ -9,7 +9,7 @@ import { styles } from '../HomePlayScreenStyle';
 
 function TemperatureImp(props) {
   const {
-    params, id, sendParamsData, changeParams, setIsScrollEnabled, temperature,
+    params, id, sendParamsData, changeParams, temperature,
   } = props;
 
   const isDisabled = Number(params.res) === 1;
@@ -26,7 +26,6 @@ function TemperatureImp(props) {
           changeParams={changeParams}
           id={id}
           temperature={temperature}
-          setIsScrollEnabled={setIsScrollEnabled}
         />
       </View>
     </>

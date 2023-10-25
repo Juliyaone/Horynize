@@ -1,6 +1,6 @@
 // const SERVER_URL = 'http://192.168.0.100' //Виктор
 const SERVER_URL = 'https://horynize.cygenic.tech';
-
+// const SERVER_URL = 'http://localhost:3000';
 // const SERVER_URL = 'https://horynize.eurodir.ru';
 
 // const SERVER_URL = 'http://95.142.39.79' //ip сервера
@@ -19,7 +19,7 @@ const UNITS = '/vent-units';
 
 // Список контроллеров пользователя
 
-export const UNITS_ALL = `${BASE_URL}${UNITS}/all`;
+export const GET_UNITS_USER = `${BASE_URL}${UNITS}/all`;
 
 // Установка параметров
 export const UNITS_SET_PARAMS = `${BASE_URL}${UNITS}/setparams`;
@@ -44,5 +44,5 @@ export const UNITS_SET_TIMERS = `${BASE_URL}${UNITS}/settimers`;
 
 const INFO = '/info';
 
-export const GET_UNITS = `${BASE_URL}${INFO}/models`;
 export const GET_CONTACTS = `${BASE_URL}${INFO}/contacts`;
+export const GET_UNITS = `${BASE_URL}${INFO}/models`;

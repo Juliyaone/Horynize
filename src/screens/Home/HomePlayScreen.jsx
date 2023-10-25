@@ -1,8 +1,8 @@
 import React, {
-  useState, useContext, useCallback, useMemo, useEffect,
+  useState, useContext, useCallback, useMemo, useEffect, useRef,
 } from 'react';
 import {
-  View, ScrollView,
+  View,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
@@ -27,10 +27,10 @@ import SpeedModal from '../Modal/SpeedModal';
 import AlisaModal from '../Modal/AlisaModal';
 
 import ModeModal from '../Modal/ModeModal';
-// import { DetailedInfo } from './sections/DetailedInfo';
+import DetailedInfoActive from './sections/DetailedInfoActive';
 import { Temperature } from './sections/Temperature';
 import { Controls } from './sections/Controls';
-import { ControlsInfo } from './sections/ControlsInfo';
+import ControlsInfo from './sections/ControlsInfo';
 
 import { styles } from './HomePlayScreenStyle';
 
@@ -45,35 +45,37 @@ const dayMapping = {
 };
 
 function HomePlayScreen({ navigation, route }) {
-  const [isScrollEnabled, setIsScrollEnabled] = useState(true);
   const clickedControllerId = route?.params?.clickedControllerId ?? undefined;
-  // console.log('clickedControllerId', clickedControllerId);
-  console.log('isScrollEnabled', isScrollEnabled);
+  const {
+    isLoading: isCurrentControllerParamsLoading,
+  } = useGetParamsQuery({ controllerId: clickedControllerId });
 
-  if (!clickedControllerId) {
+  if (!clickedControllerId || isCurrentControllerParamsLoading) {
     return <Loader />;
   }
   return (
     <SafeAreaView style={{ flex: 1 }}>
-      <ScrollView scrollEnabled={isScrollEnabled}>
-        {clickedControllerId !== undefined && clickedControllerId !== null ? (
-          <HomePlayScreenActive
-            navigation={navigation}
-            clickedControllerId={clickedControllerId}
-            setIsScrollEnabled={setIsScrollEnabled}
-          />
-        ) : (
-          <ModalNotControllers
-            text="Вы не выбрали установку"
-            navigation={navigation}
-          />
-        )}
-      </ScrollView>
+      {/* <ScrollView scrollEnabled={isScrollEnabled}> */}
+      {(clickedControllerId !== undefined) ? (
+        <HomePlayScreenActive
+          navigation={navigation}
+          clickedControllerId={clickedControllerId}
+        />
+      ) : (
+        <ModalNotControllers
+          text="Вы не выбрали установку"
+          navigation={navigation}
+        />
+      )}
+      {/* </ScrollView> */}
     </SafeAreaView>
   );
 }
 
-function HomePlayScreenActive({ navigation, clickedControllerId, setIsScrollEnabled }) {
+function HomePlayScreenActive({ navigation, clickedControllerId }) {
+  const flatListRef = useRef(null);
+
+  const [index, setIndex] = useState(0);
   const { currentDayOfWeek } = useContext(UserContext);
 
   const [modalVisibleHumidity, setModalVisibleHumidity] = useState(false);
@@ -102,10 +104,6 @@ function HomePlayScreenActive({ navigation, clickedControllerId, setIsScrollEnab
     data: timers,
   } = useGetTimersUnitQuery({ controllerId: clickedControllerId, day: dayMapping?.[currentDayOfWeek] });
 
-  const {
-    isLoading: isCurrentControllerParamsLoading,
-  } = useGetParamsQuery({ controllerId: clickedControllerId });
-
   const currentContoller = useSelector((state) => state.currentContoller);
 
   const entriesUnitParams = useMemo(() => Object.entries(currentContoller?.params ?? {}), [currentContoller]);
@@ -118,6 +116,43 @@ function HomePlayScreenActive({ navigation, clickedControllerId, setIsScrollEnab
       setResMode(currentContoller.params?.res);
     }
   }, [currentContoller]);
+
+  useEffect(() => {
+    if (flatListRef.current) {
+      console.log('flatListRef', flatListRef);
+    }
+  }, [flatListRef])
+
+  const keyForRender = ['tempTarget', 'humRoomTarget', 'fanSpeedPTarget', 'res', 'ZagrFiltr', 'tempChannel'];
+
+  const filteredEntries = entriesUnitParams.filter(([key]) => keyForRender.includes(key));
+
+  const scrollToIndex = (idx) => {
+
+    if (idx === undefined || idx < 0 || idx >= filteredEntries?.length) {
+      console.log(`Invalid index: ${idx}`);
+      return;
+    }
+
+    if (idx === 0) {
+      return;
+    }
+
+    if (idx === flatListRef.current?.length - 1) {
+      return;
+    }
+    if (flatListRef.current) {
+      flatListRef.current?.scrollToIndex({ idx, animated: true });
+      setIndex(idx)
+    } else {
+      console.log('FlatList ref is not defined yet.');
+    }
+  };
+
+  useEffect(() => {
+    console.log('index', index);
+    scrollToIndex(index);
+  }, [index])
 
   const changeParamsHandler = useCallback((params) => dispatch(changeParams(params)), [dispatch]);
 
@@ -146,7 +181,7 @@ function HomePlayScreenActive({ navigation, clickedControllerId, setIsScrollEnab
       start: '0',
     }
     try {
-      // await sendParams(params)
+      await sendParams(params)
       setConnectionText('Устройство отключено');
       setIsConnection(true);
       navigation.navigate('HomeStack', {
@@ -234,6 +269,7 @@ function HomePlayScreenActive({ navigation, clickedControllerId, setIsScrollEnab
         humTarget={humTarget}
         unitId={clickedControllerId}
         changeParams={changeParamsHandler}
+        scrollToIndex={scrollToIndex}
       />
       )}
       {modalVisibleMode && (
@@ -257,10 +293,12 @@ function HomePlayScreenActive({ navigation, clickedControllerId, setIsScrollEnab
         unitId={clickedControllerId}
         sendParamsData={sendParamsData}
         changeParams={changeParamsHandler}
+        scrollToIndex={scrollToIndex}
       />
       )}
       <View style={styles.container}>
-        {currentContoller?.params && (
+        <View style={styles.homePlayScreenActiveContainer}>
+          {currentContoller?.params && (
           <>
             {entriesUnitParams?.length && (
               <>
@@ -279,20 +317,24 @@ function HomePlayScreenActive({ navigation, clickedControllerId, setIsScrollEnab
                     entriesUnitParams={entriesUnitParams}
                     timers={timers}
                     navigation={navigation}
+                    flatListRef={flatListRef}
+                    indexActive={index}
                   />
                 </View>
               </>
             )}
             <Temperature
+              style={{ flexGrow: 1 }}
               {...currentContoller}
               temperature={temperature}
               sendParamsData={sendParamsData}
               changeParams={changeParamsHandler}
-              setIsScrollEnabled={setIsScrollEnabled}
             />
-            {/* <DetailedInfo {...currentContoller} /> */}
+
+            <DetailedInfoActive currentContoller={currentContoller} style={{ marginTop: 'auto' }} />
           </>
-        )}
+          )}
+        </View>
       </View>
     </>
   );

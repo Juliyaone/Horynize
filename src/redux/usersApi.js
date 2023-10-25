@@ -14,7 +14,6 @@ const baseQuery = fetchBaseQuery({
   prepareHeaders: async (headers) => {
     const token = await getTokenFromStorage();
 
-    // console.log('старый token из usersApi', token);
     if (token) {
       headers.set('Authorization', `Bearer ${token}`);
     }
@@ -48,45 +47,7 @@ const baseQueryWithReauth = async (args, api, extraOptions) => {
 }
 
 export const usersApi = createApi({
-  // reducerPath: 'usersApi',
-// tagTypes: ['MetaInfo', 'User', 'Units', 'Unit', 'Params'],
-  // baseQuery: fetchBaseQuery({
-  //   baseUrl: urls.BASE_URL,
-  //   prepareHeaders: async (headers) => {
-  //     const token = await getTokenFromStorage();
 
-  //     console.log('старый token из usersApi', token);
-  //     if (token) {
-  //       headers.set('Authorization', `Bearer ${token}`);
-  //     }
-  //     return headers;
-  //   },
-
-  //   async onResponse(response) {
-  //     if (response.status === 401 || response.status === 403 || response.status === 'PARSING_ERROR') {
-  //       const credentials = await getStoredCredentials(); // функция для получения сохраненных логина и пароля
-  //       console.log('credentials', credentials);
-
-  //       if (credentials) {
-  //         const { login, password } = credentials;
-  //         try {
-  //           const result = await api.dispatch(loginUser({ login, password }));
-  //           console.log('result', result);
-  //         } catch (error) {
-  //           console.log('Error during re-authentication:', error);
-  //         }
-  //         if (result.data !== 'Token timestamp error') {
-  //           // Если авторизация прошла успешно, сохраните новый токен и продолжите выполнение запроса
-  //           await saveTokenToStorage(result['0'].jwt);
-  //         } else {
-  //           // Если повторная авторизация не удалась, вывести пользователя из системы
-  //         }
-  //       }
-  //     }
-  //   },
-
-  // }),
-  // baseQuery,
   baseQuery: baseQueryWithReauth,
   endpoints: (builder) => ({
 
@@ -99,6 +60,21 @@ export const usersApi = createApi({
         try {
           const result = await queryFulfilled;
           dispatch(setControllers(result.data.models));
+        } catch (error) { /* empty */ }
+      },
+    }),
+    getUnitsUser: builder.mutation({
+      query: (body) => ({
+        url: urls.GET_UNITS_USER,
+        method: 'POST',
+        body: {
+          ...body,
+        },
+      }),
+      async onQueryStarted(_args, { dispatch, queryFulfilled }) {
+        try {
+          const result = await queryFulfilled;
+          dispatch(setUserContollers(result.data['vent-units']));
         } catch (error) { /* empty */ }
       },
     }),
@@ -151,21 +127,6 @@ export const usersApi = createApi({
           ...body,
         },
       }),
-    }),
-    getUnits: builder.mutation({
-      query: (body) => ({
-        url: urls.UNITS_ALL,
-        method: 'POST',
-        body: {
-          ...body,
-        },
-      }),
-      async onQueryStarted(_args, { dispatch, queryFulfilled }) {
-        try {
-          const result = await queryFulfilled;
-          dispatch(setUserContollers(result.data['vent-units']));
-        } catch (error) { /* empty */ }
-      },
     }),
     sendParams: builder.mutation({
       query: (body) => ({
@@ -240,15 +201,15 @@ export const usersApi = createApi({
       }),
     }),
     // new api
-    getModelsOfUser: builder.mutation({
-      query: (body) => ({
-        url: urls.UNITS_ALL,
-        method: 'POST',
-        body: {
-          ...body,
-        },
-      }),
-    }),
+    // getModelsOfUser: builder.mutation({
+    //   query: (body) => ({
+    //     url: urls.UNITS_ALL,
+    //     method: 'POST',
+    //     body: {
+    //       ...body,
+    //     },
+    //   }),
+    // }),
     getParamsModelsOfUser: builder.mutation({
       query: (body) => ({
         url: urls.UNITS_GET_PARAMS,
@@ -259,31 +220,36 @@ export const usersApi = createApi({
         },
       }),
     }),
-    getModels: builder.query({
-      query: () => ({
-        url: urls.GET_UNITS,
-        method: 'POST',
-      }),
-    }),
+    // getModels: builder.query({
+    //   query: () => ({
+    //     url: urls.GET_UNITS,
+    //     method: 'POST',
+    //   }),
+    // }),
   }),
 });
 
 export const {
   useGetUnitsAllQuery,
+  useGetUnitsUserMutation,
+
   useGetContactsQuery,
+
   useLoginUserMutation,
   useRegisterUserMutation,
-  useGetUnitsMutation,
+
   useSendParamsMutation,
   useGetParamsQuery,
+
   useBindMutation,
   useUnitsGetDayTimersQuery,
   useGetTimersUnitQuery,
   useSendDayTimersMutation,
   useSendTimersMutation,
+
   useChangePasswordMutation,
   // new api
-  useGetModelsOfUserMutation,
+  // useGetModelsOfUserMutation,
   useGetParamsModelsOfUserMutation,
-  useGetModelsQuery,
+  // useGetModelsQuery,
 } = usersApi;

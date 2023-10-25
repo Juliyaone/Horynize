@@ -14,26 +14,45 @@ import { getDeviceWordForm } from '../../utils';
 import { styles } from './DevicesStyle';
 import { images } from './images';
 
-const renderEnabled = (isEnabled) => (isEnabled === '1' ? <Text style={styles.textOn}>Включено</Text>
-  : <Text style={styles.textOff}>Выключено</Text>)
+// const renderEnabled = (isEnabled) => (isEnabled === '1' ? <Text style={styles.textOn}>Включено</Text>
+//   : <Text style={styles.textOff}>Выключено</Text>)
 
-export function Devices({ navigation, userId, devices }) {
+export function Devices({
+  navigation, userId, devices, userModels, paramsModelsData,
+}) {
   const [userDevicesError, setUserDevicesError] = useState(null);
   const [errorText, setErrorText] = useState('');
 
   const onClickAddDevices = () => navigation.navigate('DevicesAdd');
 
+  const paramsModelMap = {};
+  paramsModelsData.forEach((paramModel) => {
+    const ventUnit = paramModel.data['vent-unit'];
+    ventUnit.forEach((unit) => {
+      // Предполагается, что значение `enabled` теперь находится в unit.data[0].enabled
+      paramsModelMap[unit.id_model] = unit?.data?.[0]?.enabled;
+    });
+  });
+
   const onClickDevices = (item) => {
+    // Проверка, есть ли устройство в userModels
+    const isAvailable = userModels ? userModels.includes(item.id_model) : false;
+    // Проверка, включено ли устройство
+    const isEnabled = paramsModelMap[item.id_model] === '1';
+
     if (!userId) {
       navigation.navigate('Start');
-    } else if (!item?.id_model || !item.isAvailable) {
+    } else if (!isAvailable) {
+      // Устройство не в userModels - переходим на страницу добавления устройства
       navigation.navigate('DevicesAdd');
-    } else if (item.isEnabled === '1') {
+    } else if (!isEnabled) {
+      // Устройство в userModels и включено - переходим на страницу HomePlay
       navigation.navigate('HomeStack', {
         screen: 'HomePlay',
         params: { clickedControllerId: String(item.id_model) },
       });
     } else {
+      // Устройство в userModels, но выключено - переходим на страницу Home
       navigation.navigate('HomeStack', {
         screen: 'Home',
         params: { clickedControllerId: String(item.id_model) },
@@ -41,36 +60,45 @@ export function Devices({ navigation, userId, devices }) {
     }
   };
 
-  const renderItem = ({ item }) => (
-    <TouchableOpacity
-      style={styles.containerCardDevices}
-      onPress={() => onClickDevices(item)}
-    >
-      <View style={{ flex: 1 }}>
-        <View style={item.isAvailable ? null : styles.opacity50}>
-          {(item.img !== '')
-            ? <Image source={images[item.img]} style={styles.deviceImage} resizeMode="contain" />
-            : (
-              <View style={styles.deviceNotImageBox}>
-                <Image source={NotImgUnits} style={styles.deviceNotImage} resizeMode="contain" />
-              </View>
-            )}
-          <Text style={styles.textNameCard}>{item.name}</Text>
-          <Text style={styles.textNameCard}>{item.id_model}</Text>
-          <View style={{ flex: 1 }} />
-        </View>
-      </View>
-      {item.isAvailable ? renderEnabled(item.isEnabled) : (
-        <TouchableOpacity style={styles.textAddBox} onPress={() => onClickDevices(item)}>
-          <Text style={styles.textAdd}>Добавить</Text>
-          <View style={styles.iconPlusBgSmall}>
-            <PlusIconSmall />
-          </View>
-        </TouchableOpacity>
-      )}
-    </TouchableOpacity>
-  );
+  const renderItem = ({ item }) => {
+    const isAvailable = userModels ? userModels.includes(item.id_model) : false;
+    const isEnabled = paramsModelMap[item.id_model] === '1';
 
+    return (
+      <TouchableOpacity
+        style={styles.containerCardDevices}
+        onPress={() => onClickDevices(item)}
+      >
+        <View style={{ flex: 1 }}>
+          <View style={isAvailable ? null : styles.opacity50}>
+            {(item.img !== '')
+              ? <Image source={images[item.img]} style={styles.deviceImage} resizeMode="contain" />
+              : (
+                <View style={styles.deviceNotImageBox}>
+                  <Image source={NotImgUnits} style={styles.deviceNotImage} resizeMode="contain" />
+                </View>
+              )}
+            <Text style={styles.textNameCard}>{item.name}</Text>
+            <Text style={styles.textNameCard}>{item.id_model}</Text>
+            <View style={{ flex: 1 }} />
+          </View>
+        </View>
+        {isAvailable
+
+          ? (isEnabled
+            ? <Text style={styles.textOff}>Выключено</Text>
+            : <Text style={styles.textOn}>Включено</Text>)
+          : (
+            <TouchableOpacity style={styles.textAddBox} onPress={() => onClickDevices(item)}>
+              <Text style={styles.textAdd}>Добавить</Text>
+              <View style={styles.iconPlusBgSmall}>
+                <PlusIconSmall />
+              </View>
+            </TouchableOpacity>
+          )}
+      </TouchableOpacity>
+    );
+  };
   return (
     <>
       {userDevicesError

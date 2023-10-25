@@ -173,7 +173,7 @@ const styles = StyleSheet.create({
 });
 
 function HumidityModal({
-  modalVisible, setModalVisible, unitId, sendParamsData, humTarget, changeParams,
+  modalVisible, setModalVisible, unitId, sendParamsData, humTarget, changeParams, scrollToIndex,
 }) {
   const [valueSliderHumidity, setValueSliderHumidity] = useState(humTarget);
 
@@ -189,8 +189,9 @@ function HumidityModal({
         humRoomTarget: valueSliderHumidity,
       });
     }
+    scrollToIndex(1); // прокрутка к 4-му элементу (индексация с 0)
     setModalVisible(false);
-  }, [changeParams, sendParamsData, setModalVisible, unitId, valueSliderHumidity]);
+  }, [valueSliderHumidity, scrollToIndex, setModalVisible, changeParams]);
 
   const panResponder = useRef(
     PanResponder.create({

@@ -3,7 +3,6 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 export const saveTokenToStorage = async (token) => {
   if (token !== null) {
     await AsyncStorage.setItem('userToken', token)
-    console.log('token записали в асинксторадж', token);
   } else {
     console.log('token не смогли записать в асинксторадж', token);
   }
@@ -13,7 +12,6 @@ export const saveTokenToStorage = async (token) => {
 export const getTokenFromStorage = async () => {
   const token = await AsyncStorage.getItem('userToken');
   if (token !== null) {
-    // console.log('token получили из асинксторадж', token);
     return token;
   }
   console.log('нет токена в асинксторадж', token);

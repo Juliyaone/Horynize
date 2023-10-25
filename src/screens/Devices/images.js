@@ -7,5 +7,5 @@ export const images = {
   'http://95.142.39.79/images/models/Horynize.WF-800.png': require('../../img/devices/Horynize.WF-800.png'),
   'http://95.142.39.79/images/models/Horynize.EF-450.png': require('../../img/devices/Horynize.EF-450.png'),
   'http://95.142.39.79/images/models/Horynize.EF-700.png': require('../../img/devices/Horynize.EF-700.png'),
-  '': require('../../img/vav-active.png'),
+  // '': require('../../img/vav-active.png'),
 };

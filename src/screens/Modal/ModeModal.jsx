@@ -5,14 +5,14 @@ import {
 
 import { LinearGradient } from 'expo-linear-gradient';
 
-import CoolingActiveIcon from '../../img/coolingActiveIcon.png';
-import CoolingDeactiveIcon from '../../img/coolingDeactiveIcon.png';
+import CoolingActiveIcon from '../../img/cooling.png';
+import CoolingDeactiveIcon from '../../img/cooling-grey.png';
 
-import TempActiveIcon from '../../img/tempActiveIcon.png';
-import TempDeactiveIcon from '../../img/tempDeactiveIcon.png';
+import TempActiveIcon from '../../img/temp.png';
+import TempDeactiveIcon from '../../img/temp-grey.png';
 
-import VentActiveIcon from '../../img/ventActiveIcon.png';
-import VentDeactiveIcon from '../../img/ventDeactiveIcon.png';
+import VentActiveIcon from '../../img/fan.png';
+import VentDeactiveIcon from '../../img/fan-grey.png';
 
 import HumidityBtnIcon from '../../img/icons/btnHumidity';
 
