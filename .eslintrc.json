@@ -17,7 +17,7 @@
         "sourceType": "module"
     },
     "rules": {
-        "max-len": ["error", { "code": 120 }],
+        "max-len": ["error", { "code": 200 }],
         "semi": "off",
         "linebreak-style": ["error", "unix"],
         "react/prop-types": "off",

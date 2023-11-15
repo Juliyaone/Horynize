@@ -4,6 +4,7 @@ import React, {
 import {
   View, Text, Modal, TouchableOpacity, PanResponder, Switch,
 } from 'react-native';
+import { useSelector } from 'react-redux';
 
 import Slider from '@react-native-community/slider';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -15,8 +16,7 @@ import DefaultRadialSliderSchedul from '../../components/DefaultRadialSliderSche
 import StartTimeModal from './StartTimeModal';
 import FinishTimeModal from './FinishTimeModal';
 import Loader from '../../components/Loader';
-import { useSendDayTimersMutation, useSendTimersMutation, useGetTimersUnitQuery } from '../../redux/usersApi';
-// import { UserContext } from '../../components/providers/UserContext';
+import { useSendDayTimersMutation, useSendTimersMutation } from '../../redux/usersApi';
 
 import { styles } from './styles/ScheduleModalStyle';
 
@@ -24,6 +24,9 @@ function ScheduleModal({
   modalVisible,
   setModalVisible,
   unitId,
+  scrollToIndex,
+  changeTimersDayHandler,
+  changeDaysTimerHandler,
 }) {
   const dayMapping = {
     Пн: 1,
@@ -45,6 +48,10 @@ function ScheduleModal({
   const [finishTime, setFinishTime] = useState(new Date());
   const [fanTargetSchedule, setFanTargetSchedule] = useState(0);
   const [temperatureSchedule, setTemperatureSchedule] = useState(15);
+  const timersDayState = useSelector((state) => state.timersDay);
+  const daysTimerState = useSelector((state) => state.daysTimer);
+
+  console.log('timersDayStateScheduleModal', timersDayState);
 
   const [sendDayTimers, { isLoadingSetDayTimers }] = useSendDayTimersMutation();
   const [sendTimers, { isLoadingSetTimers }] = useSendTimersMutation();
@@ -98,6 +105,7 @@ function ScheduleModal({
   // const daysOrder = ['Вс', 'Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб'];
 
   const serverDaysOrder = ['Сб', 'Пт', 'Чт', 'Ср', 'Вт', 'Пн', 'Вс'];
+
   const getWeekString = () => serverDaysOrder.map((day) => (selectedDays.includes(day) ? '1' : '0'));
 
   const displayDays = ['Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб', 'Вс'];
@@ -165,11 +173,36 @@ function ScheduleModal({
     },
   }
 
+  // const updatedDaysTimer = {
+  //   friday: '0',
+  //   monday: '0',
+  //   saturday: '0',
+  //   sunday: '0',
+  //   thusday: '0',
+  //   tuesday: '0',
+  //   wednesday: '0',
+  // }
+
   const sendDayTimersData = async () => {
     setModalVisible(false);
     try {
       if (selectedDays?.length) {
         const days = getWeekString().join('');
+        // const serverDaysOrder = ['Сб', 'Пт', 'Чт', 'Ср', 'Вт', 'Пн', 'Вс'];
+        const weekDaysForState = ['saturday', 'friday', 'thusday', 'wednesday', 'tuesday', 'monday', 'sunday'];
+        const daysObject = Array.from(days).reduce((acc, val, index) => {
+          // console.log('val', val);
+          acc[weekDaysForState[index]] = val;
+          return acc;
+        }, {});
+        const updatedDaysTimer = {
+          ...daysTimerState,
+          timers: [
+            daysObject,
+          ],
+        };
+
+        changeDaysTimerHandler(updatedDaysTimer);
 
         const responseDayTimers = await sendDayTimers({
           controllerId: unitId,
@@ -193,11 +226,11 @@ function ScheduleModal({
               timers: result,
             });
 
-
             if (response.data.message === ' command send ') {
               continue;
             }
           }
+          scrollToIndex(2) // прокрутка к автозапуску
         } else {
           console.log('Сервер не подтвердил отправку дней');
         }

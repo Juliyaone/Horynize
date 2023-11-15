@@ -33,9 +33,6 @@ const styles = StyleSheet.create({
     backgroundColor: '#DDDDDD',
     borderRadius: 16,
   },
-  lastInputContainer: {
-    marginBottom: 10,
-  },
   input: {
     flex: 1,
     borderWidth: 0,
@@ -56,6 +53,27 @@ const styles = StyleSheet.create({
     padding: 0,
     marginTop: 0,
     marginBottom: 10,
+  },
+  cardBox: {
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'center',
+    justifyContent: 'center',
+    padding: 16,
+    backgroundColor: '#FFFFFF',
+    borderRadius: 8,
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 1,
+    },
+    shadowOpacity: 0.12,
+    shadowRadius: 2,
+    elevation: 1,
+    marginBottom: 30,
+  },
+  cardUserBtnBox: {
+    width: '100%',
   },
 
 });
@@ -85,53 +103,51 @@ function ChangePasswordForm() {
   }
 
   return (
-    <View style={{ marginBottom: 30, marginTop: 30 }}>
+  // <View style={styles.cardBox}>
+    <Formik
+      initialValues={{ oldPassword: '', newPassword: '' }}
+      validationSchema={passwordSchema}
+      onSubmit={(values, actions) => {
+        onClickBtnChangePassword(values);
+        actions.resetForm();
+      }}
+    >
+      {(props) => (
+        <View style={styles.cardBox}>
+          <View style={styles.inputContainer}>
+            <ApplyIcon style={styles.inputIcon} />
+            <TextInput
+              style={styles.input}
+              placeholder="Старый пароль"
+              onChangeText={props.handleChange('oldPassword')}
+              onBlur={props.handleBlur('oldPassword')}
+              value={props.values.oldPassword}
+            />
+          </View>
 
-      <Formik
-        initialValues={{ oldPassword: '', newPassword: '' }}
-        validationSchema={passwordSchema}
-        onSubmit={(values, actions) => {
-          onClickBtnChangePassword(values);
-          actions.resetForm();
-        }}
-      >
-        {(props) => (
-          <>
-            <View style={styles.inputContainer}>
-              <ApplyIcon style={styles.inputIcon} />
-              <TextInput
-                style={styles.input}
-                placeholder="Старый пароль"
-                onChangeText={props.handleChange('oldPassword')}
-                onBlur={props.handleBlur('oldPassword')}
-                value={props.values.oldPassword}
-              // secureTextEntry
-              />
-            </View>
+          <Text style={styles.errorText}>
+            {props.touched.oldPassword && props.errors.oldPassword}
+          </Text>
 
-            <Text style={styles.errorText}>
-              {props.touched.oldPassword && props.errors.oldPassword}
-            </Text>
-
-            <View style={[styles.inputContainer, styles.lastInputContainer]}>
-              <ApplyIcon style={styles.inputIcon} />
-              <TextInput
-                style={styles.input}
-                placeholder="Новый пароль"
-                onChangeText={props.handleChange('newPassword')}
-                onBlur={props.handleBlur('newPassword')}
-                value={props.values.newPassword}
-              // secureTextEntry
-              />
-            </View>
-            <Text style={styles.errorText}>
-              {props.touched.newPassword && props.errors.newPassword}
-            </Text>
+          <View style={styles.inputContainer}>
+            <ApplyIcon style={styles.inputIcon} />
+            <TextInput
+              style={styles.input}
+              placeholder="Новый пароль"
+              onChangeText={props.handleChange('newPassword')}
+              onBlur={props.handleBlur('newPassword')}
+              value={props.values.newPassword}
+            />
+          </View>
+          <Text style={styles.errorText}>
+            {props.touched.newPassword && props.errors.newPassword}
+          </Text>
+          <View style={styles.cardUserBtnBox}>
             <CustomButton text="Изменить пароль" onPress={props.handleSubmit} />
-          </>
-        )}
-      </Formik>
-    </View>
+          </View>
+        </View>
+      )}
+    </Formik>
   )
 }
 

@@ -38,9 +38,6 @@ const styles = StyleSheet.create({
     backgroundColor: '#DDDDDD',
     borderRadius: 16,
   },
-  lastInputContainer: {
-    marginBottom: 10,
-  },
   input: {
     flex: 1,
     borderWidth: 0,
@@ -61,6 +58,25 @@ const styles = StyleSheet.create({
     padding: 0,
     marginTop: 0,
     marginBottom: 10,
+  },
+  cardBox: {
+    alignItems: 'flex-start',
+    justifyContent: 'center',
+    padding: 16,
+    backgroundColor: '#FFFFFF',
+    borderRadius: 8,
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 1,
+    },
+    shadowOpacity: 0.12,
+    shadowRadius: 2,
+    elevation: 1,
+    marginBottom: 15,
+  },
+  cardUserBtnBox: {
+    width: '100%',
   },
 
 });
@@ -84,48 +100,52 @@ function ChangeEmailForm() {
   }
 
   return (
-    <Formik
-      initialValues={{ email: '', password: '' }}
-      validationSchema={editSchema}
-      onSubmit={(values, actions) => {
-        onClickBtnEditUser(values);
-        actions.resetForm();
-      }}
-    >
-      {(props) => (
-        <>
-          <View style={styles.inputContainer}>
-            <ApplyIcon style={styles.inputIcon} />
-            <TextInput
-              style={styles.input}
-              placeholder="Email"
-              onChangeText={props.handleChange('email')}
-              onBlur={props.handleBlur('email')}
-              value={props.values.email}
-            />
-          </View>
-          <Text style={styles.errorText}>
-            {props.touched.email && props.errors.email}
-          </Text>
-          <View style={[styles.inputContainer, styles.lastInputContainer]}>
-            <ApplyIcon style={styles.inputIcon} />
-            <TextInput
-              style={styles.input}
-              placeholder="Пароль"
-              onChangeText={props.handleChange('password')}
-              onBlur={props.handleBlur('password')}
-              value={props.values.password}
-              secureTextEntry
-            />
-          </View>
-          <Text style={styles.errorText}>
-            {props.touched.password && props.errors.password}
-          </Text>
+    <View style={styles.cardBox}>
 
-          <CustomButton text="Изменить Email" onPress={props.handleSubmit} style={styles.btnStyle} />
-        </>
-      )}
-    </Formik>
+      <Formik
+        initialValues={{ email: '', password: '' }}
+        validationSchema={editSchema}
+        onSubmit={(values, actions) => {
+          onClickBtnEditUser(values);
+          actions.resetForm();
+        }}
+      >
+        {(props) => (
+          <>
+            <View style={styles.inputContainer}>
+              <ApplyIcon style={styles.inputIcon} />
+              <TextInput
+                style={styles.input}
+                placeholder="Email"
+                onChangeText={props.handleChange('email')}
+                onBlur={props.handleBlur('email')}
+                value={props.values.email}
+              />
+            </View>
+            <Text style={styles.errorText}>
+              {props.touched.email && props.errors.email}
+            </Text>
+            <View style={styles.inputContainer}>
+              <ApplyIcon style={styles.inputIcon} />
+              <TextInput
+                style={styles.input}
+                placeholder="Пароль"
+                onChangeText={props.handleChange('password')}
+                onBlur={props.handleBlur('password')}
+                value={props.values.password}
+                secureTextEntry
+              />
+            </View>
+            <Text style={styles.errorText}>
+              {props.touched.password && props.errors.password}
+            </Text>
+            <View style={styles.cardUserBtnBox}>
+              <CustomButton text="Изменить Email" onPress={props.handleSubmit} />
+            </View>
+          </>
+        )}
+      </Formik>
+    </View>
   );
 }
 

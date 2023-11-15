@@ -174,6 +174,8 @@ const styles = StyleSheet.create({
 function HomeScreen({ navigation, route }) {
   const clickedControllerId = route?.params?.clickedControllerId ?? undefined;
 
+  console.log('HomeScreen');
+
   const {
     data: paramsClickedController,
     isLoading: isCurrentControllerParamsLoading,

@@ -1,9 +1,13 @@
-import React, { useState } from 'react';
+import React, { useState, useContext } from 'react';
 import {
-  StyleSheet, View, Text, TextInput,
+  StyleSheet, View, Text, TextInput, TouchableOpacity,
 } from 'react-native';
+
 import { Formik } from 'formik';
 import * as yup from 'yup';
+import { saveCredentials } from '../../components/providers/SecureStore';
+import { AuthContext } from '../../components/providers/AuthContext';
+
 import { useRegisterUserMutation } from '../../redux/usersApi';
 import ModalError from '../../components/ModalError';
 import GoBackComponent from '../../components/GoBack';
@@ -12,7 +16,6 @@ import Loader from '../../components/Loader';
 import ApplyIcon from '../../img/icons/apply';
 
 import CustomButton from '../../components/CustomButton';
-import { AuthContext } from '../../components/providers/AuthContext';
 
 const styles = StyleSheet.create({
   container: {
@@ -83,30 +86,46 @@ const validationSchema = yup.object().shape({
     .min(4, 'Ключ должен содержать ровно 4 символа')
     .max(4, 'Ключ должен содержать ровно 4 символа')
     .required('Введите ключ вентиляционной установки'),
-  // "id" => "5E49BC34",
-  // "key" => " F8DF",
 });
 
 function SignUp({ navigation }) {
   const [registrationError, setRegistrationError] = useState(false);
+  console.log('registrationError', registrationError);
+
   const [errorText, setErrorText] = useState('');
+  // const [isPrivacyPolicyAccepted, setIsPrivacyPolicyAccepted] = useState(false);
+
+  // console.log('isPrivacyPolicyAccepted', isPrivacyPolicyAccepted);
 
   const [registerUser, { isLoader }] = useRegisterUserMutation();
-  const { setUserId } = useContext(AuthContext);
+  const { signIn } = useContext(AuthContext);
 
   const sendRegisterData = async (values) => {
     if (values.username !== '' && values.password !== '' && values.email !== ''
       && values.id !== '' && values.key !== '') {
       try {
         const answer = await registerUser(values).unwrap();
+        console.log(answer['0']?.jwt);
 
-        if (answer && answer.data) {
+        if (answer['0']?.jwt) {
+          const token = answer['0'].jwt;
+          const { controllers } = answer;
+          const controllerId = String(answer.controllers[0].id_controller);
+          const userId = String(answer['0'].id_user);
+          const email = String(answer['0'].email);
+          const userName = String(answer['0'].username);
+
           await saveCredentials(values.username, values.password);
-
-          navigation.navigate('MainApp');
+          const data = {
+            token, controllerId, userId, controllers, email, userName,
+          };
+          await signIn(data);
         }
+        navigation.navigate('MainApp');
       } catch (error) {
         let errorMessage;
+
+        console.log('errorMessage', error);
 
         if (error.data) {
           if (error.data.message) {
@@ -127,6 +146,7 @@ function SignUp({ navigation }) {
   }
 
   const handleSubmit = async (values) => {
+    console.log('handleSubmit', values);
     sendRegisterData(values)
   };
 
@@ -150,8 +170,23 @@ function SignUp({ navigation }) {
       <Text style={styles.title}>Регистрация</Text>
 
       <Formik
-        initialValues={{ username: '', password: '', email: '' }}
-        onSubmit={handleSubmit}
+        initialValues={{
+          username: '', password: '', email: '', id: '', key: '',
+        }}
+        onSubmit={(values) => {
+          console.log('Formik onSubmit', values); // Добавьте это
+
+          // if (isPrivacyPolicyAccepted) {
+          // values.privacyPolicy = true;
+
+          handleSubmit(values);
+          navigation.navigate('MainApp');
+
+          // } else {
+          //   setRegistrationError(true);
+          //   setErrorText('Вы должны принять политику конфиденциальности');
+          // }
+        }}
         validationSchema={validationSchema}
       >
         {({
@@ -203,7 +238,7 @@ function SignUp({ navigation }) {
                 onChangeText={handleChange('id')}
                 onBlur={handleBlur('id')}
                 value={values.id}
-                placeholder="Id"
+                placeholder="Регистрационный номер"
               />
             </View>
 
@@ -215,9 +250,30 @@ function SignUp({ navigation }) {
                 onChangeText={handleChange('key')}
                 onBlur={handleBlur('key')}
                 value={values.key}
-                placeholder="Ключ"
+                placeholder="Регистрационный ключ"
               />
             </View>
+            <Text style={{
+              fontFamily: 'SFProDisplay',
+              fontSize: 14,
+              lineHeight: 18,
+              textAlign: 'center',
+              letterSpacing: 0.38,
+              color: '#787880',
+            }}
+            >
+              Регистрируясь Вы принимаете</Text>
+
+              <TouchableOpacity onPress={() => navigation.navigate('PrivacyPolicy')}>
+                <Text style={{
+                  fontFamily: 'SFProDisplay',
+                  fontSize: 14,
+                  lineHeight: 18,
+                  textAlign: 'center',
+                  letterSpacing: 0.38,
+                  color: '#787880',
+                  marginBottom: 25 }}>Политику конфиденциальности</Text>
+              </TouchableOpacity>
             <CustomButton
               onPress={handleSubmit}
               text="Зарегистрироваться"
@@ -225,7 +281,9 @@ function SignUp({ navigation }) {
               style={{ width: '100%' }}
             />
           </View>
+
         )}
+
       </Formik>
     </View>
   );

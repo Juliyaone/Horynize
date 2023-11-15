@@ -81,7 +81,7 @@ export default function ModalNotControllers({ text, navigation }) {
   const closeModal = () => {
     setVisible(false);
     navigation.navigate('DevicesStack', {
-      screen: 'Devices',
+      screen: 'DevicesUser',
     })
   }
 

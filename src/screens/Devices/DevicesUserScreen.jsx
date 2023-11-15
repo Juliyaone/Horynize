@@ -6,9 +6,8 @@ import { View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { AuthContext } from '../../components/providers/AuthContext';
-import { Devices } from './Devices';
+import { DevicesUser } from './DevicesUser/DevicesUser';
 import {
-  useGetUnitsUserMutation,
   useGetUnitsAllQuery,
   useGetParamsModelsOfUserMutation,
 } from '../../redux/usersApi';
@@ -16,48 +15,23 @@ import {
 import Loader from '../../components/Loader';
 import { styles } from './DevicesStyle';
 
-function DevicesScreen({ navigation }) {
-  const { userId } = useContext(AuthContext);
-
-  const [userModels, setUserModels] = useState(null);
+function DevicesUserScreen({ navigation }) {
+  const { userId, userControllers } = useContext(AuthContext);
   const [paramsModelsData, setParamsModelsData] = useState([]);
   const [sortedModels, setSortedModels] = useState(null);
 
   // ВСЕ УСТАНОВКИ ПРОИЗВОДИТЕЛЯ
   const { data: modelsAll, isLoading: modelsAllIsLoading } = useGetUnitsAllQuery();
-  const [getUnitsUser, { isLoading: unitsUserIsLoading }] = useGetUnitsUserMutation();
+
   const [getParamsModelsOfUser, { isLoading: isLoadingParamsModelsOfUser }] = useGetParamsModelsOfUserMutation();
-
-  // ВСЕ УСТАНОВКИ ЮЗЕРА
-  useEffect(() => {
-    if (userId) {
-      const fetchData = async () => {
-        try {
-          const [userModelsDataResponse] = await Promise.all([
-            getUnitsUser({ userId, status: '1' }),
-          ]);
-
-          if (userModelsDataResponse?.data?.['vent-units']) {
-            const userModelsResult = userModelsDataResponse?.data['vent-units'];
-            const allIdControllers = userModelsResult.map((model) => model.id_controller);
-            setUserModels(allIdControllers);
-          }
-        } catch (error) {
-          console.log(' userModels error:', error);
-        }
-      };
-
-      fetchData();
-    }
-  }, [getUnitsUser, userId]);
 
   // ПАРАМЕТРЫ ВСЕХ УСТАНОВОК ЮЗЕРА
   useEffect(() => {
     const fetchData = async () => {
-      if (userId && userModels) {
+      if (userId && userControllers) {
         const allParamsModels = await Promise.all(
-          userModels.map(async (unitId) => {
-            const paramsAllModelsUser = await getParamsModelsOfUser({ controllerId: String(unitId) });
+          userControllers.map(async (unitId) => {
+            const paramsAllModelsUser = await getParamsModelsOfUser({ controllerId: String(unitId.id_controller) });
             return paramsAllModelsUser;
           }),
         );
@@ -65,15 +39,15 @@ function DevicesScreen({ navigation }) {
       }
     };
     fetchData();
-  }, [userId, userModels, getParamsModelsOfUser]);
+  }, [userId, userControllers, getParamsModelsOfUser]);
 
   // ОТСОРТИРОВАННЫЕ УСТАНОВКИ ПРОИЗВОДИТЕЛЯ ПО НАЛИЧИЮ У ЮЗЕРА
 
   useEffect(() => {
-    if (modelsAll && modelsAll.models && userModels) {
+    if (modelsAll && modelsAll.models && userControllers) {
       const sorted = [...modelsAll.models].sort((a, b) => {
-        const aIsUserModel = userModels.includes(a.id_model);
-        const bIsUserModel = userModels.includes(b.id_model);
+        const aIsUserModel = userControllers.includes(a.id_model);
+        const bIsUserModel = userControllers.includes(b.id_model);
 
         if (aIsUserModel && !bIsUserModel) {
           return -1;
@@ -87,22 +61,20 @@ function DevicesScreen({ navigation }) {
 
       setSortedModels(sorted);
     }
-  }, [modelsAll, userModels]);
+  }, [modelsAll, userControllers]);
 
-  if (modelsAllIsLoading || unitsUserIsLoading || isLoadingParamsModelsOfUser) {
+  if (modelsAllIsLoading || isLoadingParamsModelsOfUser) {
     return <Loader />
   }
-
   return (
     <SafeAreaView style={{ flex: 1 }}>
       <View style={styles.container}>
-        {sortedModels && userModels && paramsModelsData ? (
-
-          <Devices
+        {sortedModels && userControllers && paramsModelsData ? (
+          <DevicesUser
             navigation={navigation}
             userId={userId}
             devices={sortedModels}
-            userModels={userModels}
+            userModels={userControllers}
             paramsModelsData={paramsModelsData}
           />
         ) : (
@@ -113,4 +85,4 @@ function DevicesScreen({ navigation }) {
   )
 }
 
-export default DevicesScreen;
+export default DevicesUserScreen;

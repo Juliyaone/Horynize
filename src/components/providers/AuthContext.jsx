@@ -14,6 +14,9 @@ export function AuthProvider({ children }) {
   const [userControllers, setAllControllers] = useState();
   const [userEmail, setUserEmail] = useState('');
 
+  const [isInitialized, setIsInitialized] = useState(false);
+
+
   const [isLoading, setIsLoading] = useState(true);
 
   const signIn = useCallback(async (data) => {
@@ -41,6 +44,7 @@ export function AuthProvider({ children }) {
     try {
       const userToken = await AsyncStorage.getItem('userToken');
       setUserToken(userToken);
+      console.log('userToken', userToken);
       return userToken;
     } catch (err) {
       console.log(`Токен не получен ${err}`);
@@ -104,12 +108,17 @@ export function AuthProvider({ children }) {
   }, [userName]);
 
   useEffect(() => {
-    getUserToken();
-    getUserUnitId();
-    getUserId();
-    getAllControllers();
-    getEmail();
-    getUserName();
+    const initializeAsync = async () => {
+      await getUserToken();
+      await getUserUnitId();
+      await getUserId();
+      await getAllControllers();
+      await getEmail();
+      await getUserName();
+      setIsInitialized(true); // Устанавливается после загрузки всех данных
+    };
+
+    initializeAsync();
   }, [getUserName]);
 
   const clearStoredCredentials = async () => {
@@ -139,8 +148,6 @@ export function AuthProvider({ children }) {
       setUserEmail(null);
       setIsLoading(false);
       setUserName(null);
-      console.log(`токен удален, UserId удален,  UserName удален, 
-      UnitId удален,controllers удален, email удален, SecureStore очищен`);
     } catch (error) {
       console.log(`Не удалось удалить токен или UserId или UnitId: ${error}`);
     }
@@ -149,6 +156,7 @@ export function AuthProvider({ children }) {
   const value = useMemo(() => ({
     userToken,
     isLoading,
+    isInitialized, // Добавьте это
     signIn,
     signOut,
     unitId,
@@ -157,7 +165,7 @@ export function AuthProvider({ children }) {
     userEmail,
     userName,
     setUserId,
-  }), [userToken, isLoading, signIn, signOut, unitId, userId, userControllers, userEmail, userName]);
+  }), [userToken, isLoading, isInitialized, signIn, signOut, unitId, userId, userControllers, userEmail, userName]);
 
   return (
     <AuthContext.Provider value={value}>

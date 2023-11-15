@@ -1,5 +1,5 @@
 import React, {
-  useState, useContext, useCallback, useMemo, useEffect, useRef,
+  useState, useContext, useCallback, useEffect, useRef,
 } from 'react';
 import {
   View,
@@ -12,6 +12,8 @@ import {
 } from '../../redux/usersApi';
 
 import { changeParams } from '../../redux/slices/currentControllerSlice';
+import { changeTimersDay } from '../../redux/slices/timersDaySlice';
+import { changeDaysTimer } from '../../redux/slices/daysTimerSlice';
 
 import Loader from '../../components/Loader';
 import ModalError from '../../components/ModalError';
@@ -46,20 +48,33 @@ const dayMapping = {
 
 function HomePlayScreen({ navigation, route }) {
   const clickedControllerId = route?.params?.clickedControllerId ?? undefined;
+  const { currentDayOfWeek } = useContext(UserContext);
+
   const {
     isLoading: isCurrentControllerParamsLoading,
   } = useGetParamsQuery({ controllerId: clickedControllerId });
+
+  // const {
+  //   data: timers,
+  // } = useGetTimersUnitQuery({ controllerId: clickedControllerId, day: dayMapping[currentDayOfWeek] });
+
+  // const days = ['Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб', 'Вс'];
+
+  // const timers = days.map(day =>
+  //   useGetTimersUnitQuery({ controllerId: clickedControllerId, day: dayMapping[day] })
+  // );
 
   if (!clickedControllerId || isCurrentControllerParamsLoading) {
     return <Loader />;
   }
   return (
     <SafeAreaView style={{ flex: 1 }}>
-      {/* <ScrollView scrollEnabled={isScrollEnabled}> */}
       {(clickedControllerId !== undefined) ? (
         <HomePlayScreenActive
           navigation={navigation}
           clickedControllerId={clickedControllerId}
+          // timers={timers}
+          route={route}
         />
       ) : (
         <ModalNotControllers
@@ -67,16 +82,16 @@ function HomePlayScreen({ navigation, route }) {
           navigation={navigation}
         />
       )}
-      {/* </ScrollView> */}
     </SafeAreaView>
   );
 }
 
-function HomePlayScreenActive({ navigation, clickedControllerId }) {
+function HomePlayScreenActive({
+  navigation, clickedControllerId, route,
+}) {
   const flatListRef = useRef(null);
 
   const [index, setIndex] = useState(0);
-  const { currentDayOfWeek } = useContext(UserContext);
 
   const [modalVisibleHumidity, setModalVisibleHumidity] = useState(false);
   const [modalVisibleSchedule, setModalVisibleSchedule] = useState(false);
@@ -93,68 +108,62 @@ function HomePlayScreenActive({ navigation, clickedControllerId }) {
   const [fanTarget, setFanTarget] = useState(false);
   const [resMode, setResMode] = useState(false);
 
+  const [filteredEntries, setFilteredEntries] = useState()
+
   const [errorText, setErrorText] = useState('');
   const [connectionText, setConnectionText] = useState('');
+
   const [sendParams] = useSendParamsMutation();
 
   const dispatch = useDispatch();
 
   const { data: dayTimers } = useUnitsGetDayTimersQuery({ controllerId: clickedControllerId });
-  const {
-    data: timers,
-  } = useGetTimersUnitQuery({ controllerId: clickedControllerId, day: dayMapping?.[currentDayOfWeek] });
 
   const currentContoller = useSelector((state) => state.currentContoller);
+  useEffect(() => {
+    const unsubscribe = navigation.addListener('focus', () => {
+      // Проверяем параметр fromHomeSchedule
+      if (route.params?.fromHomeSchedule) {
+        setModalVisibleSchedule(true);
+      }
+    });
 
-  const entriesUnitParams = useMemo(() => Object.entries(currentContoller?.params ?? {}), [currentContoller]);
+    return unsubscribe;
+  }, [navigation, route]);
 
   useEffect(() => {
     if (currentContoller?.params) {
       setHumTarget(currentContoller?.params?.humRoomTarget);
       setTemperature(currentContoller?.params?.tempTarget);
       setFanTarget(currentContoller?.params?.fanSpeedPTarget);
-      setResMode(currentContoller.params?.res);
+      setResMode(currentContoller.params?.res === 2057 ? 1 : currentContoller.params?.res);
+
+      const entriesUnitParams = Object.entries(currentContoller?.params);
+
+      const keyForRender = ['tempTarget', 'humRoomTarget', 'fanSpeedPTarget', 'res', 'ZagrFiltr', 'tempChannel'];
+
+      const filteredEntriesData = entriesUnitParams.filter(([key]) => keyForRender.includes(key));
+
+      setFilteredEntries(filteredEntriesData);
     }
   }, [currentContoller]);
 
-  useEffect(() => {
-    if (flatListRef.current) {
-      console.log('flatListRef', flatListRef);
-    }
-  }, [flatListRef])
-
-  const keyForRender = ['tempTarget', 'humRoomTarget', 'fanSpeedPTarget', 'res', 'ZagrFiltr', 'tempChannel'];
-
-  const filteredEntries = entriesUnitParams.filter(([key]) => keyForRender.includes(key));
-
   const scrollToIndex = (idx) => {
-
     if (idx === undefined || idx < 0 || idx >= filteredEntries?.length) {
       console.log(`Invalid index: ${idx}`);
       return;
     }
-
-    if (idx === 0) {
-      return;
-    }
-
-    if (idx === flatListRef.current?.length - 1) {
-      return;
-    }
     if (flatListRef.current) {
-      flatListRef.current?.scrollToIndex({ idx, animated: true });
+      flatListRef.current?.scrollToIndex({ index: idx, animated: true });
       setIndex(idx)
     } else {
       console.log('FlatList ref is not defined yet.');
     }
   };
 
-  useEffect(() => {
-    console.log('index', index);
-    scrollToIndex(index);
-  }, [index])
-
   const changeParamsHandler = useCallback((params) => dispatch(changeParams(params)), [dispatch]);
+  const changeTimersDayHandler = useCallback((params) => dispatch(changeTimersDay(params)), [dispatch]);
+  const changeDaysTimerHandler = useCallback((params) => dispatch(changeDaysTimer(params)), [dispatch]);
 
   const openModal = useCallback((itemName) => {
     if (itemName === 'humRoomTarget') {
@@ -184,6 +193,7 @@ function HomePlayScreenActive({ navigation, clickedControllerId }) {
       await sendParams(params)
       setConnectionText('Устройство отключено');
       setIsConnection(true);
+
       navigation.navigate('HomeStack', {
         screen: 'Home',
         params: { clickedControllerId },
@@ -250,6 +260,7 @@ function HomePlayScreenActive({ navigation, clickedControllerId }) {
         <AlisaModal
           modalVisible={modalVisibleAlisa}
           setModalVisible={setModalVisibleAlisa}
+          scrollToIndex={scrollToIndex}
         />
       )}
       {modalVisibleSchedule && (
@@ -258,6 +269,9 @@ function HomePlayScreenActive({ navigation, clickedControllerId }) {
         setModalVisible={setModalVisibleSchedule}
         unitId={clickedControllerId}
         dayTimers={dayTimers}
+        scrollToIndex={scrollToIndex}
+        changeTimersDayHandler={changeTimersDayHandler}
+        changeDaysTimerHandler={changeDaysTimerHandler}
       />
       ) }
       {modalVisibleHumidity && (
@@ -281,6 +295,7 @@ function HomePlayScreenActive({ navigation, clickedControllerId }) {
         resMode={resMode}
         changeParams={changeParamsHandler}
         unitId={clickedControllerId}
+        scrollToIndex={scrollToIndex}
       />
       )}
 
@@ -300,12 +315,12 @@ function HomePlayScreenActive({ navigation, clickedControllerId }) {
         <View style={styles.homePlayScreenActiveContainer}>
           {currentContoller?.params && (
           <>
-            {entriesUnitParams?.length && (
+              {filteredEntries?.length && (
               <>
                 <View style={styles.flatListContainerHome}>
                   <Controls
                     {...currentContoller}
-                    entriesUnitParams={entriesUnitParams}
+                    entriesUnitParams={filteredEntries}
                     openModal={openModal}
                     sendParamsOff={sendParamsOff}
                   />
@@ -314,21 +329,22 @@ function HomePlayScreenActive({ navigation, clickedControllerId }) {
                   <ControlsInfo
                     {...currentContoller}
                     temperature={temperature}
-                    entriesUnitParams={entriesUnitParams}
-                    timers={timers}
+                    filteredEntries={filteredEntries}
+                    // timers={timers}
                     navigation={navigation}
                     flatListRef={flatListRef}
                     indexActive={index}
                   />
                 </View>
               </>
-            )}
+              )}
             <Temperature
               style={{ flexGrow: 1 }}
               {...currentContoller}
               temperature={temperature}
               sendParamsData={sendParamsData}
               changeParams={changeParamsHandler}
+              scrollToIndex={scrollToIndex}
             />
 
             <DetailedInfoActive currentContoller={currentContoller} style={{ marginTop: 'auto' }} />

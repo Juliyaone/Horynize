@@ -1,4 +1,4 @@
-import React, { useContext } from 'react';
+import React, { useContext, useEffect } from 'react';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 
 import DevicesIcon from '../../img/icons/nav/devices';
@@ -12,13 +12,21 @@ import { AuthContext } from '../providers/AuthContext';
 
 const Tab = createBottomTabNavigator();
 
-function TabNavigator() {
-  const { userToken } = useContext(AuthContext);
+function TabNavigator({ navigation }) {
+  const { userToken, isLoading, isInitialized } = useContext(AuthContext);
+
+  useEffect(() => {
+    if (isInitialized && !isLoading) {
+      navigation.navigate(userToken ? 'DevicesStack' : 'DevicesStack');
+    }
+  }, [userToken, isLoading, isInitialized, navigation]);
+
+  const initialRouteName = userToken ? 'DevicesStack' : 'DevicesStack';
 
   const activTabIconColor = '#ED7635';
   return (
     <Tab.Navigator
-      initialRouteName="DevicesStack"
+      initialRouteName={initialRouteName}
       screenOptions={({ route }) => ({
         tabBarIcon: ({ focused, color }) => {
           let iconXml;
@@ -42,6 +50,8 @@ function TabNavigator() {
           alignItems: 'center',
           justifyContent: 'center',
           paddingBottom: 0,
+          paddingTop: 15,
+
           borderTopWidth: 1,
           borderTopColor: '#BEBEC0',
         },

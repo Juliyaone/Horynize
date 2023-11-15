@@ -12,7 +12,7 @@ const styles = StyleSheet.create({
 });
 
 function DefaultRadialSlider({
-  temperature, sendParamsData, changeParams, id,
+  temperature, sendParamsData, changeParams, id, scrollToIndex,
 }) {
   const sendParamsTemperature = async (newTemperature) => {
     try {
@@ -29,12 +29,13 @@ function DefaultRadialSlider({
     }
   }
 
-  const handleOnChange = () => {
-  };
+  // const handleOnChange = () => {
+  // };
 
   const handleOnComplete = (value) => {
     sendParamsTemperature(value);
     changeParams({ tempTarget: value });
+    scrollToIndex(3) // прокрутка к темепартуре
   };
 
   return (
@@ -43,7 +44,7 @@ function DefaultRadialSlider({
         value={temperature}
         min={15}
         max={30}
-        onChange={handleOnChange}
+        // onChange={handleOnChange}
         onComplete={(value) => handleOnComplete(value)}
         thumbColor="#FF5204"
         thumbBorderWidth={3}

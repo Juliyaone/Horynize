@@ -1,25 +1,22 @@
-import React, { useContext } from 'react';
+import React, { useContext, useState } from 'react';
 import {
   View, Text, TextInput, StyleSheet, ScrollView, TouchableOpacity,
 } from 'react-native';
 import { Formik } from 'formik';
 import * as yup from 'yup';
 import ArrowLeft from '../../img/icons/ArrowLeft';
-
+import { useBindMutation } from '../../redux/usersApi';
 import { AuthContext } from '../../components/providers/AuthContext'
 import ApplyIcon from '../../img/icons/apply';
+import ModalError from '../../components/ModalError';
+import Loader from '../../components/Loader';
 
 import CustomButton from '../../components/CustomButton';
-// import GoBackComponent from '../../components/GoBack';
 
 const ServerSchema = yup.object({
-  customName: yup.string().required('Custom Name is required'),
-  binding: yup.string().required('Binding is required'),
-  id: yup.string().required('ID is required'),
-  key: yup.string().required('Key is required'),
-  id_model: yup.string().required('Model ID is required'),
+  id: yup.string().required('Регистрационный номер обязателен'),
+  key: yup.string().length(4, 'Регистрационный ключ должен состоять из 4 символов').required('Регистрационный ключ обязателен'),
 });
-
 const styles = StyleSheet.create({
   container: {
     padding: 10,
@@ -77,16 +74,54 @@ const styles = StyleSheet.create({
   },
 });
 
-export default function DevicesAddScreen({ navigation }) {
-  const { userId, unitId } = useContext(AuthContext);
+export default function DevicesAddScreen({ navigation, route }) {
+  const customNameRoute = route?.params?.customName;
+  const clickedControllerId = route?.params?.clickedControllerId;
+  const [isModalVisible, setIsModalVisible] = useState(false);
+
+  console.log('customName', customNameRoute);
+  console.log('clickedControllerId', clickedControllerId);
+
+  const { userId } = useContext(AuthContext);
+
+  const [bind, { isLoading: isLoadingBind }] = useBindMutation();
+
+  // binding: 0 - отвязка, 1 - привязка, 2 - редактирование customName
+  if (isLoadingBind) {
+    return <Loader />
+  }
+
+    const handleSubmit = async (values, actions) => {
+      const bindData = {
+        userid: values.userid,
+        controllerid: values.controllerid,
+        customName: values.customName,
+        binding: values.binding,
+        id: values.id,
+        key: values.key,
+        id_model: values.id_model,
+      };
+      try {
+        await bind(bindData);
+        actions.resetForm();
+      } catch (error) {
+        console.error('Ошибка привязки:', error);
+        setIsModalVisible(true); // Показываем модальное окно
+      }
+    }
 
   return (
     <ScrollView>
+      <ModalError
+        errorText="Произошла ошибка при привязке"
+        visible={isModalVisible}
+        onDismiss={() => setIsModalVisible(false)}
+      />
       <View style={styles.container}>
         <TouchableOpacity
           style={styles.btnBack}
           onPress={() => navigation.navigate('DevicesStack', {
-            screen: 'Devices',
+            screen: 'DevicesAll',
           })}
         >
           <ArrowLeft />
@@ -96,23 +131,24 @@ export default function DevicesAddScreen({ navigation }) {
         <Formik
           initialValues={{
             userid: userId,
-            controllerid: unitId,
-            customName: '',
-            binding: '',
+            controllerid: clickedControllerId,
+            customName: customNameRoute,
+            binding: '1', // 1 - привязка
             id: '',
             key: '',
-            id_model: '',
+            id_model: Number(clickedControllerId),
           }}
           validationSchema={ServerSchema}
-          onSubmit={(values, actions) => {
-            // Здесь отправить значения на сервер
-            actions.resetForm();
-          }}
+          onSubmit={handleSubmit}
         >
           {(props) => (
             <View style={styles.container}>
               {Object.keys(props.values).map((key) => (
-                (key !== 'userid' && key !== 'controllerid') && (
+                (key !== 'userid'
+                && key !== 'controllerid'
+                && key !== 'customName'
+                && key !== 'binding'
+                && key !== 'id_model') && (
                   <React.Fragment key={key}>
                     <View style={styles.inputContainer}>
                       <ApplyIcon style={styles.inputIcon} />
@@ -121,7 +157,10 @@ export default function DevicesAddScreen({ navigation }) {
                         onChangeText={props.handleChange(key)}
                         value={props.values[key]}
                         onBlur={props.handleBlur(key)}
-                        placeholder={key}
+                        // eslint-disable-next-line no-nested-ternary
+                        placeholder={key === 'key'
+                          ? 'Регистрационный ключ' : key === 'id'
+                            ? 'Регистрационный номер' : key}
                       />
                     </View>
                     <Text style={styles.errorText}>
@@ -130,6 +169,7 @@ export default function DevicesAddScreen({ navigation }) {
                   </React.Fragment>
                 )
               ))}
+
               <CustomButton text="Приязать установку" onPress={props.handleSubmit} />
             </View>
           )}

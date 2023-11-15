@@ -13,7 +13,8 @@ import { AuthProvider, AuthContext } from './src/components/providers/AuthContex
 
 import StartScreen from './src/screens/Start/StartScreen';
 import SignInScreen from './src/screens/SignIn/SignInScreen'
-import SignUpScreen from './src/screens/SignUp/SignUpScreen';
+import SignUpStack from './src/components/nav/SignUpStackNavigator';
+
 import TabNavigator from './src/components/nav/TabNavigator';
 import Loader from './src/components/Loader';
 
@@ -30,7 +31,7 @@ function AppStack() {
     <Stack.Navigator initialRouteName={userToken ? 'MainApp' : 'Start'}>
       <Stack.Screen name="Start" component={StartScreen} options={{ headerShown: false }} />
       <Stack.Screen name="SignIn" component={SignInScreen} options={{ headerShown: false }} />
-      <Stack.Screen name="SignUp" component={SignUpScreen} options={{ headerShown: false }} />
+      <Stack.Screen name="SignUp" component={SignUpStack} options={{ headerShown: false }} />
       <Stack.Screen name="MainApp" component={TabNavigator} options={{ headerShown: false }} />
     </Stack.Navigator>
   );

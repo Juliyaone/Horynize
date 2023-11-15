@@ -1,11 +1,10 @@
-import React, { useRef, useEffect } from 'react';
+import React, { useRef } from 'react';
 import {
-  StyleSheet, View, Text, Modal, TouchableOpacity, PanResponder, Dimensions, Image,
+  StyleSheet, View, Text, Modal, Button, PanResponder, Dimensions,
 } from 'react-native';
-// eslint-disable-next-line import/no-extraneous-dependencies
 import * as AuthSession from 'expo-auth-session';
-
-import AlisaIconMiddle from '../../img/alisaIconMiddle.png';
+import { useFetchAuthConfigQuery } from '../../redux/usersApi';
+import Loader from '../../components/Loader';
 
 const screenHeight = Dimensions.get('window').height;
 
@@ -72,7 +71,8 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   icon: {
-    marginRight: 8,
+    width: 50,
+    height: 50,
   },
   text: {
     color: 'white',
@@ -104,7 +104,7 @@ const styles = StyleSheet.create({
   },
   boxAutoModeItem: {
     width: 79,
-    height: 76,
+    heigh: 76,
     alignItems: 'center',
     justifyContent: 'center',
     backgroundColor: '#FFFFFF',
@@ -136,26 +136,13 @@ const styles = StyleSheet.create({
   },
 });
 
-function AlisaModal({
-  modalVisible,
-  setModalVisible,
-}) {
-  const redirectUri = AuthSession.makeRedirectUri({
-    native: 'mycoolredirect://redirect',
-  });
+function AlisaModal({ modalVisible, setModalVisible, scrollToIndex }) {
+  const { data: authConfig, error, isLoading } = useFetchAuthConfigQuery();
 
-  const [request, response, promptAsync] = AuthSession.useAuthRequest({
-    // Обращение к вашему серверу для инициации процесса OAuth
-    authorizationEndpoint: 'http://localhost:3000/auth/yandex',
-  });
-
-  useEffect(() => {
-    if (response?.type === 'success') {
-      const { code } = response.params;
-      // Используйте код для получения токена доступа (через ваш сервер)
-      setModalVisible(false);
-    }
-  }, [response]);
+  const onPress = () => {
+    scrollToIndex(1);
+    setModalVisible(false);
+  };
 
   const panResponder = useRef(
     PanResponder.create({
@@ -167,6 +154,37 @@ function AlisaModal({
       },
     }),
   ).current;
+
+  const [request, response, promptAsync] = AuthSession.useAuthRequest(
+    {
+      redirectUri: 'https://horynize.cygenic.tech/oauth/login.php',
+      clientId: 'b48b79fdf64f4cb5810825887b89a457',
+      responseType: AuthSession.ResponseType.Code,
+      scopes: ['login:email', 'login:info'], // указываем здесь необходимые scopes
+      extraParams: {
+        // Параметры, необходимые для вашего сервера авторизации
+      },
+    },
+    {
+      authorizationEndpoint: 'https://oauth.yandex.ru/authorize',
+    },
+  );
+
+  // Убрать useEffect для обработки ответа Яндекса, так как теперь это делает сервер
+
+  if (isLoading) {
+    return <Loader />;
+  }
+
+  if (error) {
+    console.error('Ошибка при запросе конфигурации авторизации:', error);
+    // Здесь можно добавить обработку ошибок, связанных с запросом конфигурации
+  }
+
+  console.log('authConfig', authConfig);
+
+  // Используйте ответ от сервера для обновления интерфейса или состояния компонента
+  // Например, отображение данных пользователя или сообщения об ошибке
 
   return (
     <Modal
@@ -180,14 +198,16 @@ function AlisaModal({
       <View style={styles.centeredView}>
         <View style={styles.modalView} {...panResponder.panHandlers}>
           <Text style={styles.modalText}>Подключить Алису</Text>
-
-          <TouchableOpacity onPress={async () => {
-            if (request) {
-              await promptAsync({ useProxy: false });
-            }
-          }}>
-            <Image source={AlisaIconMiddle} style={{ width: 50, height: 50 }} />
-          </TouchableOpacity>
+          <View>
+            <Button
+              disabled={!request}
+              title="Привязать к Алисе"
+              onPress={() => {
+                promptAsync();
+              }}
+            />
+          </View>
+          {/* Здесь может быть отображение данных пользователя или сообщения об ошибке */}
         </View>
       </View>
     </Modal>

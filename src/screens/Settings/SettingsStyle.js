@@ -85,7 +85,7 @@ export const styles = StyleSheet.create({
     fontStyle: 'normal',
     fontWeight: '400',
     fontSize: 16,
-    lineHeight: 16,
+    lineHeight: 18,
     alignItems: 'center',
     letterSpacing: 0.35,
     color: '#212121',
@@ -94,8 +94,13 @@ export const styles = StyleSheet.create({
     width: '100%',
     flexDirection: 'row',
     justifyContent: 'space-between',
+    flexWrap: 'wrap',
     alignItems: 'center',
     marginBottom: 12,
+  },
+  btnDevices: {
+    flexDirection: 'row',
+    alignItems: 'center',
   },
 
 });

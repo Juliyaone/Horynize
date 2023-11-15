@@ -189,7 +189,7 @@ function HumidityModal({
         humRoomTarget: valueSliderHumidity,
       });
     }
-    scrollToIndex(1); // прокрутка к 4-му элементу (индексация с 0)
+    scrollToIndex(5); // прокрутка к влажности
     setModalVisible(false);
   }, [valueSliderHumidity, scrollToIndex, setModalVisible, changeParams]);
 
@@ -241,7 +241,7 @@ function HumidityModal({
                 onValueChange={setValueSliderHumidity}
                 thumbTintColor="#ED7635"
                 value={valueSliderHumidity}
-                onSlidingComplete={(value) => setValueSliderHumidity(value.toString())}
+                onSlidingComplete={(value) => setValueSliderHumidity(value)}
               />
             </View>
           </View>

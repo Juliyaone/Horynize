@@ -17,7 +17,6 @@ const fontSizeBtnText = buttonWidth * 0.12;
 const calculatedLineHeight = buttonWidth * 0.12 + 0.1
 const ImgWidth = buttonWidth * 0.3;
 
-
 const styles = StyleSheet.create({
   controlsBox: {
     width: buttonWidth,

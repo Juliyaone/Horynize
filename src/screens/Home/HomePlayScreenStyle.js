@@ -157,5 +157,7 @@ export const styles = StyleSheet.create({
   disabledContainer: {
     display: 'none',
   },
-
+  fullSize: {
+    width: '100%',
+  },
 });

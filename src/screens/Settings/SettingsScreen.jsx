@@ -27,7 +27,7 @@ function SettingsScreen({ navigation }) {
     navigation.dispatch(
       CommonActions.reset({
         index: 0,
-        routes: [{ name: 'DevicesStack' }],
+        routes: [{ name: 'Start' }],
       }),
     );
     signOut();
@@ -56,12 +56,14 @@ function SettingsScreen({ navigation }) {
               <Text style={styles.cardUserText}>{userName}</Text>
             </View>
             <View style={styles.cardUserNumberOfDevicesBox}>
-              <Text style={styles.cardUserNumberOfDevicesText}>
-                {userControllers?.length || 0}
-                {' '}
-                {getDeviceWordForm(1)}
-              </Text>
-              <ArrowRightSmallIcon />
+              <TouchableOpacity style={styles.btnDevices} onPress={() => navigation.navigate('DevicesStack', { screen: 'DevicesUser' })}>
+                <Text style={styles.cardUserNumberOfDevicesText}>
+                  {userControllers?.length || 0}
+                  {' '}
+                  {getDeviceWordForm(1)}
+                </Text>
+                <ArrowRightSmallIcon />
+              </TouchableOpacity>
             </View>
             <View style={styles.cardUserBtnBox}>
               <CustomButton text="Выйти" IconComponent={ExitIcon} onPress={handleLogout} />

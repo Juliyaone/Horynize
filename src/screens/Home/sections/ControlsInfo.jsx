@@ -1,10 +1,11 @@
 import React, {
-  useCallback, useEffect, useState, useLayoutEffect,
+  useCallback,
 } from 'react';
 import {
-  View, Text, TouchableOpacity, FlatList, Image, StyleSheet, Dimensions,
+  View, Text, FlatList, Image, StyleSheet, Dimensions, TouchableOpacity,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
+import { useSelector } from 'react-redux';
 
 import TemperatureIcon from '../../../img/temp-white.png';
 import HumidityIcon from '../../../img/hum-white.png';
@@ -12,8 +13,7 @@ import SpeedIcon from '../../../img/fan-white.png';
 import TimerActiveIcon from '../../../img/time-white.png';
 import MicrophoneActiveIcon from '../../../img/microfon-white.png';
 import ModeActiveIcon from '../../../img/mode-white.png';
-
-// import SettingsIcon from '../../../img/icons/settings';
+import SettingsIcon from '../../../img/settings-light-grey.png';
 
 const screenWidth = Dimensions.get('window').width;
 const gap = 10;
@@ -112,6 +112,7 @@ const FunctionsIcon = {
   fanSpeedPTarget: SpeedIcon,
   res: ModeActiveIcon,
   ZagrFiltr: TimerActiveIcon,
+  ZagrFiltr1: SettingsIcon,
   tempChannel: MicrophoneActiveIcon,
 };
 
@@ -121,42 +122,39 @@ const resNames = {
   2: 'Нагрев',
   3: 'Охлаждение',
   4: 'Климат-контроль',
+  2057: 'Hе выбрано',
 };
 
 function ControlsInfo(props) {
   const {
-    params, id, entriesUnitParams, timers, navigation, temperature, indexActive, flatListRef,
+    params, id, filteredEntries, navigation, temperature, flatListRef, indexActive,
   } = props;
 
   const {
     res: resMode, humRoomTarget: humTarget, fanSpeedPTarget: fanTarget,
   } = params;
 
-  const keyForRender = ['tempTarget', 'humRoomTarget', 'fanSpeedPTarget', 'res', 'ZagrFiltr', 'tempChannel'];
+  const timersDayState = useSelector((state) => state.timersDay);
+  // console.log('timersDayStateControlsInfo', timersDayState);
 
-  
-  const filteredEntries = entriesUnitParams.filter(([key]) => keyForRender.includes(key));
-
-  // const handleSettings = useCallback(() => {
-  //   if (id) {
-  //     navigation.navigate('HomeStack', { screen: 'HomeSchedule', params: { clickedControllerId: String(id) } });
-  //   }
-  // }, [id, navigation]);
-
-  const renderItem = ({ item, index }) => {
-    // console.log('renderItem', index);
-    // console.log('indexActive', indexActive);
-
-    if (item[0] === 'tempTarget' && resMode === '1') {
-      return null;
+  const handleSettings = useCallback(() => {
+    if (id) {
+      navigation.navigate('HomeStack', { screen: 'HomeSchedule', params: { clickedControllerId: String(id) } });
     }
+  }, [id, navigation]);
+
+  const renderItem = ({ item }) => {
+    // if (item[0] === 'tempTarget' && resMode == '1') {
+    //   return null;
+    // }
 
     const imageSrc = FunctionsIcon[item[0]];
 
     return (
       <View
         style={[
-          (index === indexActive) ? styles.controlsInfoBoxActive : styles.controlsInfoBox,
+          styles.controlsInfoBox,
+          // (index === indexActive) ? styles.controlsInfoBoxActive : styles.controlsInfoBox,
         ]}
       >
         <View style={styles.controlsInfoBoxIconSettings}>
@@ -166,13 +164,12 @@ function ControlsInfo(props) {
           >
             <Image source={imageSrc} style={styles.controlsInfoBgIcon} />
           </LinearGradient>
+          {(item[0] === 'ZagrFiltr') && (
+          <TouchableOpacity onPress={handleSettings}>
+            <Image source={SettingsIcon} style={styles.controlsInfoBgIcon} />
+          </TouchableOpacity>
+          )}
 
-          {/* {item[0] === 'ZagrFiltr'
-            && (
-              <TouchableOpacity onPress={handleSettings}>
-                <SettingsIcon />
-              </TouchableOpacity>
-            )} */}
         </View>
 
         {(item[0] === 'tempTarget') && (
@@ -222,23 +219,18 @@ function ControlsInfo(props) {
 
         {(item[0] === 'ZagrFiltr') && (
           <>
-            <Text style={styles.controlsInfoBtnTextName}>Автозапуск</Text>
+            <Text style={styles.controlsInfoBtnTextName}>Автозапуск сегодня</Text>
 
-            {timers?.timers && (
-              <>
-                <View style={styles.controlsInfoBtnTextBox}>
-                  <Text style={styles.controlsInfoBtnText}>{timers?.timers[0].time}</Text>
-                </View>
-                {timers?.timers[1].fanSpeed === '255' && (
-                  <>
-                    <Text style={styles.controlsInfoBtnText}>до</Text>
-                    <View style={styles.controlsInfoBtnTextBox}>
-                      <Text style={styles.controlsInfoBtnText}>{timers?.timers[1].time}</Text>
-                    </View>
-
-                  </>
-                )}
-              </>
+            {timersDayState?.timers[0]?.num === 1 && (
+              <View style={styles.controlsInfoBtnTextBox}>
+                <Text style={styles.controlsInfoBtnText}>
+                  {timersDayState?.timers[0].time}
+                  {' '}
+                  до
+                  {' '}
+                  {timersDayState?.timers[1].time}
+                </Text>
+              </View>
             )}
           </>
         )}

@@ -221,7 +221,7 @@ const arr = [
 const keyForRender = ['Temp', 'Vent', 'Cooling', 'Auto'];
 
 function ModeModal({
-  modalVisible, setModalVisible, sendParamsData, unitId, resMode, changeParams,
+  modalVisible, setModalVisible, sendParamsData, unitId, resMode, changeParams, scrollToIndex,
 }) {
   const [activeItem, setActiveItem] = useState(Number(resMode));
   const panResponder = useRef(
@@ -252,9 +252,10 @@ function ModeModal({
         controllerId: String(unitId),
         res: String(activeItem),
       });
+      scrollToIndex(0) // прокрутка к режиму
     }
     setModalVisible(false);
-  }, [activeItem, changeParams, sendParamsData, setModalVisible, unitId]);
+  }, [activeItem, changeParams, scrollToIndex, sendParamsData, setModalVisible, unitId]);
 
   if (resMode === undefined) {
     return null;

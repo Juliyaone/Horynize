@@ -150,13 +150,13 @@ function SpeedModal({
 
   const onPress = useCallback(() => {
     if (valueSliderSpeed !== undefined && valueSliderSpeed !== null) {
-      // sendParamsData({
-      //   controllerId: String(unitId),
-      //   fanTarget: valueSliderSpeed.toString(),
-      // });
+      sendParamsData({
+        controllerId: String(unitId),
+        fanTarget: valueSliderSpeed.toString(),
+      });
     }
     changeParams({ fanSpeedPTarget: valueSliderSpeed });
-    scrollToIndex(5);// прокрутка к 3-му элементу (индексация с 0)
+    scrollToIndex(4);// прокрутка к скорости
 
     setModalVisibleSpeed(false);
   }, [changeParams, scrollToIndex, setModalVisibleSpeed, valueSliderSpeed]);
@@ -205,7 +205,7 @@ function SpeedModal({
                 thumbTintColor="#ED7635"
                 onValueChange={setValueSliderSpeed}
                 value={valueSliderSpeed}
-                onSlidingComplete={(value) => setValueSliderSpeed(value.toString())}
+                onSlidingComplete={(value) => setValueSliderSpeed(value)}
               />
             </View>
           </View>

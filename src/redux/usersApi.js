@@ -6,6 +6,9 @@ import { getTokenFromStorage, saveTokenToStorage, deleteTokenFromStorage } from 
 import { getStoredCredentials } from '../components/providers/SecureStore';
 import { setUser } from './slices/usersSlice';
 import { setContacts } from './slices/contactsSlice';
+import { setTimersDay } from './slices/timersDaySlice';
+import { setDaysTimer } from './slices/daysTimerSlice';
+
 import { setControllers, setUserContollers } from './slices/controllersSlice';
 import { setCurrentParams, setCurrentId } from './slices/currentControllerSlice';
 
@@ -128,6 +131,15 @@ export const usersApi = createApi({
         },
       }),
     }),
+    deleteUser: builder.mutation({
+      query: (body) => ({
+        url: urls.DELETE_USER,
+        method: 'POST',
+        body: {
+          ...body,
+        },
+      }),
+    }),
     sendParams: builder.mutation({
       query: (body) => ({
         url: urls.UNITS_SET_PARAMS,
@@ -172,15 +184,35 @@ export const usersApi = createApi({
           ...body,
         },
       }),
+      async onQueryStarted(_args, { dispatch, queryFulfilled }) {
+        try {
+          const result = await queryFulfilled;
+          dispatch(setDaysTimer(result.data));
+        } catch (error) {
+          dispatch(setDaysTimer({
+            timers: ['Не загрузились данные'],
+            'vent-unit': ['Не загрузились данные'],
+          }));
+        }
+      },
     }),
     getTimersUnit: builder.query({
       query: (body) => ({
         url: urls.UNITS_TIMERS,
         method: 'POST',
-        body: {
-          ...body,
-        },
+        body,
       }),
+      async onQueryStarted(_args, { dispatch, queryFulfilled }) {
+        try {
+          const result = await queryFulfilled;
+          dispatch(setTimersDay(result.data));
+        } catch (error) {
+          dispatch(setTimersDay({
+            timers: ['Не загрузились данные'],
+            'vent-unit': ['Не загрузились данные'],
+          }));
+        }
+      },
     }),
     sendDayTimers: builder.mutation({
       query: (body) => ({
@@ -226,6 +258,13 @@ export const usersApi = createApi({
     //     method: 'POST',
     //   }),
     // }),
+
+    fetchAuthConfig: builder.query({
+      query: () => ({
+        url: urls.URL_API_ENDPOINT,
+        method: 'GET',
+      }),
+    }),
   }),
 });
 
@@ -252,4 +291,6 @@ export const {
   // useGetModelsOfUserMutation,
   useGetParamsModelsOfUserMutation,
   // useGetModelsQuery,
+  useFetchAuthConfigQuery,
+  useDeleteUserMutation,
 } = usersApi;

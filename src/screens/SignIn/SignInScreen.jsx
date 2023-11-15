@@ -1,6 +1,6 @@
 import React, { useState, useContext } from 'react';
 import {
-  StyleSheet, View, Text, TextInput,
+  StyleSheet, View, Text, TextInput, TouchableOpacity
 } from 'react-native';
 
 import { Formik } from 'formik';
@@ -65,6 +65,23 @@ const styles = StyleSheet.create({
     padding: 0,
     marginTop: 0,
     marginBottom: 10,
+  },
+  textPasswordBox: {
+    display: 'flex',
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 20,
+  },
+  textPassword: {
+    fontFamily: 'SFProDisplay',
+    fontStyle: 'normal',
+    fontWeight: '600',
+    fontSize: 16,
+    lineHeight: 18,
+    letterSpacing: 0.374,
+    color: '#787880',
+    marginBottom: 20,
+    textAlign: 'center',
   },
 
 });
@@ -142,18 +159,18 @@ function SignInScreen({ navigation }) {
 
       {authorizationError
         && (
-        <ModalError
-          errorText={errorText}
-          visible={!!authorizationError}
-          onDismiss={() => setAuthorizationError(null)}
-        />
+          <ModalError
+            errorText={errorText}
+            visible={!!authorizationError}
+            onDismiss={() => setAuthorizationError(null)}
+          />
         )}
       <GoBackComponent navigation={navigation} />
 
       <Text style={styles.title}>Авторизация</Text>
 
       <Formik
-        initialValues={{ username: 'victoruni1', password: '1234567890' }}
+        initialValues={{ username: 'Alexalex', password: '!Q@aw3zse4' }}
         onSubmit={handleSubmit}
         validationSchema={validationSchema}
       >
@@ -191,6 +208,12 @@ function SignInScreen({ navigation }) {
               />
             </View>
             <CustomButton onPress={handleSubmit} text="Войти" IconComponent={false} style={{ width: '100%' }} />
+
+            <TouchableOpacity style={styles.textPasswordBox}>
+              <Text style={styles.textPassword}>
+                Забыли пароль?
+              </Text>
+            </TouchableOpacity>
 
           </View>
         )}
