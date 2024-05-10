@@ -1,16 +1,19 @@
-import React from 'react';
+import React, { useContext } from 'react';
 import {
   View, Text,
 } from 'react-native';
-import { useSelector } from 'react-redux';
 import CustomButton from '../../components/CustomButton';
 import SettingsIcon from '../../img/icons/settings';
+
+import { AuthContext } from '../../components/providers/AuthContext';
 
 import { styles } from './SettingsStyle';
 import LockIcon from '../../img/icons/lock';
 
 export function PersonalData({ navigation }) {
-  const auth = useSelector((state) => state.auth);
+  const {
+    userEmail,
+  } = useContext(AuthContext);
 
   const onChangePassword = () => {
     navigation.navigate('ChangeUserData');
@@ -23,8 +26,8 @@ export function PersonalData({ navigation }) {
         <SettingsIcon />
       </View>
       <View style={styles.cardUserDataBox}>
-        <Text style={styles.cardUserText}>Адрес эл. почты</Text>
-        <Text style={styles.cardUserText}>{auth?.user?.email ?? ''}</Text>
+        <Text style={styles.cardUserText}>Почта</Text>
+        <Text style={styles.cardUserText}>{userEmail ?? ''}</Text>
       </View>
       <View style={styles.cardUserBtnBox}>
         <CustomButton text="Изменить данные" IconComponent={LockIcon} onPress={onChangePassword} />

@@ -1,13 +1,16 @@
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react'
 import * as urls from './urls';
 
-import { getTokenFromStorage, saveTokenToStorage, deleteTokenFromStorage } from '../components/providers/tokenStorage';
+import {
+  getTokenFromStorage, saveTokenToStorage, deleteTokenFromStorage, getRefreshTokenFromStorage, saveRefreshTokenToStorage, getUserIdFromStorage,
+} from '../components/providers/tokenStorage';
 
-import { getStoredCredentials } from '../components/providers/SecureStore';
 import { setUser } from './slices/usersSlice';
 import { setContacts } from './slices/contactsSlice';
 import { setTimersDay } from './slices/timersDaySlice';
 import { setDaysTimer } from './slices/daysTimerSlice';
+import { setTimersAllDays } from './slices/timersAllDaysSlice';
+
 
 import { setControllers, setUserContollers } from './slices/controllersSlice';
 import { setCurrentParams, setCurrentId } from './slices/currentControllerSlice';
@@ -25,25 +28,40 @@ const baseQuery = fetchBaseQuery({
 })
 
 const baseQueryWithReauth = async (args, api, extraOptions) => {
-  const result = await baseQuery(args, api, extraOptions);
-  if (result?.error && (result?.error.data === 'Token timestamp error'
-  || result?.error.data === 'Token not found in request')) {
-    await deleteTokenFromStorage();
-    const credentials = await getStoredCredentials(); // функция для получения сохраненных логина и пароля
+  let result = await baseQuery(args, api, extraOptions);
 
-    if (credentials) {
-      const { username, password } = credentials;
+  if (result?.error && (result?.error.data === 'Token not found in request'
+  || result?.error.data === 'Token timestamp error')) {
+    await deleteTokenFromStorage();
+
+    const refreshToken = await getRefreshTokenFromStorage('userRefreshToken');
+
+    const userId = await getUserIdFromStorage();
+
+    if (refreshToken) {
       try {
-        const refreshResult = await baseQuery(
-          { url: `${urls.LOGIN}`, method: 'POST', body: { username, password } },
-          api,
-          extraOptions,
-        )
-        if (refreshResult.data['0'].jwt) {
-          // Если авторизация прошла успешно, сохраните новый токен и продолжите выполнение запроса
-          await saveTokenToStorage(refreshResult.data['0'].jwt);
+        // Запрос на обновление access token с использованием refresh token
+        const refreshResult = await baseQuery({
+          url: urls.REFRESH_TOKEN,
+          method: 'POST',
+          body: {
+            "refreshToken": refreshToken,
+            "userId": userId,
+          },
+        }, api, extraOptions);
+
+        if (refreshResult.data?.refreshToken) {
+          // Если обновление прошло успешно, сохраняем новый access token  и refresh_token далее повторяем исходный запрос
+          await saveTokenToStorage(refreshResult.data.jwt);
+          await saveRefreshTokenToStorage(refreshResult.data.refreshToken);
+
+          // Повторение исходного запроса с новым access token
+          result = await baseQuery(args, api, extraOptions);
         }
-      } catch (error) { /* empty */ }
+      } catch (error) {
+        console.error('Ошибка при обновлении какого токена', error);
+        // Обработка ошибок обновления токена, например, переадресация на страницу логина
+      }
     }
   }
   return result;
@@ -118,7 +136,7 @@ export const usersApi = createApi({
       async onQueryStarted(_args, { dispatch, queryFulfilled }) {
         try {
           const result = await queryFulfilled;
-          dispatch(setUser(result.data['0']));
+          dispatch(setUser(result.data));
         } catch (error) { /* empty */ }
       },
     }),
@@ -158,7 +176,6 @@ export const usersApi = createApi({
           controllerId: String(body.controllerId),
         },
       }),
-      // providesTags: ['Params'],
       async onQueryStarted(_args, { dispatch, queryFulfilled }) {
         try {
           const result = await queryFulfilled;
@@ -170,6 +187,15 @@ export const usersApi = createApi({
     bind: builder.mutation({
       query: (body) => ({
         url: urls.UNITS_BIND,
+        method: 'POST',
+        body: {
+          ...body,
+        },
+      }),
+    }),
+    getUserTokens: builder.query({
+      query: (body) => ({
+        url: urls.GET_USER_TOKENS,
         method: 'POST',
         body: {
           ...body,
@@ -200,7 +226,9 @@ export const usersApi = createApi({
       query: (body) => ({
         url: urls.UNITS_TIMERS,
         method: 'POST',
-        body,
+        body: {
+          ...body,
+        },
       }),
       async onQueryStarted(_args, { dispatch, queryFulfilled }) {
         try {
@@ -209,11 +237,33 @@ export const usersApi = createApi({
         } catch (error) {
           dispatch(setTimersDay({
             timers: ['Не загрузились данные'],
-            'vent-unit': ['Не загрузились данные'],
           }));
         }
       },
     }),
+
+    getTimersUnitAll: builder.mutation({
+      query: (body) => ({
+        url: urls.UNITS_TIMERS,
+        method: 'POST',
+        body: {
+          ...body,
+        },
+      }),
+      async onQueryStarted(_args, { dispatch, queryFulfilled }) {
+        try {
+          const result = await queryFulfilled;
+          dispatch(setTimersAllDays(result.data));
+        } catch (error) {
+          dispatch(setTimersAllDays({
+            timersAllDays: ['Не загрузились данные'],
+          }));
+        }
+      },
+    }),
+
+
+
     sendDayTimers: builder.mutation({
       query: (body) => ({
         url: urls.UNITS_SET_DAY_TIMERS,
@@ -252,12 +302,6 @@ export const usersApi = createApi({
         },
       }),
     }),
-    // getModels: builder.query({
-    //   query: () => ({
-    //     url: urls.GET_UNITS,
-    //     method: 'POST',
-    //   }),
-    // }),
 
     fetchAuthConfig: builder.query({
       query: () => ({
@@ -277,12 +321,17 @@ export const {
   useLoginUserMutation,
   useRegisterUserMutation,
 
+  useGetUserTokensQuery,
+
   useSendParamsMutation,
   useGetParamsQuery,
 
   useBindMutation,
   useUnitsGetDayTimersQuery,
   useGetTimersUnitQuery,
+
+  useGetTimersUnitAllMutation, // получать таймеры по очереди на все дни на которые установлен таймер
+
   useSendDayTimersMutation,
   useSendTimersMutation,
 

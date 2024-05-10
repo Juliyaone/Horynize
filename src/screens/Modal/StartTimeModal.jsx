@@ -1,15 +1,18 @@
-import React, { useRef } from 'react';
+import React, { useRef, useState } from 'react';
 import {
   View, Text, Modal, TouchableOpacity, PanResponder, Platform,
 } from 'react-native';
 
 import { LinearGradient } from 'expo-linear-gradient';
 import TimePicker from '../../components/TimePicker';
-import ApplyIcon from '../../img/icons/apply';
+import TimePickerAndroid from '../../components/TimePickerAndroid';
 
+import ApplyIcon from '../../img/icons/apply';
 import { styles } from './styles/StartTimeModalStyle';
 
-function StartTimeModal({ modalVisibleStartTime, setModalVisibleStartTime, setStartTime }) {
+function StartTimeModal({
+  modalVisibleStartTime, setModalVisibleStartTime, startTime, setStartTime,
+}) {
   const panResponder = useRef(
     PanResponder.create({
       onStartShouldSetPanResponder: () => true,
@@ -23,6 +26,19 @@ function StartTimeModal({ modalVisibleStartTime, setModalVisibleStartTime, setSt
 
   const isAndroid = Platform.OS === 'android';
 
+  if (isAndroid && modalVisibleStartTime) {
+    return (
+      <View>
+        <TimePickerAndroid
+          modalVisibleStartTime={modalVisibleStartTime}
+          onClose={setModalVisibleStartTime}
+          startTime={startTime}
+          setTime={setStartTime}
+        />
+      </View>
+    );
+  }
+
   return (
     <Modal
       animationType="slide"
@@ -33,28 +49,26 @@ function StartTimeModal({ modalVisibleStartTime, setModalVisibleStartTime, setSt
       }}
     >
       <View style={styles.centeredView}>
-        <View style={[styles.modalView, isAndroid ? styles.modalViewTransparent : null]} {...panResponder.panHandlers}>
+        <View style={styles.modalView} {...panResponder.panHandlers}>
           {!isAndroid && <Text style={styles.modalText}>Начало работы</Text>}
 
-          <TimePicker closeModal={setModalVisibleStartTime} setTime={setStartTime} />
+          <TimePicker setTime={setStartTime} startTime={startTime} closeModal={setModalVisibleStartTime} />
 
-          {!isAndroid && (
-            <TouchableOpacity
-              activeOpacity={0.8}
-              style={styles.button}
-              onPress={() => { setModalVisibleStartTime(!modalVisibleStartTime) }}
+          <TouchableOpacity
+            activeOpacity={0.8}
+            style={styles.button}
+            onPress={() => { setModalVisibleStartTime(!modalVisibleStartTime) }}
+          >
+            <LinearGradient
+              colors={['#FEB84A', '#FF5204']}
+              style={styles.gradientBackground}
             >
-              <LinearGradient
-                colors={['#FEB84A', '#FF5204']}
-                style={styles.gradientBackground}
-              >
-                <View style={styles.content}>
-                  <ApplyIcon style={styles.icon} />
-                  <Text style={styles.text}>Применить</Text>
-                </View>
-              </LinearGradient>
-            </TouchableOpacity>
-          )}
+              <View style={styles.content}>
+                <ApplyIcon style={styles.icon} />
+                <Text style={styles.text}>Применить</Text>
+              </View>
+            </LinearGradient>
+          </TouchableOpacity>
         </View>
       </View>
     </Modal>

@@ -6,6 +6,7 @@ import { controllersSlice } from './slices/controllersSlice';
 import { currentControllerSlice } from './slices/currentControllerSlice';
 import { timersDaySlice } from './slices/timersDaySlice';
 import { daysTimerSlice } from './slices/daysTimerSlice';
+import { timersAllDaysSlice } from './slices/timersAllDaysSlice';
 
 export const store = configureStore({
   reducer: {
@@ -16,6 +17,7 @@ export const store = configureStore({
     currentContoller: currentControllerSlice.reducer,
     timersDay: timersDaySlice.reducer,
     daysTimer: daysTimerSlice.reducer,
+    timersAllDays: timersAllDaysSlice.reducer,
   },
   middleware: (getDefaultMiddleware) => getDefaultMiddleware().concat(usersApi.middleware),
   devTools: true,

@@ -2,6 +2,8 @@ import React, { useRef, useState, useCallback } from 'react';
 import {
   StyleSheet, View, Text, Modal, TouchableOpacity, PanResponder, Dimensions,
 } from 'react-native';
+import { responsiveFontSize } from 'react-native-responsive-dimensions';
+
 import Slider from '@react-native-community/slider';
 
 import { LinearGradient } from 'expo-linear-gradient';
@@ -50,9 +52,7 @@ const styles = StyleSheet.create({
     fontFamily: 'SFProDisplay',
     fontStyle: 'normal',
     fontWeight: '600',
-    fontSize: 20,
-    lineHeight: 28,
-    letterSpacing: 0.35,
+    fontSize: responsiveFontSize(2.8),
     color: '#212121',
     marginBottom: 15,
   },
@@ -77,7 +77,7 @@ const styles = StyleSheet.create({
   },
   text: {
     color: 'white',
-    fontSize: 16,
+    fontSize: responsiveFontSize(2.1),
     fontWeight: 'bold',
   },
   boxDays: {
@@ -122,10 +122,8 @@ const styles = StyleSheet.create({
     fontFamily: 'SFProDisplay',
     fontStyle: 'normal',
     fontWeight: '600',
-    fontSize: 10,
-    lineHeight: 12,
+    fontSize: responsiveFontSize(1.5),
     textAlign: 'center',
-    letterSpacing: 0.374,
     color: '#787880',
   },
   boxAutoModeItemActive: {
@@ -148,18 +146,45 @@ function SpeedModal({
 }) {
   const [valueSliderSpeed, setValueSliderSpeed] = useState(fanTarget);
 
+  // const onPress = useCallback(() => {
+  //   if (valueSliderSpeed !== undefined && valueSliderSpeed !== null) {
+  //     sendParamsData({
+  //       controllerId: String(unitId),
+  //       fanTarget: valueSliderSpeed.toString(),
+  //     });
+  //   }
+  //   changeParams({ fanSpeedPTarget: valueSliderSpeed });
+  //   scrollToIndex(4);// прокрутка к скорости
+
+  //   setModalVisibleSpeed(false);
+  // }, [changeParams, valueSliderSpeed, scrollToIndex, setModalVisibleSpeed, sendParamsData, unitId]);
+
+  // const onPress = useCallback(() => {
+  //   if (valueSliderSpeed !== undefined && valueSliderSpeed !== null) {
+  //     sendParamsData({
+  //       controllerId: String(unitId),
+  //       fanTarget: valueSliderSpeed.toString(),
+  //     }).then(() => {
+  //       changeParams({ fanSpeedPTarget: valueSliderSpeed });
+  //       scrollToIndex(4); // прокрутка к скорости
+  //       setModalVisibleSpeed(false);
+  //     });
+  //   }
+  // }, [changeParams, valueSliderSpeed, scrollToIndex, setModalVisibleSpeed, sendParamsData, unitId]);
+
   const onPress = useCallback(() => {
     if (valueSliderSpeed !== undefined && valueSliderSpeed !== null) {
       sendParamsData({
         controllerId: String(unitId),
         fanTarget: valueSliderSpeed.toString(),
       });
+      changeParams({
+        fanSpeedPTarget: valueSliderSpeed,
+      });
     }
-    changeParams({ fanSpeedPTarget: valueSliderSpeed });
-    scrollToIndex(4);// прокрутка к скорости
-
+    scrollToIndex(5); // прокрутка к влажности
     setModalVisibleSpeed(false);
-  }, [changeParams, scrollToIndex, setModalVisibleSpeed, valueSliderSpeed]);
+  }, [valueSliderSpeed, scrollToIndex, setModalVisibleSpeed, sendParamsData, unitId, changeParams]);
 
   const panResponder = useRef(
     PanResponder.create({
@@ -185,6 +210,7 @@ function SpeedModal({
         setModalVisibleSpeed(false);
       }}
     >
+
       <View style={styles.centeredView}>
         <View style={styles.modalView} {...panResponder.panHandlers}>
           <Text style={styles.modalText}>Скорость притока</Text>

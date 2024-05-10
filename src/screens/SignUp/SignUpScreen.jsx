@@ -1,23 +1,60 @@
-import React, { useState, useContext } from 'react';
+import React, { useState, useContext, useEffect } from 'react';
 import {
-  StyleSheet, View, Text, TextInput, TouchableOpacity,
+  StyleSheet, View, Text, TextInput, TouchableOpacity, Modal, ScrollView,
 } from 'react-native';
+import { responsiveFontSize } from 'react-native-responsive-dimensions';
 
+import { LinearGradient } from 'expo-linear-gradient';
+import { Picker } from '@react-native-picker/picker';
 import { Formik } from 'formik';
 import * as yup from 'yup';
-import { saveCredentials } from '../../components/providers/SecureStore';
+import { useRegisterUserMutation, useGetUnitsAllQuery } from '../../redux/usersApi';
+
 import { AuthContext } from '../../components/providers/AuthContext';
 
-import { useRegisterUserMutation } from '../../redux/usersApi';
-import ModalError from '../../components/ModalError';
-import GoBackComponent from '../../components/GoBack';
+import GalleryModal from '../Modal/GalleryModal';
 import Loader from '../../components/Loader';
-
-import ApplyIcon from '../../img/icons/apply';
-
+import ModalError from '../../components/ModalError';
 import CustomButton from '../../components/CustomButton';
 
+import ArrowLeft from '../../img/icons/ArrowLeft';
+import ApplyIcon from '../../img/icons/apply';
+
 const styles = StyleSheet.create({
+  containerSignUp: {
+    position: 'relative',
+    marginLeft: 20,
+    marginRight: 20,
+    marginTop: 80,
+  },
+  floatingGoBack: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    width: '100%',
+    zIndex: 1,
+    backgroundColor: '#ffffff',
+  },
+  btnBack: {
+    width: '100%',
+    display: 'flex',
+    flexDirection: 'row',
+    justifyContent: 'flex-start',
+    alignItems: 'center',
+    marginTop: 30,
+    marginBottom: 10,
+  },
+  modalContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+  },
+  pickerContainer: {
+    backgroundColor: 'white',
+    width: '80%',
+    borderRadius: 10,
+  },
   container: {
     padding: 10,
     justifyContent: 'center',
@@ -27,9 +64,7 @@ const styles = StyleSheet.create({
     fontFamily: 'SFProDisplay',
     fontStyle: 'normal',
     fontWeight: '600',
-    fontSize: 20,
-    lineHeight: 28,
-    letterSpacing: 0.35,
+    fontSize: responsiveFontSize(2.8),
     color: '#212121',
     marginBottom: 30,
   },
@@ -51,7 +86,7 @@ const styles = StyleSheet.create({
     borderRadius: 16,
     padding: 15,
     color: '#212121',
-    fontSize: 16,
+    fontSize: responsiveFontSize(2.1),
   },
   inputIcon: {
     width: 15,
@@ -65,14 +100,50 @@ const styles = StyleSheet.create({
     marginTop: 0,
     marginBottom: 10,
   },
+  textRegistr: {
+    fontFamily: 'SFProDisplay',
+    fontSize: responsiveFontSize(1.8),
+    textAlign: 'center',
+    color: '#787880',
+  },
+  textRegistrBtn: {
+    fontFamily: 'SFProDisplay',
+    fontSize: 14,
+    textAlign: 'center',
+    color: '#ffffff',
+  },
+  btnRegisterBox: {
+    display: 'flex',
+    justifyContent: 'center',
+    alignItems: 'center',
+    width: 25,
+    height: 25,
+    marginRight: 20,
+    borderRadius: 50,
+    overflow: 'hidden',
+  },
+  boxTextTextRegistr: {
+    marginBottom: 20,
+    marginTop: 10,
+  },
+  gradientBackground: {
+    width: '100%',
+    height: '100%',
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderRadius: 50,
+  },
 });
 
 const validationSchema = yup.object().shape({
   username: yup
     .string()
+    .matches(/^[a-zA-Z0-9\-_\.]+$/, 'Введите имя на английском языке')
+    .min(4, 'Не менее 4 символов')
     .required('Введите ваше имя'),
   password: yup
     .string()
+    .min(8, 'Пароль должен содержать не менее 8 символов')
     .required('Введите ваш пароль'),
   email: yup
     .string()
@@ -86,45 +157,60 @@ const validationSchema = yup.object().shape({
     .min(4, 'Ключ должен содержать ровно 4 символа')
     .max(4, 'Ключ должен содержать ровно 4 символа')
     .required('Введите ключ вентиляционной установки'),
+  modelId: yup.string().required('Выберите модель'),
 });
 
 function SignUp({ navigation }) {
+  const [isGalleryModalVisible, setGalleryModalVisible] = useState(false);
+  const [isPickerVisible, setPickerVisible] = useState(false);
+
+  const [selectedModelId, setSelectedModelId] = useState(null);
+  const [selectedModelName, setSelectedModelName] = useState('');
+
   const [registrationError, setRegistrationError] = useState(false);
-  console.log('registrationError', registrationError);
-
   const [errorText, setErrorText] = useState('');
-  // const [isPrivacyPolicyAccepted, setIsPrivacyPolicyAccepted] = useState(false);
 
-  // console.log('isPrivacyPolicyAccepted', isPrivacyPolicyAccepted);
-
-  const [registerUser, { isLoader }] = useRegisterUserMutation();
   const { signIn } = useContext(AuthContext);
 
-  const sendRegisterData = async (values) => {
+  const { data: modelsAll, isLoading: modelsAllIsLoading, error: errorModelsAll } = useGetUnitsAllQuery();
+
+  const [registerUser, { isLoader }] = useRegisterUserMutation();
+
+  const errObj = {
+    incomplete_request_fields: 'Вы не заполнили все поля',
+    incorrect_username: 'Неверный логин',
+    short_password: 'Короткий пароль',
+    invalid_email: 'Не верный email',
+    user_exists: 'Пользователь с таким email уже зарегистрирован',
+    controller_hash_is_wrong: 'Проверьте поля "Регистрационный номер" и "Регистрационный ключ". Если усановка ранее уже была привязана к другому пользователю, то ее необходимо отвязать.',
+  }
+
+  const submitToServer = async (values) => {
     if (values.username !== '' && values.password !== '' && values.email !== ''
-      && values.id !== '' && values.key !== '') {
+      && values.id !== '' && values.key !== '' && values.modelId !== '') {
       try {
         const answer = await registerUser(values).unwrap();
-        console.log(answer['0']?.jwt);
 
-        if (answer['0']?.jwt) {
-          const token = answer['0'].jwt;
+        if (answer?.jwt) {
+          const token = String(answer?.jwt);
+          const refreshToken = String(answer?.refreshToken);
+          const controllerId = String(answer.controllerId);
+
           const { controllers } = answer;
-          const controllerId = String(answer.controllers[0].id_controller);
-          const userId = String(answer['0'].id_user);
-          const email = String(answer['0'].email);
-          const userName = String(answer['0'].username);
 
-          await saveCredentials(values.username, values.password);
+          const userIdData = String(answer.id_user);
+          const email = String(answer.email);
+          const userNameData = String(answer.username);
+
           const data = {
-            token, controllerId, userId, controllers, email, userName,
+            token, controllerId, userIdData, controllers, email, userNameData, refreshToken,
           };
+
           await signIn(data);
         }
         navigation.navigate('MainApp');
       } catch (error) {
         let errorMessage;
-
         console.log('errorMessage', error);
 
         if (error.data) {
@@ -138,154 +224,207 @@ function SignUp({ navigation }) {
         } else {
           errorMessage = JSON.stringify(error);
         }
+        setErrorText(errObj[errorMessage]);
 
-        setErrorText(errorMessage);
         setRegistrationError(true);
       }
     }
   }
 
-  const handleSubmit = async (values) => {
-    console.log('handleSubmit', values);
-    sendRegisterData(values)
+  const openPickerModal = () => {
+    setPickerVisible(true);
   };
 
-  if (isLoader) {
+  const handleModelChange = (itemValue, setFieldValue) => {
+    setSelectedModelId(itemValue);
+    const selectedName = modelsAll.models.find((model) => model.id_model.toString() === itemValue)?.name || '';
+    setSelectedModelName(selectedName);
+    setPickerVisible(false);
+    setFieldValue('modelId', itemValue); // Обновляем modelId в Formik
+  };
+
+  if (modelsAllIsLoading || isLoader) {
     return <Loader />
+  }
+  if (errorModelsAll) {
+    return <Text style={{ marginTop: 100 }}>Сервер не отвечает, попробуйте войти позже</Text>
   }
 
   return (
-    <View style={styles.container}>
+    <View style={{ backgroundColor: 'ffffff', flex: 1 }}>
 
-      {registrationError
-        && (
-        <ModalError
-          errorText={errorText}
-          visible={!!registrationError}
-          onDismiss={() => setRegistrationError(null)}
-        />
-        )}
-      <GoBackComponent navigation={navigation} />
+      <View style={styles.floatingGoBack}>
+        <TouchableOpacity style={styles.btnBack} onPress={() => navigation.goBack()}>
+          <ArrowLeft />
+          <Text>Назад</Text>
+        </TouchableOpacity>
+      </View>
 
-      <Text style={styles.title}>Регистрация</Text>
+      <ScrollView style={{ backgroundColor: '#ffffff', flex: 1 }}>
 
-      <Formik
-        initialValues={{
-          username: '', password: '', email: '', id: '', key: '',
-        }}
-        onSubmit={(values) => {
-          console.log('Formik onSubmit', values); // Добавьте это
-
-          // if (isPrivacyPolicyAccepted) {
-          // values.privacyPolicy = true;
-
-          handleSubmit(values);
-          navigation.navigate('MainApp');
-
-          // } else {
-          //   setRegistrationError(true);
-          //   setErrorText('Вы должны принять политику конфиденциальности');
-          // }
-        }}
-        validationSchema={validationSchema}
-      >
-        {({
-          // eslint-disable-next-line no-shadow
-          handleChange, handleBlur, handleSubmit, values, errors,
-        }) => (
-          <View>
-            {errors.username && <Text style={styles.errorText}>{errors.username}</Text>}
-
-            <View style={styles.inputContainer}>
-              <ApplyIcon style={styles.inputIcon} />
-              <TextInput
-                style={styles.input}
-                onChangeText={handleChange('username')}
-                onBlur={handleBlur('username')}
-                value={values.username}
-                placeholder="Имя"
+        <View style={styles.containerSignUp}>
+          {registrationError
+            && (
+              <ModalError
+                errorText={errorText}
+                visible={!!registrationError}
+                onDismiss={() => setRegistrationError(null)}
               />
-            </View>
-            {errors.password && <Text style={styles.errorText}>{errors.password}</Text>}
-            <View style={styles.inputContainer}>
-              <ApplyIcon style={styles.inputIcon} />
-              <TextInput
-                style={styles.input}
-                onChangeText={handleChange('password')}
-                onBlur={handleBlur('password')}
-                value={values.password}
-                placeholder="Пароль"
-                secureTextEntry
-              />
-            </View>
-            {errors.email && <Text style={styles.errorText}>{errors.email}</Text>}
-            <View style={styles.inputContainer}>
-              <ApplyIcon style={styles.inputIcon} />
-              <TextInput
-                style={styles.input}
-                onChangeText={handleChange('email')}
-                onBlur={handleBlur('email')}
-                value={values.email}
-                placeholder="Email"
-              />
-            </View>
+            )}
 
-            {errors.id && <Text style={styles.errorText}>{errors.id}</Text>}
-            <View style={styles.inputContainer}>
-              <ApplyIcon style={styles.inputIcon} />
-              <TextInput
-                style={styles.input}
-                onChangeText={handleChange('id')}
-                onBlur={handleBlur('id')}
-                value={values.id}
-                placeholder="Регистрационный номер"
-              />
-            </View>
+          <Text style={styles.title}>Регистрация</Text>
 
-            {errors.key && <Text style={styles.errorText}>{errors.key}</Text>}
-            <View style={[styles.inputContainer, styles.lastInputContainer]}>
-              <ApplyIcon style={styles.inputIcon} />
-              <TextInput
-                style={styles.input}
-                onChangeText={handleChange('key')}
-                onBlur={handleBlur('key')}
-                value={values.key}
-                placeholder="Регистрационный ключ"
-              />
-            </View>
-            <Text style={{
-              fontFamily: 'SFProDisplay',
-              fontSize: 14,
-              lineHeight: 18,
-              textAlign: 'center',
-              letterSpacing: 0.38,
-              color: '#787880',
+          <Formik
+            initialValues={{
+              username: '', password: '', email: '', id: '', key: '', modelId: '',
             }}
-            >
-              Регистрируясь Вы принимаете</Text>
+            onSubmit={(values, actions) => {
+              submitToServer(values, actions, navigation);
+            }}
+            validationSchema={validationSchema}
+          >
+            {({
+              handleChange, handleBlur, handleSubmit, setFieldValue, touched, errors, values,
+            }) => (
 
-              <TouchableOpacity onPress={() => navigation.navigate('PrivacyPolicy')}>
-                <Text style={{
-                  fontFamily: 'SFProDisplay',
-                  fontSize: 14,
-                  lineHeight: 18,
-                  textAlign: 'center',
-                  letterSpacing: 0.38,
-                  color: '#787880',
-                  marginBottom: 25 }}>Политику конфиденциальности</Text>
-              </TouchableOpacity>
-            <CustomButton
-              onPress={handleSubmit}
-              text="Зарегистрироваться"
-              IconComponent={false}
-              style={{ width: '100%' }}
-            />
-          </View>
+              <View>
+                {touched.username && errors.username && <Text style={styles.errorText}>{errors.username}</Text>}
+                <View style={styles.inputContainer}>
+                  <ApplyIcon style={styles.inputIcon} />
+                  <TextInput
+                    style={styles.input}
+                    onChangeText={handleChange('username')}
+                    onBlur={handleBlur('username')}
+                    value={values.username}
+                    placeholder="Имя"
+                  />
+                </View>
 
-        )}
+                {touched.password && errors.password && <Text style={styles.errorText}>{errors.password}</Text>}
+                <View style={styles.inputContainer}>
+                  <ApplyIcon style={styles.inputIcon} />
+                  <TextInput
+                    style={styles.input}
+                    onChangeText={handleChange('password')}
+                    onBlur={handleBlur('password')}
+                    value={values.password}
+                    placeholder="Пароль"
+                    secureTextEntry
+                  />
+                </View>
 
-      </Formik>
+                {touched.email && errors.email && <Text style={styles.errorText}>{errors.email}</Text>}
+                <View style={styles.inputContainer}>
+                  <ApplyIcon style={styles.inputIcon} />
+                  <TextInput
+                    style={styles.input}
+                    onChangeText={handleChange('email')}
+                    onBlur={handleBlur('email')}
+                    value={values.email}
+                    placeholder="Email"
+                  />
+                </View>
+
+                {touched.modelId && errors.modelId && <Text style={styles.errorText}>{errors.modelId}</Text>}
+                <TouchableOpacity style={styles.inputContainer} onPress={openPickerModal}>
+                  <ApplyIcon style={styles.inputIcon} />
+                  <TextInput
+                    onPressIn={openPickerModal}
+                    style={styles.input}
+                    editable={false}
+                    placeholder="Выберите модель"
+                    value={selectedModelName}
+                    pointerEvents="none"
+                  />
+                </TouchableOpacity>
+
+                <Modal
+                  transparent
+                  visible={isPickerVisible}
+                  onRequestClose={() => setPickerVisible(false)}
+                >
+                  <View style={styles.modalContainer}>
+                    <View style={styles.pickerContainer}>
+                      <Picker
+                        selectedValue={selectedModelId}
+                        onValueChange={(itemValue) => handleModelChange(itemValue, setFieldValue)}
+                      >
+                        {modelsAll?.models.map((model, index) => (
+                          <Picker.Item label={model.name} value={model.id_model.toString()} key={index} />
+                        ))}
+                      </Picker>
+                    </View>
+                  </View>
+                </Modal>
+
+                {touched.id && errors.id && <Text style={styles.errorText}>{errors.id}</Text>}
+                <View style={styles.inputContainer}>
+                  <ApplyIcon style={styles.inputIcon} />
+                  <TextInput
+                    style={styles.input}
+                    onChangeText={handleChange('id')}
+                    onBlur={handleBlur('id')}
+                    autoCapitalize="characters"
+                    value={values.id}
+                    placeholder="Регистрационный номер"
+                  />
+                  <TouchableOpacity style={styles.btnRegisterBox} onPress={() => setGalleryModalVisible(true)}>
+                    <LinearGradient
+                      colors={['#FEB84A', '#FF5204']}
+                      style={styles.gradientBackground}
+                    >
+                      <Text style={styles.textRegistrBtn}>?</Text>
+                    </LinearGradient>
+                  </TouchableOpacity>
+                </View>
+
+                {touched.key && errors.key && <Text style={styles.errorText}>{errors.key}</Text>}
+                <View style={styles.inputContainer}>
+                  <ApplyIcon style={styles.inputIcon} />
+                  <TextInput
+                    style={styles.input}
+                    onChangeText={handleChange('key')}
+                    onBlur={handleBlur('key')}
+                    autoCapitalize="characters"
+                    value={values.key}
+                    placeholder="Регистрационный ключ"
+                  />
+                  <TouchableOpacity style={styles.btnRegisterBox} onPress={() => setGalleryModalVisible(true)}>
+                    <LinearGradient
+                      colors={['#FEB84A', '#FF5204']}
+                      style={styles.gradientBackground}
+                    >
+                      <Text style={styles.textRegistrBtn}>?</Text>
+                    </LinearGradient>
+                  </TouchableOpacity>
+                </View>
+
+                <GalleryModal isGalleryModalVisible={isGalleryModalVisible} setGalleryModalVisible={setGalleryModalVisible} />
+
+                <View style={styles.boxTextTextRegistr}>
+                  <Text style={styles.textRegistr}>Регистрируясь Вы принимаете</Text>
+
+                  <TouchableOpacity onPress={() => navigation.navigate('PrivacyPolicy')}>
+                    <Text style={styles.textRegistr}>Политику конфиденциальности</Text>
+                  </TouchableOpacity>
+                </View>
+
+                <CustomButton
+                  onPress={handleSubmit}
+                  text="Зарегистрироваться"
+                  IconComponent={false}
+                  style={{ width: '100%' }}
+                />
+
+              </View>
+
+            )}
+
+          </Formik>
+        </View>
+      </ScrollView>
     </View>
+
   );
 }
 

@@ -1,8 +1,7 @@
 import { createSlice } from '@reduxjs/toolkit';
 
 const initialState = {
-  timers: [],
-  'vent-unit': [],
+  timersDay: [],
 };
 
 export const timersDaySlice = createSlice({
@@ -11,13 +10,12 @@ export const timersDaySlice = createSlice({
   reducers: {
     setTimersDay: (state, action) => {
       // eslint-disable-next-line no-param-reassign
-      state.timers = action.payload.timers;
+      state.timersDay = action.payload.timers;
       // eslint-disable-next-line no-param-reassign
-      state['vent-unit'] = action.payload['vent-unit'];
     },
     changeTimersDay: (state, action) => {
     // eslint-disable-next-line no-param-reassign
-      state.timers = { ...state.timers, ...action.payload.timers }
+      state.timersDay = [...action.payload];
     },
   },
 });

@@ -2,19 +2,17 @@ import React, { useState } from 'react'
 import {
   StyleSheet, View, Text, TouchableOpacity,
 } from 'react-native'
+import { responsiveFontSize } from 'react-native-responsive-dimensions';
+
 import { useSelector } from 'react-redux';
 import CustomButton from '../../components/CustomButton';
 
 import ArrowLeft from '../../img/icons/ArrowLeft';
 import ApplyIcon from '../../img/icons/apply';
 
-// import { useGetTimersUnitQuery } from '../../redux/usersApi';
-
-// import Loader from '../../components/Loader';
 
 const styles = StyleSheet.create({
   container: {
-    // justifyContent: 'center',
     marginLeft: 20,
     marginRight: 20,
   },
@@ -29,11 +27,9 @@ const styles = StyleSheet.create({
     fontFamily: 'SFProDisplayBold',
     fontStyle: 'normal',
     fontWeight: '700',
-    fontSize: 18,
-    lineHeight: 24,
+    fontSize: responsiveFontSize(2.5),
     alignItems: 'center',
     textAlign: 'center',
-    letterSpacing: 0.38,
     color: '#222222',
     marginBottom: 25,
   },
@@ -61,9 +57,7 @@ const styles = StyleSheet.create({
     fontFamily: 'SFProDisplay',
     fontStyle: 'normal',
     fontWeight: '600',
-    fontSize: 16,
-    lineHeight: 18,
-    letterSpacing: 0.374,
+    fontSize: responsiveFontSize(2.1),
     color: '#787880',
     marginBottom: 10,
   },
@@ -76,12 +70,7 @@ export default function HomeScheduleScreen({ navigation, route }) {
   const timersDayState = useSelector((state) => state.timersDay);
   const daysTimerState = useSelector((state) => state.daysTimer);
 
-  console.log('daysTimerState', daysTimerState);
-  console.log('timersDayStateHomeScheduleScreen', timersDayState);
-  const firstTimer = daysTimerState.timers[0];
   const days = ['monday', 'tuesday', 'wednesday', 'thusday', 'friday', 'saturday', 'sunday'];
-
-  const firstDayWithOne = days.find((day) => firstTimer[day] === '1');
 
   const dayMapping = {
     sunday: 0,
@@ -92,13 +81,6 @@ export default function HomeScheduleScreen({ navigation, route }) {
     friday: 5,
     saturday: 6,
   };
-  console.log('Первый день недели с 1:', dayMapping[firstDayWithOne]);
-
-  // const {
-  //   data: timersForWeek,
-  // } = useGetTimersUnitQuery({ controllerId: clickedControllerId, day: dayMapping[firstDayWithOne] });
-
-  // console.log('timersForWeek', timersForWeek);
 
   const changeScheduleHandler = () => {
     if (currentContoller?.params?.enabled === '1') {
@@ -113,6 +95,25 @@ export default function HomeScheduleScreen({ navigation, route }) {
       })
     }
   }
+
+  const renderTimerTime = (dayIndex) => {
+    // Проверка на существование данных
+    if (timersDayState?.timersDay && timersDayState?.timersDay?.length > 0) {
+      // Проверяем, включает ли массив дней указанный день
+      if (timersDayState?.timersDay[0]?.day && timersDayState?.timersDay[0]?.day.includes(dayIndex)) {
+        return (
+          <Text style={styles.controlsInfoBtnText}>
+            {timersDayState?.timersDay[0]?.time}
+            {' '}
+            до
+            {' '}
+            {timersDayState?.timersDay[1]?.time}
+          </Text>
+        );
+      }
+    }
+    return <Text style={styles.controlsInfoBtnText}>Нет</Text>;
+  };
 
   return (
     <>
@@ -137,123 +138,58 @@ export default function HomeScheduleScreen({ navigation, route }) {
       </TouchableOpacity>
       <View style={styles.container}>
 
-        {/* <Text>График работы установки на сегодня </Text>
-      {timersDayState?.timers[0]?.num === 1 && (
-        <View style={styles.controlsInfoBtnTextBox}>
-          <Text style={styles.controlsInfoBtnText}>
-            {timersDayState?.timers[0].time}
-            {' '}
-            до
-            {' '}
-            {timersDayState?.timers[1].time}
-          </Text>
-        </View>
-      )} */}
         <Text style={styles.headerTextSettings}>График работы установки</Text>
-        {/* { daysTimerState.timers[0] &&  */}
-        <View style={styles.cardUserBox}>
+        {daysTimerState.timers[0]
+          && (
+            <View style={styles.cardUserBox}>
 
-          <View style={{ flexDirection: 'row', justifyContent: 'center' }}>
-            <View style={{ flexDirection: 'column', justifyContent: 'space-around', marginRight: 20 }}>
-              <Text style={styles.headerText}>Понедельник</Text>
-              <Text style={styles.headerText}>Вторник</Text>
-              <Text style={styles.headerText}>Среда</Text>
-              <Text style={styles.headerText}>Четверг</Text>
-              <Text style={styles.headerText}>Пятница</Text>
-              <Text style={styles.headerText}>Суббота</Text>
-              <Text style={styles.headerText}>Воскресенье</Text>
+              <View style={{ flexDirection: 'row', justifyContent: 'center' }}>
+                <View style={{ flexDirection: 'column', justifyContent: 'space-around', marginRight: 20 }}>
+                  <View style={{ flexDirection: 'column', justifyContent: 'space-around' }}>
+                    <Text style={styles.headerText}>
+                      Понедельник
+                      {' '}
+                      {renderTimerTime(1)}
+                    </Text>
+                    <Text style={styles.headerText}>
+                      Вторник
+                      {' '}
+                      {renderTimerTime(2)}
+                    </Text>
+                    <Text style={styles.headerText}>
+                      Среда
+                      {' '}
+                      {renderTimerTime(3)}
+                    </Text>
+                    <Text style={styles.headerText}>
+                      Четверг
+                      {' '}
+                      {renderTimerTime(4)}
+                    </Text>
+                    <Text style={styles.headerText}>
+                      Пятница
+                      {' '}
+                      {renderTimerTime(5)}
+                    </Text>
+                    <Text style={styles.headerText}>
+                      Суббота
+                      {' '}
+                      {renderTimerTime(6)}
+                    </Text>
+                    <Text style={styles.headerText}>
+                      Воскресение
+                      {' '}
+                      {renderTimerTime(7)}
+                    </Text>
+                  </View>
+                </View>
+
+              </View>
+              <View style={styles.cardUserBtnBox}>
+                <CustomButton text="Изменить график" IconComponent={ApplyIcon} onPress={changeScheduleHandler} />
+              </View>
             </View>
-
-            {/* <View style={{ flexDirection: 'column', justifyContent: 'space-around' }}>
-              <Text style={styles.headerText}>
-                {daysTimerState.timers[0].monday === '1' ? (
-                  <Text style={styles.controlsInfoBtnText}>
-                    {timersDayState?.timers[0].time}
-                    {' '}
-                    до
-                    {' '}
-                    {timersDayState?.timers[1].time}
-                  </Text>
-                ) : 'Нет'}
-
-              </Text>
-              <Text style={styles.headerText}>
-                {daysTimerState.timers[0].tuesday === '1' ? (
-                  <Text style={styles.controlsInfoBtnText}>
-                    {timersDayState?.timers[0].time}
-                    {' '}
-                    до
-                    {' '}
-                    {timersDayState?.timers[1].time}
-                  </Text>
-                ) : 'Нет'}
-
-              </Text>
-              <Text style={styles.headerText}>
-                {daysTimerState.timers[0].wednesday === '1' ? (
-                  <Text style={styles.controlsInfoBtnText}>
-                    {timersDayState?.timers[0].time}
-                    {' '}
-                    до
-                    {' '}
-                    {timersDayState?.timers[1].time}
-                  </Text>
-                ) : 'Нет'}
-
-              </Text>
-              <Text style={styles.headerText}>
-                {daysTimerState.timers[0].thusday === '1' ? (
-                  <Text style={styles.controlsInfoBtnText}>
-                    {timersDayState?.timers[0].time}
-                    {' '}
-                    {' '}
-                    {timersDayState?.timers[1].time}
-                  </Text>
-                ) : 'Нет'}
-
-              </Text>
-              <Text style={styles.headerText}>
-                {daysTimerState.timers[0].friday === '1' ? (
-                  <Text style={styles.controlsInfoBtnText}>
-                    {timersDayState?.timers[0].time}
-                    {' '}
-                    до
-                    {' '}
-                    {timersDayState?.timers[1].time}
-                  </Text>
-                ) : 'Нет'}
-
-              </Text>
-              <Text style={styles.headerText}>
-                {daysTimerState.timers[0].saturday === '1' ? (
-                  <Text style={styles.controlsInfoBtnText}>
-                    {timersDayState?.timers[0].time}
-                    до
-                    {timersDayState?.timers[1].time}
-                  </Text>
-                ) : 'Нет'}
-
-              </Text>
-              <Text style={styles.headerText}>
-                {daysTimerState.timers[0].sunday === '1' ? (
-                  <Text style={styles.controlsInfoBtnText}>
-                    {timersDayState?.timers[0].time}
-                    {' '}
-                    до
-                    {' '}
-                    {timersDayState?.timers[1].time}
-                  </Text>
-                ) : 'Нет'}
-
-              </Text>
-            </View> */}
-
-          </View>
-          {/* <View style={styles.cardUserBtnBox}>
-            <CustomButton text="Изменить график" IconComponent={ApplyIcon} onPress={changeScheduleHandler} />
-          </View> */}
-        </View>
-
+          )}
       </View>
     </>
   )

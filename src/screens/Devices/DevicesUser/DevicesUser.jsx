@@ -4,156 +4,156 @@ import {
   View, Text, FlatList, Image, TouchableOpacity,
 } from 'react-native';
 
-import { useBindMutation } from '../../../redux/usersApi';
-
 import CustomButton from '../../../components/CustomButton';
 import NotImgUnits from '../../../img/not-img-units.png';
-import ModalError from '../../../components/ModalError';
-import MinusSmallIcon from '../../../img/icons/MinusSmallIcon';
-
+import { useBindMutation } from '../../../redux/usersApi';
+import Loader from '../../../components/Loader';
 import { getDeviceWordForm } from '../../../utils';
+import EditComponent from '../../../img/icons/edit';
+import EditModal from '../../Modal/EditModal';
 import { styles } from '../DevicesStyle';
-import { images } from '../images';
 
 export function DevicesUser({
-  navigation, userId, devices, userModels, paramsModelsData,
+  navigation, userId, userModels, paramsModelsData, modelsAll,
 }) {
-  const [userDevicesError, setUserDevicesError] = useState(null);
-  const [errorText, setErrorText] = useState('');
-
-  const [bind, { isLoading: isLoadingBind }] = useBindMutation();
-
   const onClickAddDevices = () => navigation.navigate('DevicesAll');
+  const [bind, { isLoading: isLoadingBind }] = useBindMutation();
+  const [modalVisible, setModalVisible] = useState(false);
+  const [selectedDevice, setSelectedDevice] = useState(null);
 
-  const paramsModelMap = {};
-  paramsModelsData.forEach((param) => {
-    const ventUnitId = param.data['vent-unit']?.[0]?.['id_vent-unit'];
-    const isEnabled = param.data.data?.[0]?.enabled;
-    if (ventUnitId) {
-      paramsModelMap[ventUnitId] = isEnabled === '1';
-    }
-  });
+  // binding: 0 - отвязка, 1 - привязка, 2 - редактирование customName
+  if (isLoadingBind) {
+    return <Loader />
+  }
 
-  const userDevices = devices.filter((device) => userModels.some((model) => model.id_model === device.id_model));
+  const devicesUserNewArr = [];
 
-  // console.log('userModels', userModels);
-  // console.log('userDevices', userDevices);
-  // console.log('paramsModelMap:', paramsModelMap);
+  if (paramsModelsData.length > 0) {
+    paramsModelsData.forEach((param) => {
+      const ventUnitId = param.data['vent-unit'][0]['id_vent-unit']; // Получаем ID контроллера из paramsModelsData
+      const controller = userModels.find((c) => c.id_controller.toString() === ventUnitId); // Ищем контроллер по id_controller
+      if (controller) {
+        const model = modelsAll.models.find((m) => m.id_model === controller.id_model); // Ищем модель для получения изображения
+        if (model) {
+          devicesUserNewArr.push({
+            id_controller: controller.id_controller,
+            id_model: controller.id_model,
+            name_model: controller.name, // Имя из userModels
+            img: model.img, // Изображение из modelsAll
+            isEnabled: param.data.data[0].enabled, // Используем данные состояния устройства
+          });
+        }
+      }
+    });
+  }
 
   const onClickDevices = (item) => {
-    // Find if the clicked device exists in userModels
-    const correspondingModel = userModels.find((model) => model.id_model === item.id_model);
-    const idController = correspondingModel ? correspondingModel.id_controller : null;
-
-    // Check if the device is available in userModels
-    const isAvailable = idController !== null;
-
-    // Check if the device is enabled
-    const isEnabled = paramsModelMap[item.id_model] === true;
-    // console.log('Device Clicked:', item.id_model, 'Is Available:', isAvailable, 'Is Enabled:', isEnabled);
-
     if (!userId) {
       navigation.navigate('Start');
-    } else if (isEnabled) {
-      // Device in userModels and enabled - navigate to HomePlay screen
-      navigation.navigate('HomeStack', {
-        screen: 'HomePlay',
-        params: { clickedControllerId: String(idController) },
-      });
-    } else {
-      // Device in userModels but disabled - navigate to Home screen
+    }
+    if (item.isEnabled === '0') {
       navigation.navigate('HomeStack', {
         screen: 'Home',
-        params: { clickedControllerId: String(idController) },
+        params: { clickedControllerId: String(item.id_controller) },
+      });
+    }
+    if (item.isEnabled === '1') {
+      navigation.navigate('HomeStack', {
+        screen: 'HomePlay',
+        params: { clickedControllerId: String(item.id_controller), name: item.name_model },
       });
     }
   };
 
-  const onClickDevicesMinus = async (values, actions) => {
-    // const bindData = {
-    //   userid: values.userid,
-    //   controllerid: values.controllerid,
-    //   customName: values.customName,
-    //   binding: values.binding,
-    //   id: values.id,
-    //   key: values.key,
-    //   id_model: values.id_model,
-    // };
-
-    // try {
-    //   await bind(bindData);
-    //   actions.resetForm();
-    // } catch (error) {
-    //   console.error('Ошибка привязки:', error);
-    // }
-    console.log('hjgkjglhljh');
+  const onClickEdit = async (item) => {
+    setSelectedDevice(item)
+    setModalVisible(true);
   }
 
-  const renderItem = ({ item }) => {
-    const isEnabled = paramsModelMap[item.id_model];
-
-    return (
+  const renderItem = ({ item }) => (
+    <View style={{ alignItems: 'center', width: '46%' }}>
       <TouchableOpacity
         style={styles.containerCardDevices}
         onPress={() => onClickDevices(item)}
       >
-        <View style={{ flex: 1 }}>
-          <View>
+
+        <TouchableOpacity
+          onPress={() => onClickEdit(item)}
+          style={{
+            flexDirection: 'row', justifyContent: 'flex-end', width: '100%', height: 15,
+          }}
+        >
+          <EditComponent style={{
+            flexDirection: 'row', justifyContent: 'flex-end', width: 20, height: 15,
+          }}
+          />
+        </TouchableOpacity>
+
+        <View style={{ flex: 1, width: '100%' }}>
+          <View style={{ flex: 1, width: '100%' }}>
             {(item.img !== '')
-              ? <Image source={images[item.img]} style={styles.deviceImage} resizeMode="contain" />
+              ? <Image source={{ uri: item.img }} style={styles.deviceImage} resizeMode="contain" />
+
               : (
                 <View style={styles.deviceNotImageBox}>
                   <Image source={NotImgUnits} style={styles.deviceNotImage} resizeMode="contain" />
                 </View>
               )}
-            <Text style={styles.textNameCard}>{item.name}</Text>
-            <Text style={styles.textNameCard}>{item.id_model}</Text>
-            <View style={{ flex: 1 }} />
+            <Text style={styles.textNameCard}>
+              {' '}
+              {item.name_model.replace(/-/g, '\u00A0-\u00A0')}
+            </Text>
+
+            <View />
           </View>
         </View>
-        {isEnabled && <Text style={styles.textOn}>Включено</Text>}
-        {!isEnabled && (<Text style={styles.textOff}>Выключено</Text>)}
+        {item.isEnabled === '1' ? <Text style={styles.textOn}>Включено</Text>
+          : <Text style={styles.textOff}>Выключено</Text>}
       </TouchableOpacity>
-    );
-  };
+    </View>
+  );
+
   return (
     <>
-      {userDevicesError
-          && (
-          <ModalError
-            errorText={errorText}
-            visible={!!userDevicesError}
-            onDismiss={() => setUserDevicesError(null)}
-            navigation={navigation}
-            screenName="Start"
-          />
-          )}
+
+      {modalVisible && (
+        <EditModal
+          modalVisible={modalVisible}
+          setModalVisible={setModalVisible}
+          selectedDevice={selectedDevice}
+          bind={bind}
+          userId={userId}
+        />
+      )}
 
       <View style={styles.deviceBoxHoryzontal}>
         <Text style={styles.headerText}>Выберите устройство</Text>
-        <TouchableOpacity style={styles.iconPlusBg} onPress={onClickDevicesMinus}>
-          <MinusSmallIcon />
-        </TouchableOpacity>
       </View>
 
-      <Text style={styles.textLightGrey}>
-        {userModels?.length || 0}
-        {' '}
-        {getDeviceWordForm(userModels?.length || 0)}
-      </Text>
-      <>
-        <View style={styles.flatListContainer}>
-          <FlatList
-            data={userDevices}
-            keyExtractor={(item) => item.id_model.toString()}
-            renderItem={renderItem}
-            showsVerticalScrollIndicator={false}
-            estimatedItemSize={33}
-            numColumns={2}
-          />
-        </View>
+      {userModels && userModels.length === 0 ? (
+        <Text style={styles.textOff}>У вас нет привязанных устройств</Text>
+      ) : (
+        <>
+          <Text style={styles.textLightGrey}>
+            {userModels?.length || 0}
+            {' '}
+            {getDeviceWordForm(userModels?.length || 0)}
+          </Text>
+          <View style={styles.flatListContainer}>
+            <FlatList
+              data={devicesUserNewArr}
+              keyExtractor={(item) => item.id_model.toString()}
+              renderItem={renderItem}
+              showsVerticalScrollIndicator={false}
+              estimatedItemSize={33}
+              numColumns={2}
+            />
+          </View>
+        </>
+      )}
+      <View style={{ marginTop: 'auto' }}>
         <CustomButton text="Добавить устройство" style={{ width: '100%' }} onPress={onClickAddDevices} />
-      </>
+      </View>
     </>
   );
 }

@@ -3,9 +3,7 @@ import {
   View, Text, Modal, TouchableOpacity, StyleSheet, Dimensions,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
-
-// import SaveIcon from '../img/icons/save.svg';
-// import GoodIcon from '../img/icons/good.svg';
+import { responsiveFontSize } from 'react-native-responsive-dimensions';
 
 const screenHeight = Dimensions.get('window').height;
 
@@ -38,9 +36,7 @@ const styles = StyleSheet.create({
 
     fontStyle: 'normal',
     fontWeight: '600',
-    fontSize: 20,
-    lineHeight: 28,
-    letterSpacing: 0.35,
+    fontSize: responsiveFontSize(2.8),
     color: '#212121',
     marginBottom: 30,
     textAlign: 'center',
@@ -69,7 +65,7 @@ const styles = StyleSheet.create({
   },
   text: {
     color: 'white',
-    fontSize: 16,
+    fontSize: responsiveFontSize(2.1),
     fontWeight: 'bold',
   },
 });

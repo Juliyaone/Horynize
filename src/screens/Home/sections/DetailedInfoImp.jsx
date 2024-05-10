@@ -1,6 +1,11 @@
-import React from 'react';
-import { View, Text, StyleSheet } from 'react-native';
+import React, { useState } from 'react';
+import {
+  View, Text, StyleSheet, Dimensions,
+} from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
+import { responsiveFontSize } from 'react-native-responsive-dimensions';
+
+const { width: screenWidth } = Dimensions.get('window'); // Получаем ширину экрана
 
 const styles = StyleSheet.create({
   boxHomeDetaile: {
@@ -9,6 +14,14 @@ const styles = StyleSheet.create({
     alignItems: 'flex-start',
     flexWrap: 'wrap',
     justifyContent: 'space-between',
+  },
+  gradientBox: {
+    borderRadius: 12,
+    paddingTop: 14,
+    paddingBottom: 4,
+    paddingLeft: 24,
+    paddingRight: 24,
+    marginBottom: 20,
   },
   boxHomeDetaileItem: {
     display: 'flex',
@@ -22,10 +35,8 @@ const styles = StyleSheet.create({
     fontFamily: 'SFProDisplay',
     fontStyle: 'normal',
     fontWeight: '400',
-    fontSize: 12,
-    lineHeight: 14,
+    fontSize: responsiveFontSize(1.6),
     textAlign: 'center',
-    letterSpacing: 0.374,
     color: '#FFFFFF',
     marginBottom: 5,
   },
@@ -34,15 +45,44 @@ const styles = StyleSheet.create({
     fontStyle: 'normal',
     fontWeight: '600',
     fontSize: 32,
-    lineHeight: 38,
     textAlign: 'center',
-    letterSpacing: 0.374,
     color: '#FFFFFF',
   },
 });
 
 function DetailedInfoImp({ currentContoller }) {
   const { data } = currentContoller;
+  const [layoutWidth, setLayoutWidth] = useState(screenWidth); // Исходная ширина устанавливается равной ширине экрана
+
+  // Обработчик, который запускается, когда размеры блока становятся известны
+  const onLayout = (event) => {
+    const { width } = event.nativeEvent.layout;
+    setLayoutWidth(width); // Обновляем состояние с новой шириной блока
+  };
+
+  // Вычисляем размер шрифта как процент от ширины блока
+  const fontSize = layoutWidth * 0.09; // Например, 5% от ширины блока
+  const fontSizeBig = layoutWidth * 0.04; // Например, 5% от ширины блока
+
+  // Создаем динамический стиль для текста
+  const dynamicTextStyles = StyleSheet.create({
+    textBig: {
+      fontSize: fontSizeBig,
+      fontFamily: 'SFProDisplay',
+      fontStyle: 'normal',
+      fontWeight: '600',
+      textAlign: 'center',
+      color: '#FFFFFF',
+    },
+    text: {
+      fontSize, // Используем вычисленный размер шрифта
+      fontFamily: 'SFProDisplay',
+      fontStyle: 'normal',
+      fontWeight: '600',
+      textAlign: 'center',
+      color: '#FFFFFF',
+    },
+  });
 
   if (!data || !data.length || !data[0]) {
     return null;
@@ -71,8 +111,12 @@ function DetailedInfoImp({ currentContoller }) {
 
       return (
         <View style={styles.boxHomeDetaileItem} key={key}>
-          <Text style={styles.boxHomeDetaileItemName}>{text}</Text>
-          <Text style={styles.boxHomeDetaileItemText}>{unit}</Text>
+          {/* <Text style={styles.boxHomeDetaileItemName}>{text}</Text> */}
+          <Text style={dynamicTextStyles.textBig}>{text}</Text>
+
+          {/* <Text style={styles.boxHomeDetaileItemText}>{unit}</Text> */}
+          <Text style={dynamicTextStyles.text}>{unit}</Text>
+
         </View>
       );
     });
@@ -80,14 +124,8 @@ function DetailedInfoImp({ currentContoller }) {
   return (
     <LinearGradient
       colors={['#FEB84A', '#FF5204']}
-      style={{
-        borderRadius: 12,
-        paddingTop: 14,
-        paddingBottom: 4,
-        paddingLeft: 24,
-        paddingRight: 24,
-        marginBottom: 20,
-      }}
+      style={styles.gradientBox}
+      onLayout={onLayout} // Присваиваем обработчик события onLayout
     >
       <View style={styles.boxHomeDetaile}>{result}</View>
     </LinearGradient>

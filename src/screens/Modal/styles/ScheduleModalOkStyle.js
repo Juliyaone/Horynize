@@ -1,4 +1,5 @@
 import { StyleSheet } from 'react-native';
+import { responsiveFontSize } from 'react-native-responsive-dimensions';
 
 export const styles = StyleSheet.create({
   centeredView: {
@@ -39,9 +40,7 @@ export const styles = StyleSheet.create({
     fontFamily: 'SFProDisplay',
     fontStyle: 'normal',
     fontWeight: '600',
-    fontSize: 20,
-    lineHeight: 28,
-    letterSpacing: 0.35,
+    fontSize: responsiveFontSize(2.8),
     color: '#212121',
     marginBottom: 24,
   },
@@ -67,8 +66,6 @@ export const styles = StyleSheet.create({
     fontStyle: 'normal',
     fontWeight: '400',
     fontSize: 17,
-    lineHeight: 20,
-    letterSpacing: 0.374,
     color: '#212121',
   },
   boxBtnLabelSchedule: {
@@ -81,9 +78,7 @@ export const styles = StyleSheet.create({
     fontFamily: 'SFProDisplay',
     fontStyle: 'normal',
     fontWeight: '400',
-    fontSize: 14,
-    lineHeight: 17,
-    letterSpacing: 0.374,
+    fontSize: responsiveFontSize(1.8),
     color: '#787880',
     marginBottom: 7,
   },
@@ -97,9 +92,7 @@ export const styles = StyleSheet.create({
     fontFamily: 'SFProDisplay',
     fontStyle: 'normal',
     fontWeight: '400',
-    fontSize: 14,
-    lineHeight: 17,
-    letterSpacing: 0.374,
+    fontSize: responsiveFontSize(1.8),
     color: '#787880',
     marginBottom: 25,
   },
@@ -108,9 +101,7 @@ export const styles = StyleSheet.create({
     fontStyle: 'normal',
     textTransform: 'uppercase',
     fontWeight: '400',
-    fontSize: 14,
-    lineHeight: 17,
-    letterSpacing: 0.374,
+    fontSize: responsiveFontSize(1.8),
     color: '#787880',
   },
   boxAutoRun: {
@@ -124,9 +115,7 @@ export const styles = StyleSheet.create({
     fontFamily: 'SFProDisplay',
     fontStyle: 'normal',
     fontWeight: '400',
-    fontSize: 14,
-    lineHeight: 17,
-    letterSpacing: 0.374,
+    fontSize: responsiveFontSize(1.8),
     color: '#787880',
   },
   button: {
@@ -150,7 +139,7 @@ export const styles = StyleSheet.create({
   },
   text: {
     color: 'white',
-    fontSize: 16,
+    fontSize: responsiveFontSize(2.1),
     fontWeight: 'bold',
   },
 });

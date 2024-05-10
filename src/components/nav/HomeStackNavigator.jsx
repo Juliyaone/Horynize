@@ -12,7 +12,7 @@ function HomeStackNavigator() {
     <HomeStack.Navigator screenOptions={{ headerShown: false }}>
       <HomeStack.Screen name="Home" component={HomeScreen} />
       <HomeStack.Screen name="HomePlay" component={HomePlayScreen} />
-      <HomeStack.Screen name="HomeSchedule" component={HomeScheduleScreen} />
+      {/* <HomeStack.Screen name="HomeSchedule" component={HomeScheduleScreen} /> */}
     </HomeStack.Navigator>
   );
 }

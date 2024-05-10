@@ -1,11 +1,16 @@
-import React from 'react';
+import React, { useState } from 'react';
 import {
-  View, StyleSheet, ScrollView, Text,
+  View, StyleSheet, Text, ScrollView,
 } from 'react-native';
+import { responsiveFontSize } from 'react-native-responsive-dimensions';
+
+
 import ChangePasswordForm from '../../components/ChangePasswordForm';
 import ChangeEmailForm from '../../components/ChangeEmailForm'
 import GoBackComponent from '../../components/GoBack';
 import DeleteUser from '../../components/DeleteUser';
+import ModalError from '../../components/ModalError';
+import ModalSuccess from '../../components/ModalSuccess';
 
 const styles = StyleSheet.create({
   container: {
@@ -16,9 +21,7 @@ const styles = StyleSheet.create({
     fontFamily: 'SFProDisplay',
     fontStyle: 'normal',
     fontWeight: '600',
-    fontSize: 20,
-    lineHeight: 28,
-    letterSpacing: 0.35,
+    fontSize: responsiveFontSize(2.8),
     color: '#212121',
     marginBottom: 30,
   },
@@ -27,25 +30,55 @@ const styles = StyleSheet.create({
     fontFamily: 'SFProDisplayBold',
     fontStyle: 'normal',
     fontWeight: '700',
-    fontSize: 18,
-    lineHeight: 24,
+    fontSize: responsiveFontSize(2.5),
     alignItems: 'center',
     textAlign: 'center',
-    letterSpacing: 0.38,
     color: '#222222',
     marginBottom: 25,
   },
 });
 
 function ChangeUserDataScreen({ navigation }) {
+  const [errorText, setErrorText] = useState('');
+  const [chagePasswordError, setChagePasswordError] = useState(false);
+  const [chagePasswordSuccessfully, setChagePasswordSuccessfully] = useState(false);
+
   return (
     <ScrollView>
+      <GoBackComponent navigation={navigation} />
+
       <View style={styles.container}>
-        <GoBackComponent navigation={navigation} />
+
         <Text style={styles.headerTextSettings}>Личные данные</Text>
-        <ChangePasswordForm />
-        <ChangeEmailForm />
-        <DeleteUser />
+
+        {chagePasswordError
+          && (
+            <ModalError
+              errorText={errorText}
+              visible={!!chagePasswordError}
+              onDismiss={() => setChagePasswordError(null)}
+            />
+          )}
+
+        {chagePasswordSuccessfully
+          && (
+            <ModalError
+              errorText="Данные изменены"
+              visible={!!chagePasswordSuccessfully}
+              onDismiss={() => setChagePasswordSuccessfully(null)}
+            />
+          )}
+        <ChangePasswordForm
+          setChagePasswordSuccessfully={setChagePasswordSuccessfully}
+          setChagePasswordError={setChagePasswordError}
+          setErrorText={setErrorText}
+        />
+        <ChangeEmailForm
+          setChagePasswordSuccessfully={setChagePasswordSuccessfully}
+          setChagePasswordError={setChagePasswordError}
+          setErrorText={setErrorText}
+        />
+        <DeleteUser navigation={navigation} />
       </View>
     </ScrollView>
   );

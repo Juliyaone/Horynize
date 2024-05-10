@@ -5,6 +5,8 @@ import {
 
 import { useDeleteUserMutation } from '../redux/usersApi';
 import Loader from './Loader';
+import { responsiveFontSize } from 'react-native-responsive-dimensions';
+
 import { AuthContext } from './providers/AuthContext';
 
 const styles = StyleSheet.create({
@@ -16,9 +18,9 @@ const styles = StyleSheet.create({
     fontFamily: 'SFProDisplay',
     fontStyle: 'normal',
     fontWeight: '600',
-    fontSize: 16,
-    lineHeight: 18,
-    letterSpacing: 0.374,
+    fontSize: responsiveFontSize(2.1),
+
+
     color: '#787880',
     marginBottom: 20,
     textAlign: 'center',
@@ -66,8 +68,8 @@ const styles = StyleSheet.create({
   },
 });
 
-function DeleteUser() {
-  const { userId } = useContext(AuthContext);
+function DeleteUser({ navigation }) {
+  const { userId, signOut } = useContext(AuthContext);
   const [modalVisible, setModalVisible] = useState(false);
 
   const [deleteUser, { isLoading: isLoaderDeleteUser }] = useDeleteUserMutation();
@@ -81,6 +83,9 @@ function DeleteUser() {
       user_id: userId,
     };
     deleteUser(userData);
+    signOut();
+    navigation.navigate('Start');
+
     setModalVisible(false);
   };
 

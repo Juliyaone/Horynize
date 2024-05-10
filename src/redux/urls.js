@@ -1,11 +1,4 @@
-// const SERVER_URL = 'http://192.168.0.100' //Виктор
-const SERVER_URL = 'https://horynize.cygenic.tech';
-// const SERVER_URL = 'http://localhost:3000';
-// const SERVER_URL = 'https://horynize.eurodir.ru';
-
-// const SERVER_URL = 'http://95.142.39.79' //ip сервера
-
-// https://horynize.eurodir.ru/api/vent-units/setparams
+const SERVER_URL = 'https://smart.horynize.ru';
 
 export const BASE_URL = `${SERVER_URL}/api`;
 
@@ -13,8 +6,7 @@ export const REGISTRATION = `${BASE_URL}/users/reguser`;
 export const LOGIN = `${BASE_URL}/users/auth`;
 export const CHANGE_PASSWORD = `${BASE_URL}/users/edituser`;
 export const DELETE_USER = `${BASE_URL}/users/deleteuser`;
-
-// /api/users/edituser
+export const REFRESH_TOKEN = `${BASE_URL}/users/check_refresh_token.php`;
 
 const UNITS = '/vent-units';
 
@@ -43,10 +35,9 @@ export const UNITS_SET_DAY_TIMERS = `${BASE_URL}${UNITS}/setdaystimers`;
 // Установка таймеров для дня  (4 таймера на день)
 export const UNITS_SET_TIMERS = `${BASE_URL}${UNITS}/settimers`;
 
+export const GET_USER_TOKENS = `${BASE_URL}${UNITS}/getusertokens`;
+
 const INFO = '/info';
 
 export const GET_CONTACTS = `${BASE_URL}${INFO}/contacts`;
 export const GET_UNITS = `${BASE_URL}${INFO}/models`;
-
-// Авторизация для Алисы
-export const URL_API_ENDPOINT = `${SERVER_URL}/oauth/login.php`;

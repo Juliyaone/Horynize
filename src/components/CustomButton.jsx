@@ -2,6 +2,8 @@ import React from 'react';
 import {
   TouchableOpacity, StyleSheet, Text, View,
 } from 'react-native';
+import { responsiveFontSize } from 'react-native-responsive-dimensions';
+
 import { LinearGradient } from 'expo-linear-gradient';
 
 const styles = StyleSheet.create({
@@ -25,7 +27,7 @@ const styles = StyleSheet.create({
   },
   text: {
     color: 'white',
-    fontSize: 16,
+    fontSize: responsiveFontSize(2.1),
     fontWeight: 'bold',
   },
 });

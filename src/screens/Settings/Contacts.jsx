@@ -26,7 +26,7 @@ export function Contacts() {
         <Text style={styles.cardUserText}>{contacts?.phone ?? ''}</Text>
       </View>
       <View style={styles.cardUserDataBox}>
-        <Text style={styles.cardUserText}>Адрес эл. почты</Text>
+        <Text style={styles.cardUserText}>Почта</Text>
         <Text style={styles.cardUserText}>{contacts?.email ?? ''}</Text>
       </View>
       <View style={styles.cardUserBtnBox}>

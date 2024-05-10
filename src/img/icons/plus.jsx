@@ -9,7 +9,7 @@ const PlusIcon = (props) => (
         strokeWidth: 12,
         strokeLinecap: "butt",
         strokeLinejoin: "miter",
-        stroke: "#fff",
+        stroke: "#ED7635",
         strokeOpacity: 1,
         strokeMiterlimit: 10,
       }}

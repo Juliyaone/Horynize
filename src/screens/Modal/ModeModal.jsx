@@ -2,6 +2,8 @@ import React, { useRef, useState, useCallback } from 'react';
 import {
   StyleSheet, View, Text, Modal, TouchableOpacity, PanResponder, Image,
 } from 'react-native';
+import { responsiveFontSize, responsiveWidth, responsiveHeight } from 'react-native-responsive-dimensions';
+
 
 import { LinearGradient } from 'expo-linear-gradient';
 
@@ -55,9 +57,7 @@ const styles = StyleSheet.create({
     fontFamily: 'SFProDisplay',
     fontStyle: 'normal',
     fontWeight: '600',
-    fontSize: 20,
-    lineHeight: 28,
-    letterSpacing: 0.35,
+    fontSize: responsiveFontSize(2.8),
     color: '#212121',
     marginBottom: 15,
   },
@@ -82,7 +82,7 @@ const styles = StyleSheet.create({
   },
   text: {
     color: 'white',
-    fontSize: 16,
+    fontSize: responsiveFontSize(2.1),
     fontWeight: 'bold',
   },
   boxDays: {
@@ -109,8 +109,8 @@ const styles = StyleSheet.create({
     marginBottom: 23,
   },
   boxAutoModeItem: {
-    width: 90,
-    height: 90,
+    width: responsiveWidth(23), // Задает ширину как 20% от ширины экрана
+    height: responsiveHeight(12), // Задает высоту как 10% от высоты экрана
     alignItems: 'center',
     justifyContent: 'center',
     backgroundColor: '#FFFFFF',
@@ -127,15 +127,17 @@ const styles = StyleSheet.create({
   },
   boxAutoModeItemActive: {
     borderColor: '#ED7635',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0,
+    shadowRadius: 0,
   },
   boxAutoModeText: {
     fontFamily: 'SFProDisplay',
     fontStyle: 'normal',
     fontWeight: '600',
-    fontSize: 10,
-    lineHeight: 12,
+    fontSize: responsiveFontSize(1.5),
     textAlign: 'center',
-    letterSpacing: 0.374,
     color: '#787880',
   },
   boxAutoModeTextActive: {
@@ -165,18 +167,14 @@ const styles = StyleSheet.create({
     fontFamily: 'SFProDisplay',
     fontStyle: 'normal',
     fontWeight: '400',
-    fontSize: 16,
-    lineHeight: 19,
-    letterSpacing: 0.374,
+    fontSize: responsiveFontSize(2.1),
     color: '#787880',
   },
   sliderText: {
     fontFamily: 'SFProDisplay',
     fontStyle: 'normal',
     fontWeight: '400',
-    fontSize: 16,
-    lineHeight: 19,
-    letterSpacing: 0.374,
+    fontSize: responsiveFontSize(2.1),
     color: '#787880',
   },
 });
@@ -211,19 +209,42 @@ const iconSelector = (imageKeyIcon, active) => {
   }
 };
 
-const arr = [
-  { id: 1, name: 'Вентиляция', imageKeyIcon: 'Vent' },
-  { id: 2, name: 'Hагрев', imageKeyIcon: 'Temp' },
-  { id: 3, name: 'Oхлаждение', imageKeyIcon: 'Cooling' },
-  { id: 4, name: 'Климат-контроль', imageKeyIcon: 'Auto' },
-];
+// Функция для получения массива доступных режимов в зависимости от avalibleMode
+function getAvailableModes(avalibleMode) {
+  const modes = [];
+  if (avalibleMode === 3) {
+    // Вентиляция, нагрев, охлаждение, климат-контроль
+    modes.push(
+      { id: 1, name: 'Вентиляция', imageKeyIcon: 'Vent' },
+      { id: 2, name: 'Hагрев', imageKeyIcon: 'Temp' },
+      { id: 3, name: 'Oхлаждение', imageKeyIcon: 'Cooling' },
+      { id: 4, name: 'Климат-контроль', imageKeyIcon: 'Auto' },
+    );
+  } else if (avalibleMode === 2) {
+    // Вентиляция, нагрев
+    modes.push(
+      { id: 1, name: 'Вентиляция', imageKeyIcon: 'Vent' },
+      { id: 2, name: 'Hагрев', imageKeyIcon: 'Temp' },
+    );
+  } else if (avalibleMode === 1) {
+    // Вентиляция, охлаждение
+    modes.push(
+      { id: 1, name: 'Вентиляция', imageKeyIcon: 'Vent' },
+      { id: 3, name: 'Oхлаждение', imageKeyIcon: 'Cooling' },
+    );
+  }
+  return modes;
+}
 
 const keyForRender = ['Temp', 'Vent', 'Cooling', 'Auto'];
 
 function ModeModal({
-  modalVisible, setModalVisible, sendParamsData, unitId, resMode, changeParams, scrollToIndex,
+  modalVisible, setModalVisible, sendParamsData, unitId, resMode, avalibleMode, changeParams, scrollToIndex,
 }) {
   const [activeItem, setActiveItem] = useState(Number(resMode));
+
+  const modesData = getAvailableModes(avalibleMode);
+
   const panResponder = useRef(
     PanResponder.create({
       onStartShouldSetPanResponder: () => true,
@@ -245,19 +266,19 @@ function ModeModal({
 
   const onPress = useCallback(() => {
     if (activeItem) {
-      changeParams({
-        res: String(activeItem),
-      })
       sendParamsData({
         controllerId: String(unitId),
         res: String(activeItem),
       });
-      scrollToIndex(0) // прокрутка к режиму
+      changeParams({
+        res: String(activeItem),
+      })
     }
+    scrollToIndex(0) // прокрутка к режиму
     setModalVisible(false);
   }, [activeItem, changeParams, scrollToIndex, sendParamsData, setModalVisible, unitId]);
 
-  if (resMode === undefined) {
+  if (resMode === undefined || avalibleMode === undefined) {
     return null;
   }
 
@@ -274,7 +295,7 @@ function ModeModal({
         <View style={styles.modalView} {...panResponder.panHandlers}>
           <Text style={styles.modalText}>Автоматический режим</Text>
           <View style={styles.boxAutoMode}>
-            {arr.map((item) => {
+            {modesData.map((item) => {
               const iconOrText = iconSelector(item.imageKeyIcon, activeItem === item.id);
               if (!keyForRender.includes(item.imageKeyIcon)) {
                 return null;
@@ -289,7 +310,7 @@ function ModeModal({
                   onPress={() => handlePress(item.id)}
                 >
                   {typeof iconOrText === 'string' ? (
-                    <Text style={{ fontSize: 20, color: activeItem === item.id ? '#ED7635' : '#787880' }}>
+                    <Text style={{ fontSize: responsiveFontSize(2.8), color: activeItem === item.id ? '#ED7635' : '#787880' }}>
                       {iconOrText}
                     </Text>
                   ) : (

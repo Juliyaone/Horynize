@@ -2,6 +2,8 @@ import {
   StyleSheet, View, Text, TouchableOpacity,
 } from 'react-native'
 import React from 'react'
+import { responsiveFontSize } from 'react-native-responsive-dimensions';
+
 import CustomButton from '../../components/CustomButton';
 
 const styles = StyleSheet.create({
@@ -11,12 +13,9 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   textNotReg: {
-
     fontStyle: 'normal',
     fontWeight: '400',
-    fontSize: 16,
-    lineHeight: 28,
-    letterSpacing: 0.35,
+    fontSize: responsiveFontSize(2.1),
     textAlign: 'center',
     color: '#212121',
     marginTop: 30,
@@ -33,7 +32,7 @@ export default function StartScreen({ navigation }) {
   };
 
   const handleClick3 = () => {
-    navigation.navigate('MainApp');
+    navigation.navigate('MainAppNotRegister');
   };
 
   return (

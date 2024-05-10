@@ -4,12 +4,15 @@ import {
 } from 'react-native';
 import { Formik } from 'formik';
 import * as yup from 'yup';
+import { responsiveFontSize } from 'react-native-responsive-dimensions';
+
 import ArrowLeft from '../../img/icons/ArrowLeft';
 import { useBindMutation } from '../../redux/usersApi';
 import { AuthContext } from '../../components/providers/AuthContext'
 import ApplyIcon from '../../img/icons/apply';
 import ModalError from '../../components/ModalError';
 import Loader from '../../components/Loader';
+import GalleryModal from '../Modal/GalleryModal';
 
 import CustomButton from '../../components/CustomButton';
 
@@ -27,9 +30,7 @@ const styles = StyleSheet.create({
     fontFamily: 'SFProDisplay',
     fontStyle: 'normal',
     fontWeight: '600',
-    fontSize: 20,
-    lineHeight: 28,
-    letterSpacing: 0.35,
+    fontSize: responsiveFontSize(2.8),
     color: '#212121',
     marginBottom: 30,
   },
@@ -50,7 +51,7 @@ const styles = StyleSheet.create({
     borderRadius: 16,
     padding: 15,
     color: '#212121',
-    fontSize: 16,
+    fontSize: responsiveFontSize(2.1),
   },
   inputIcon: {
     width: 15,
@@ -72,17 +73,31 @@ const styles = StyleSheet.create({
     marginBottom: 'auto',
     marginTop: 50,
   },
+  textInstruction: {
+    fontFamily: 'SFProDisplay',
+    fontStyle: 'normal',
+    fontWeight: '600',
+    fontSize: responsiveFontSize(2.1),
+    color: '#787880',
+    marginBottom: 20,
+    textAlign: 'center',
+  },
 });
 
 export default function DevicesAddScreen({ navigation, route }) {
-  const customNameRoute = route?.params?.customName;
-  const clickedControllerId = route?.params?.clickedControllerId;
+  const nameRoute = route?.params?.customName;
+
+  console.log('nameRoute', nameRoute);
+  const clickedControllerId = route?.params?.clickedIdModel;
+
   const [isModalVisible, setIsModalVisible] = useState(false);
+  const [isGalleryModalVisible, setGalleryModalVisible] = useState(false);
 
-  console.log('customName', customNameRoute);
-  console.log('clickedControllerId', clickedControllerId);
+  const [errorText, setErrorText] = useState('');
+  const [authorizationError, setAuthorizationError] = useState(false);
 
-  const { userId } = useContext(AuthContext);
+
+  const { userId, bindController } = useContext(AuthContext);
 
   const [bind, { isLoading: isLoadingBind }] = useBindMutation();
 
@@ -91,32 +106,46 @@ export default function DevicesAddScreen({ navigation, route }) {
     return <Loader />
   }
 
-    const handleSubmit = async (values, actions) => {
-      const bindData = {
-        userid: values.userid,
-        controllerid: values.controllerid,
-        customName: values.customName,
-        binding: values.binding,
-        id: values.id,
-        key: values.key,
-        id_model: values.id_model,
-      };
-      try {
-        await bind(bindData);
-        actions.resetForm();
-      } catch (error) {
-        console.error('Ошибка привязки:', error);
-        setIsModalVisible(true); // Показываем модальное окно
+  const handleSubmit = async (values, actions) => {
+    const bindData = {
+      userid: values.userid,
+      customName: values.customName,
+      binding: values.binding,
+      id: values.id,
+      key: values.key,
+      id_model: values.id_model,
+    };
+
+    try {
+      const bindDataAwait = await bind(bindData);
+
+      if (bindDataAwait.data && bindDataAwait.data.controllerID) {
+        await bindController(bindDataAwait.data);
+      } else {
+        console.error('Controller ID is missing in the response');
       }
+
+      navigation.navigate('DevicesStack', {
+        screen: 'DevicesUser',
+      });
+    } catch (error) {
+      console.error('Ошибка добавления установки:', error);
+      setErrorText(error?.data?.message);
+      setAuthorizationError(true)
     }
+  }
 
   return (
     <ScrollView>
-      <ModalError
-        errorText="Произошла ошибка при привязке"
-        visible={isModalVisible}
-        onDismiss={() => setIsModalVisible(false)}
-      />
+      {authorizationError
+        && (
+          <ModalError
+            errorText={errorText}
+            visible={!!authorizationError}
+            onDismiss={() => setAuthorizationError(null)}
+          />
+        )}
+
       <View style={styles.container}>
         <TouchableOpacity
           style={styles.btnBack}
@@ -131,8 +160,7 @@ export default function DevicesAddScreen({ navigation, route }) {
         <Formik
           initialValues={{
             userid: userId,
-            controllerid: clickedControllerId,
-            customName: customNameRoute,
+            customName: nameRoute,
             binding: '1', // 1 - привязка
             id: '',
             key: '',
@@ -145,10 +173,10 @@ export default function DevicesAddScreen({ navigation, route }) {
             <View style={styles.container}>
               {Object.keys(props.values).map((key) => (
                 (key !== 'userid'
-                && key !== 'controllerid'
-                && key !== 'customName'
-                && key !== 'binding'
-                && key !== 'id_model') && (
+                  && key !== 'controllerid'
+                  && key !== 'customName'
+                  && key !== 'binding'
+                  && key !== 'id_model') && (
                   <React.Fragment key={key}>
                     <View style={styles.inputContainer}>
                       <ApplyIcon style={styles.inputIcon} />
@@ -174,6 +202,12 @@ export default function DevicesAddScreen({ navigation, route }) {
             </View>
           )}
         </Formik>
+
+        <TouchableOpacity onPress={() => setGalleryModalVisible(true)}>
+          <Text style={styles.textInstruction}>Инструкция</Text>
+        </TouchableOpacity>
+
+        <GalleryModal isGalleryModalVisible={isGalleryModalVisible} setGalleryModalVisible={setGalleryModalVisible} />
       </View>
     </ScrollView>
   );

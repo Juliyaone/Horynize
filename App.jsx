@@ -16,6 +16,8 @@ import SignInScreen from './src/screens/SignIn/SignInScreen'
 import SignUpStack from './src/components/nav/SignUpStackNavigator';
 
 import TabNavigator from './src/components/nav/TabNavigator';
+import TabNotRegisterNavigator from './src/components/nav/notRegisterNavigator/TabNotRegisterNavigator';
+
 import Loader from './src/components/Loader';
 
 SplashScreen.preventAutoHideAsync();
@@ -28,11 +30,13 @@ function AppStack() {
     return <Loader />;
   }
   return (
-    <Stack.Navigator initialRouteName={userToken ? 'MainApp' : 'Start'}>
+    <Stack.Navigator initialRouteName={userToken !== null ? 'MainApp' : 'Start'}>
       <Stack.Screen name="Start" component={StartScreen} options={{ headerShown: false }} />
       <Stack.Screen name="SignIn" component={SignInScreen} options={{ headerShown: false }} />
       <Stack.Screen name="SignUp" component={SignUpStack} options={{ headerShown: false }} />
       <Stack.Screen name="MainApp" component={TabNavigator} options={{ headerShown: false }} />
+      <Stack.Screen name="MainAppNotRegister" component={TabNotRegisterNavigator} options={{ headerShown: false }} />
+
     </Stack.Navigator>
   );
 }

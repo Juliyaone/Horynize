@@ -8,6 +8,32 @@ export const saveTokenToStorage = async (token) => {
   }
 }
 
+export const getUserIdFromStorage = async () => {
+  try {
+    const userId = await AsyncStorage.getItem('userIdAsyncStorage');
+    return userId;
+  } catch (err) {
+    console.log(`текущий id юзера не получен ${err}`);
+    return null;
+  }
+};
+
+export const saveRefreshTokenToStorage = async (refreshToken) => {
+  if (refreshToken !== null) {
+    await AsyncStorage.setItem('userRefreshToken', refreshToken)
+  } else {
+    console.log('refreshToken не смогли записать в асинксторадж', refreshToken);
+  }
+}
+
+export const getRefreshTokenFromStorage = async () => {
+  const userRefreshToken = await AsyncStorage.getItem('userRefreshToken')
+  if (userRefreshToken !== null) {
+    return userRefreshToken;
+  }
+  console.log('нет userRefreshToken в асинксторадж', userRefreshToken);
+}
+
 // eslint-disable-next-line consistent-return
 export const getTokenFromStorage = async () => {
   const token = await AsyncStorage.getItem('userToken');
@@ -16,16 +42,6 @@ export const getTokenFromStorage = async () => {
   }
   console.log('нет токена в асинксторадж', token);
 }
-
-// TODO: delete
-export const isTokenExpired = (token) => {
-  try {
-    const decoded = JSON.parse(atob(token.split('.')[1]));
-    return decoded.exp < Date.now() / 1000;
-  } catch (err) {
-    return false;
-  }
-};
 
 export const deleteTokenFromStorage = async () => {
   await AsyncStorage.removeItem('userToken');

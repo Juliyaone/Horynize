@@ -1,42 +1,73 @@
-import React from 'react';
-import { StyleSheet, View } from 'react-native';
+import React, { useEffect, useContext } from 'react';
+import { StyleSheet, View, Dimensions } from 'react-native';
 import { RadialSlider } from 'react-native-radial-slider';
+import { AuthContext } from './providers/AuthContext';
+
+const window = Dimensions.get('window');
+
+const isTablet = () => {
+  const aspectRatio = window.height / window.width;
+  return window.width >= 768 && aspectRatio <= 1.6;
+};
 
 const styles = StyleSheet.create({
   containerRadialSlider: {
+    height: '90%',
     alignItems: 'center',
     justifyContent: 'center',
-    marginBottom: 0,
+    marginBottom: 20,
     paddingBottom: 0,
+    paddingTop: 50,
   },
 });
 
-function DefaultRadialSlider({
-  temperature, sendParamsData, changeParams, id, scrollToIndex,
-}) {
-  const sendParamsTemperature = async (newTemperature) => {
-    try {
-      if (id) {
-        const data = {
-          controllerId: String(id),
-          tempTarget: String(newTemperature),
-        }
-
-        await sendParamsData(data);
-      }
-    } catch (error) {
-      console.log('errornewTemperature', error);
-    }
+const getSliderStyle = () => {
+  if (isTablet()) {
+    // Стили для планшетов/iPad
+    return {
+      radius: 200,
+      thumbRadius: 25,
+      thumbBorderWidth: 10,
+      sliderWidth: 40,
+      sliderStyle: 20,
+      isHideButtons: true,
+      valueStyle: { fontSize: 100, color: '#FF5204' },
+      unitStyle: { fontSize: 40, color: '#FF5204', fontWeight: '700' },
+    };
   }
-
-  // const handleOnChange = () => {
-  // };
-
-  const handleOnComplete = (value) => {
-    sendParamsTemperature(value);
-    changeParams({ tempTarget: value });
-    scrollToIndex(3) // прокрутка к темепартуре
+  // Стили для телефонов
+  return {
+    radius: 85,
+    thumbRadius: 10,
+    thumbBorderWidth: 5,
+    sliderWidth: 20,
+    sliderStyle: 10,
+    isHideButtons: true,
+    valueStyle: { fontSize: 53, color: '#FF5204' },
+    unitStyle: { fontSize: 24, color: '#FF5204', fontWeight: '700' },
   };
+};
+
+function DefaultRadialSlider({
+  sendParamsData, changeParams, temperature, scrollToIndex, currentParams,
+}) {
+  const sliderStyle = getSliderStyle();
+
+  // const { unitId } = useContext(AuthContext);
+
+  const sendParamsTemperature = async (newTemperature) => {
+    // console.log('currentParams во время вызова:', currentParams['vent-unit'][0]['id_vent-unit']);
+    const unitControllerCurrentId = currentParams['vent-unit'][0]['id_vent-unit'];
+
+    const data = {
+      controllerId: String(unitControllerCurrentId),
+      tempTarget: String(newTemperature),
+    }
+
+    await sendParamsData(data);
+    changeParams({ tempTarget: newTemperature });
+    scrollToIndex(3) // прокрутка к темепартуре
+  }
 
   return (
     <View style={styles.containerRadialSlider}>
@@ -44,12 +75,10 @@ function DefaultRadialSlider({
         value={temperature}
         min={15}
         max={30}
-        // onChange={handleOnChange}
-        onComplete={(value) => handleOnComplete(value)}
+        onComplete={(value) => sendParamsTemperature(value)}
         thumbColor="#FF5204"
-        thumbBorderWidth={3}
-        thumbRadius={14}
-        valueStyle={{ fontSize: 53, color: '#FF5204' }}
+        thumbRadius={sliderStyle.thumbRadius}
+        valueStyle={sliderStyle.valueStyle}
         needleBackgroundColor="#e2e2e2"
         stroke="#FF5204"
         lineColor="#e2e2e2"
@@ -59,7 +88,12 @@ function DefaultRadialSlider({
         isHideTailText
         isHideTitle
         unit="°C"
-        unitStyle={{ fontSize: 24, color: '#FF5204', fontWeight: 700 }}
+        isHideButtons={sliderStyle.isHideButtons}
+        markerLineSize={sliderStyle.markerLineSize}
+        sliderWidth={sliderStyle.sliderWidth}
+        thumbBorderWidth={sliderStyle.thumbBorderWidth}
+        radius={sliderStyle.radius}
+        unitStyle={sliderStyle.unitStyle}
       />
     </View>
   );

@@ -3,8 +3,8 @@ import {
   View, Text, Modal, TouchableOpacity, StyleSheet, Dimensions,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
+import { responsiveFontSize } from 'react-native-responsive-dimensions';
 
-import ConnectionIcon from '../img/icons/connectionIcon';
 import GoodIcon from '../img/icons/goodIcon';
 
 const screenHeight = Dimensions.get('window').height;
@@ -38,9 +38,7 @@ const styles = StyleSheet.create({
     fontFamily: 'SFProDisplay',
     fontStyle: 'normal',
     fontWeight: '600',
-    fontSize: 20,
-    lineHeight: 28,
-    letterSpacing: 0.35,
+    fontSize: responsiveFontSize(2.8),
     color: '#212121',
     marginBottom: 30,
     textAlign: 'center',
@@ -69,7 +67,7 @@ const styles = StyleSheet.create({
   },
   text: {
     color: 'white',
-    fontSize: 16,
+    fontSize: responsiveFontSize(2.1),
     fontWeight: 'bold',
   },
 });
@@ -85,7 +83,7 @@ export default function ModalConnection({ connectionText, visible, onDismiss }) 
         <View style={styles.modalView}>
           <Text style={styles.modalText}>{connectionText}</Text>
           <View style={styles.iconConnection}>
-            <ConnectionIcon />
+            {/* <ConnectionIcon /> */}
           </View>
           <TouchableOpacity activeOpacity={0.8} style={styles.button} onPress={onDismiss}>
             <LinearGradient

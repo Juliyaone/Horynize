@@ -2,6 +2,8 @@ import React, { useRef, useState, useCallback } from 'react';
 import {
   StyleSheet, View, Text, Modal, TouchableOpacity, PanResponder,
 } from 'react-native';
+import { responsiveFontSize } from 'react-native-responsive-dimensions';
+
 import Slider from '@react-native-community/slider';
 
 import { LinearGradient } from 'expo-linear-gradient';
@@ -47,9 +49,7 @@ const styles = StyleSheet.create({
     fontFamily: 'SFProDisplay',
     fontStyle: 'normal',
     fontWeight: '600',
-    fontSize: 20,
-    lineHeight: 28,
-    letterSpacing: 0.35,
+    fontSize: responsiveFontSize(2.8),
     color: '#212121',
     marginBottom: 15,
   },
@@ -74,7 +74,7 @@ const styles = StyleSheet.create({
   },
   text: {
     color: 'white',
-    fontSize: 16,
+    fontSize: responsiveFontSize(2.1),
     fontWeight: 'bold',
   },
   boxDays: {
@@ -119,10 +119,8 @@ const styles = StyleSheet.create({
     fontFamily: 'SFProDisplay',
     fontStyle: 'normal',
     fontWeight: '600',
-    fontSize: 10,
-    lineHeight: 12,
+    fontSize: responsiveFontSize(1.5),
     textAlign: 'center',
-    letterSpacing: 0.374,
     color: '#787880',
   },
   boxAutoModeItemActive: {
@@ -156,18 +154,14 @@ const styles = StyleSheet.create({
     fontFamily: 'SFProDisplay',
     fontStyle: 'normal',
     fontWeight: '400',
-    fontSize: 16,
-    lineHeight: 19,
-    letterSpacing: 0.374,
+    fontSize: responsiveFontSize(2.1),
     color: '#787880',
   },
   sliderText: {
     fontFamily: 'SFProDisplay',
     fontStyle: 'normal',
     fontWeight: '400',
-    fontSize: 16,
-    lineHeight: 19,
-    letterSpacing: 0.374,
+    fontSize: responsiveFontSize(2.1),
     color: '#787880',
   },
 });
@@ -191,7 +185,7 @@ function HumidityModal({
     }
     scrollToIndex(5); // прокрутка к влажности
     setModalVisible(false);
-  }, [valueSliderHumidity, scrollToIndex, setModalVisible, changeParams]);
+  }, [valueSliderHumidity, scrollToIndex, setModalVisible, sendParamsData, unitId, changeParams]);
 
   const panResponder = useRef(
     PanResponder.create({

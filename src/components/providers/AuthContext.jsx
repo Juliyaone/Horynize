@@ -2,7 +2,6 @@ import React, {
   createContext, useState, useEffect, useMemo, useCallback,
 } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import * as SecureStore from 'expo-secure-store';
 
 export const AuthContext = createContext();
 
@@ -16,25 +15,27 @@ export function AuthProvider({ children }) {
 
   const [isInitialized, setIsInitialized] = useState(false);
 
-
   const [isLoading, setIsLoading] = useState(true);
 
   const signIn = useCallback(async (data) => {
     try {
-      const { token, controllerId, userId, controllers, email, userName } = data;
+      const {
+        token, controllerId, userIdData = [], controllers, email, userNameData, refreshToken,
+      } = data;
       await AsyncStorage.setItem('userToken', token);
+      await AsyncStorage.setItem('userRefreshToken', refreshToken);
       await AsyncStorage.setItem('idControllerAsyncStorage', controllerId);
-      await AsyncStorage.setItem('userIdAsyncStorage', userId);
+      await AsyncStorage.setItem('userIdAsyncStorage', userIdData);
       await AsyncStorage.setItem('controllersAsyncStorage', JSON.stringify(controllers));
       await AsyncStorage.setItem('emailAsyncStorage', email);
-      await AsyncStorage.setItem('userNameAsyncStorage', userName);
+      await AsyncStorage.setItem('userNameAsyncStorage', userNameData);
 
-      setUserName(userName);
+      setUserName(userNameData);
       setUserToken(token);
-      setUserId(userId);
+      setUserId(userIdData);
       setUnitId(controllerId);
       setAllControllers(controllers);
-      setUserEmail(userName);
+      setUserEmail(email);
     } catch (error) {
       console.log(`Не удалось сохранить токен в AsyncStorage: ${error}`);
     }
@@ -42,10 +43,9 @@ export function AuthProvider({ children }) {
 
   const getUserToken = async () => {
     try {
-      const userToken = await AsyncStorage.getItem('userToken');
-      setUserToken(userToken);
-      console.log('userToken', userToken);
-      return userToken;
+      const userTokenData = await AsyncStorage.getItem('userToken');
+      setUserToken(userTokenData);
+      return userTokenData;
     } catch (err) {
       console.log(`Токен не получен ${err}`);
     } finally {
@@ -105,9 +105,74 @@ export function AuthProvider({ children }) {
     } catch (err) {
       console.log(`логин пользльзователя не получен ${err}`);
     }
-  }, [userName]);
+  }, []);
+
+  const unlinkController = useCallback(async (controllerIdToRemove) => {
+    // Фильтрация списка контроллеров для исключения отвязанного
+
+    const updatedControllers = userControllers.filter((controller) => controller.id_controller != controllerIdToRemove);
+
+    // Обновление состояния и AsyncStorage
+    try {
+      await AsyncStorage.setItem('controllersAsyncStorage', JSON.stringify(updatedControllers));
+      setAllControllers(updatedControllers); // Обновляем состояние
+    } catch (err) {
+      console.log(`Ошибка при обновлении контроллеров: ${err}`);
+    }
+  }, [userControllers]);
+
+  const bindController = useCallback(async (controllerData) => {
+    try {
+      if (!controllerData) {
+        console.error('No data received for new controller');
+        return;
+      }
+
+      const newController = {
+        id_controller: controllerData.controllerID,
+        id_model: controllerData.id_model,
+        name: controllerData.name,
+      };
+
+      const updatedControllers = [...(userControllers || []), newController];
+      await AsyncStorage.setItem('controllersAsyncStorage', JSON.stringify(updatedControllers));
+
+      setAllControllers(updatedControllers); // Обновляем состояние с новым списком контроллеров
+    } catch (error) {
+      console.error(`Ошибка при привязке нового контроллера: ${error}`);
+    }
+  }, [userControllers]);
+
+  const bindControllerEditName = useCallback(async (controllerData) => {
+    try {
+      if (!controllerData) {
+        console.error('No data received for controller name update');
+        return;
+      }
+
+      // Find the index of the controller that needs to be updated
+      const controllerIndex = userControllers.findIndex((c) => c.id_controller === controllerData.controllerid);
+
+      if (controllerIndex === -1) {
+        console.error('Controller not found');
+        return;
+      }
+      const updatedControllers = [...userControllers];
+      updatedControllers[controllerIndex] = {
+        ...updatedControllers[controllerIndex],
+        name: controllerData.customName,
+      };
+
+      await AsyncStorage.setItem('controllersAsyncStorage', JSON.stringify(updatedControllers));
+      setAllControllers(updatedControllers);
+    } catch (error) {
+      console.error(`Error updating controller name: ${error}`);
+    }
+  }, [userControllers]);
 
   useEffect(() => {
+    console.log('userControllers', userControllers);
+
     const initializeAsync = async () => {
       await getUserToken();
       await getUserUnitId();
@@ -121,15 +186,6 @@ export function AuthProvider({ children }) {
     initializeAsync();
   }, [getUserName]);
 
-  const clearStoredCredentials = async () => {
-    try {
-      await SecureStore.deleteItemAsync('username');
-      await SecureStore.deleteItemAsync('password');
-    } catch (error) {
-      console.error('Could not clear credentials', error);
-    }
-  };
-
   const signOut = useCallback(async () => {
     try {
       await AsyncStorage.removeItem('userToken');
@@ -138,8 +194,6 @@ export function AuthProvider({ children }) {
       await AsyncStorage.removeItem('controllersAsyncStorage');
       await AsyncStorage.removeItem('emailAsyncStorage');
       await AsyncStorage.removeItem('userNameAsyncStorage');
-
-      await clearStoredCredentials();
 
       setUserId(null);
       setUnitId(null);
@@ -156,7 +210,10 @@ export function AuthProvider({ children }) {
   const value = useMemo(() => ({
     userToken,
     isLoading,
-    isInitialized, // Добавьте это
+    isInitialized,
+    unlinkController,
+    bindController,
+    bindControllerEditName,
     signIn,
     signOut,
     unitId,
@@ -165,7 +222,7 @@ export function AuthProvider({ children }) {
     userEmail,
     userName,
     setUserId,
-  }), [userToken, isLoading, isInitialized, signIn, signOut, unitId, userId, userControllers, userEmail, userName]);
+  }), [userToken, isLoading, isInitialized, signIn, signOut, unitId, userId, userControllers, userEmail, userName, unlinkController, bindController, bindControllerEditName]);
 
   return (
     <AuthContext.Provider value={value}>

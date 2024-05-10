@@ -1,11 +1,17 @@
 import React, { useRef } from 'react';
 import {
-  StyleSheet, View, Text, Modal, TouchableOpacity, PanResponder, Platform,
+  StyleSheet, View, Modal, PanResponder, Text, Dimensions,
 } from 'react-native';
+import { responsiveFontSize } from 'react-native-responsive-dimensions';
 
 import { RadialSlider } from 'react-native-radial-slider';
-// TODO
-import { LinearGradient } from 'expo-linear-gradient';
+
+const window = Dimensions.get('window');
+
+const isTablet = () => {
+  const aspectRatio = window.height / window.width;
+  return window.width >= 768 && aspectRatio <= 1.6;
+};
 
 const styles = StyleSheet.create({
   centeredView: {
@@ -41,9 +47,7 @@ const styles = StyleSheet.create({
     fontFamily: 'SFProDisplay',
     fontStyle: 'normal',
     fontWeight: '600',
-    fontSize: 20,
-    lineHeight: 28,
-    letterSpacing: 0.35,
+    fontSize: responsiveFontSize(2.8),
     color: '#212121',
     marginBottom: 10,
   },
@@ -68,67 +72,102 @@ const styles = StyleSheet.create({
   },
   text: {
     color: 'white',
-    fontSize: 16,
+    fontSize: responsiveFontSize(2.1),
     fontWeight: 'bold',
+  },
+  containerRadialSlider: {
+    height: '90%',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 20,
+    paddingBottom: 0,
+    paddingTop: 50,
   },
 });
 
+const getSliderStyle = () => {
+  if (isTablet()) {
+    // Стили для планшетов/iPad
+    return {
+      radius: 200,
+      thumbRadius: 25,
+      thumbBorderWidth: 10,
+      sliderWidth: 40,
+      sliderStyle: 20,
+      isHideButtons: true,
+      valueStyle: { fontSize: 100, color: '#FF5204' },
+      unitStyle: { fontSize: 40, color: '#FF5204', fontWeight: '700' },
+    };
+  }
+  // Стили для телефонов
+  return {
+    radius: 85,
+    thumbRadius: 10,
+    thumbBorderWidth: 5,
+    sliderWidth: 20,
+    sliderStyle: 10,
+    isHideButtons: true,
+    valueStyle: { fontSize: 53, color: '#FF5204' },
+    unitStyle: { fontSize: 24, color: '#FF5204', fontWeight: '700' },
+  };
+};
+
 function DefaultRadialSliderSchedul({
-  modalVisible, setModalVisible, setTemperatureSchedule, temperatureSchedule, setIsEnabledTemp,
+  setModalVisibleTemperature, modalVisibleTemperature, setTemperatureSchedule, temperatureSchedule,
 }) {
+  const sliderStyle = getSliderStyle();
+
   const panResponder = useRef(
     PanResponder.create({
       onStartShouldSetPanResponder: () => true,
       onPanResponderMove: (_, gestureState) => {
         if (gestureState.dy > 50) {
-          setModalVisible(false);
-          setIsEnabledTemp(false)
+          setModalVisibleTemperature(false);
         }
       },
     }),
   ).current;
 
-  // TODO
-  const isAndroid = Platform.OS === 'android';
-
-  const handleOnChange = (value) => {
-    setTemperatureSchedule(value);
-    return value;
-  };
-
   return (
     <Modal
       animationType="slide"
       transparent
-      visible={modalVisible}
+      visible={modalVisibleTemperature}
       onRequestClose={() => {
-        setModalVisible(!modalVisible);
-        setIsEnabledTemp(false)
+        setModalVisibleTemperature(!modalVisibleTemperature);
       }}
     >
       <View style={styles.centeredView}>
         <View style={styles.modalView} {...panResponder.panHandlers}>
+          <Text style={styles.modalText}>Температура</Text>
 
-          <RadialSlider
-            value={temperatureSchedule}
-            min={15}
-            max={30}
-            onChange={handleOnChange}
-            thumbColor="#FF5204"
-            thumbBorderWidth={3}
-            thumbRadius={14}
-            valueStyle={{ fontSize: 53, color: '#FF5204' }}
-            needleBackgroundColor="#e2e2e2"
-            stroke="#FF5204"
-            lineColor="#e2e2e2"
-            sliderTrackColor="#e2e2e2"
-            linearGradient={[{ offset: '0%', color: '#FEB84A' }, { offset: '100%', color: '#FF5204' }]}
-            isHideSubtitle
-            isHideTailText
-            isHideTitle
-            unit="°C"
-            unitStyle={{ fontSize: 24, color: '#FF5204', fontWeight: 700 }}
-          />
+          <View style={styles.containerRadialSlider}>
+            <RadialSlider
+              value={Number(temperatureSchedule)}
+              min={15}
+              max={30}
+              onComplete={(value) => setTemperatureSchedule(value)}
+              thumbColor="#FF5204"
+              thumbRadius={sliderStyle.thumbRadius}
+              valueStyle={sliderStyle.valueStyle}
+              needleBackgroundColor="#e2e2e2"
+              stroke="#FF5204"
+              lineColor="#e2e2e2"
+              sliderTrackColor="#e2e2e2"
+              linearGradient={[{ offset: '0%', color: '#FEB84A' }, { offset: '100%', color: '#FF5204' }]}
+              isHideSubtitle
+              isHideTailText
+              isHideTitle
+              unit="°C"
+              isHideButtons={sliderStyle.isHideButtons}
+              markerLineSize={sliderStyle.markerLineSize}
+              sliderWidth={sliderStyle.sliderWidth}
+              thumbBorderWidth={sliderStyle.thumbBorderWidth}
+              radius={sliderStyle.radius}
+              unitStyle={sliderStyle.unitStyle}
+            />
+          </View>
+
         </View>
       </View>
     </Modal>

@@ -1,10 +1,10 @@
 import React, { useRef } from 'react';
 import {
-  StyleSheet, View, Text, Modal, Button, PanResponder, Dimensions,
+  StyleSheet, View, Text, Modal, Button, PanResponder, Dimensions, Platform, Linking, Alert,
 } from 'react-native';
-import * as AuthSession from 'expo-auth-session';
-import { useFetchAuthConfigQuery } from '../../redux/usersApi';
-import Loader from '../../components/Loader';
+import { responsiveFontSize } from 'react-native-responsive-dimensions';
+
+import CustomButton from '../../components/CustomButton';
 
 const screenHeight = Dimensions.get('window').height;
 
@@ -48,9 +48,7 @@ const styles = StyleSheet.create({
     fontFamily: 'SFProDisplay',
     fontStyle: 'normal',
     fontWeight: '600',
-    fontSize: 20,
-    lineHeight: 28,
-    letterSpacing: 0.35,
+    fontSize: responsiveFontSize(2.8),
     color: '#212121',
     marginBottom: 15,
   },
@@ -76,7 +74,7 @@ const styles = StyleSheet.create({
   },
   text: {
     color: 'white',
-    fontSize: 16,
+    fontSize: responsiveFontSize(2.1),
     fontWeight: 'bold',
   },
   boxDays: {
@@ -121,10 +119,8 @@ const styles = StyleSheet.create({
     fontFamily: 'SFProDisplay',
     fontStyle: 'normal',
     fontWeight: '600',
-    fontSize: 10,
-    lineHeight: 12,
+    fontSize: responsiveFontSize(1.5),
     textAlign: 'center',
-    letterSpacing: 0.374,
     color: '#787880',
   },
   boxAutoModeItemActive: {
@@ -137,11 +133,21 @@ const styles = StyleSheet.create({
 });
 
 function AlisaModal({ modalVisible, setModalVisible, scrollToIndex }) {
-  const { data: authConfig, error, isLoading } = useFetchAuthConfigQuery();
-
-  const onPress = () => {
-    scrollToIndex(1);
-    setModalVisible(false);
+  const openLink = (androidUrl, iosUrl = '', message = '') => {
+    if (Platform.OS === 'ios' && message) {
+      // Если мы на iOS и есть сообщение, показываем его вместо открытия ссылки
+      Alert.alert('Уведомление', message);
+    } else {
+      // В противном случае обрабатываем URL как обычно
+      const url = Platform.OS === 'ios' ? iosUrl : androidUrl;
+      Linking.canOpenURL(url).then((supported) => {
+        if (supported) {
+          Linking.openURL(url);
+        } else {
+          console.log(`Don't know how to open URI: ${url}`);
+        }
+      });
+    }
   };
 
   const panResponder = useRef(
@@ -154,38 +160,6 @@ function AlisaModal({ modalVisible, setModalVisible, scrollToIndex }) {
       },
     }),
   ).current;
-
-  const [request, response, promptAsync] = AuthSession.useAuthRequest(
-    {
-      redirectUri: 'https://horynize.cygenic.tech/oauth/login.php',
-      clientId: 'b48b79fdf64f4cb5810825887b89a457',
-      responseType: AuthSession.ResponseType.Code,
-      scopes: ['login:email', 'login:info'], // указываем здесь необходимые scopes
-      extraParams: {
-        // Параметры, необходимые для вашего сервера авторизации
-      },
-    },
-    {
-      authorizationEndpoint: 'https://oauth.yandex.ru/authorize',
-    },
-  );
-
-  // Убрать useEffect для обработки ответа Яндекса, так как теперь это делает сервер
-
-  if (isLoading) {
-    return <Loader />;
-  }
-
-  if (error) {
-    console.error('Ошибка при запросе конфигурации авторизации:', error);
-    // Здесь можно добавить обработку ошибок, связанных с запросом конфигурации
-  }
-
-  console.log('authConfig', authConfig);
-
-  // Используйте ответ от сервера для обновления интерфейса или состояния компонента
-  // Например, отображение данных пользователя или сообщения об ошибке
-
   return (
     <Modal
       animationType="slide"
@@ -197,17 +171,31 @@ function AlisaModal({ modalVisible, setModalVisible, scrollToIndex }) {
     >
       <View style={styles.centeredView}>
         <View style={styles.modalView} {...panResponder.panHandlers}>
-          <Text style={styles.modalText}>Подключить Алису</Text>
-          <View>
-            <Button
-              disabled={!request}
-              title="Привязать к Алисе"
+          <Text style={styles.modalText}>Голосовые ассистенты</Text>
+          <View style={{ width: '100%' }}>
+
+            <CustomButton
+              style={{ width: '100%' }}
+              text="Алиса"
               onPress={() => {
-                promptAsync();
+                openLink(
+                  'https://play.google.com/store/apps/details?id=com.yandex.iot', // Android URL для Алисы
+                  'https://apps.apple.com/ru/app/%D0%B4%D0%BE%D0%BC-%D1%81-%D0%B0%D0%BB%D0%B8%D1%81%D0%BE%D0%B9/id1582810683', // iOS URL для Алисы
+                )
               }}
             />
+            {/* <CustomButton
+              style={{ width: '100%' }}
+              text="Сбер"
+              onPress={() => {
+                openLink(
+                  'https://play.google.com/store/apps/details?id=com.salute.smarthome.prod', // Android URL для Сбер Салют
+                  '', // iOS URL не используется
+                  'Приложение "Сбер Салют" недоступно на iOS', // Сообщение для пользователей iOS
+                )
+              }}
+            /> */}
           </View>
-          {/* Здесь может быть отображение данных пользователя или сообщения об ошибке */}
         </View>
       </View>
     </Modal>

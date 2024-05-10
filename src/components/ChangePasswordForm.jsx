@@ -1,12 +1,13 @@
-import React from 'react';
+import React, { useContext } from 'react';
 import {
   View, Text, TextInput, StyleSheet,
 } from 'react-native';
 import { Formik } from 'formik';
 import * as yup from 'yup';
 import { useChangePasswordMutation } from '../redux/usersApi';
-import Loader from './Loader';
+import { responsiveFontSize } from 'react-native-responsive-dimensions';
 import ApplyIcon from '../img/icons/apply';
+import { AuthContext } from './providers/AuthContext';
 
 import CustomButton from './CustomButton';
 
@@ -20,9 +21,7 @@ const styles = StyleSheet.create({
     fontFamily: 'SFProDisplay',
     fontStyle: 'normal',
     fontWeight: '600',
-    fontSize: 20,
-    lineHeight: 28,
-    letterSpacing: 0.35,
+    fontSize: responsiveFontSize(2.8),
     color: '#212121',
     marginBottom: 30,
   },
@@ -40,7 +39,7 @@ const styles = StyleSheet.create({
     borderRadius: 16,
     padding: 15,
     color: '#212121',
-    fontSize: 16,
+    fontSize: responsiveFontSize(2.1),
   },
   inputIcon: {
     width: 15,
@@ -79,33 +78,44 @@ const styles = StyleSheet.create({
 });
 
 const passwordSchema = yup.object({
-  oldPassword: yup.string().required('Старый пароль обязателен'),
   newPassword: yup.string().required('Новый пароль обязателен').min(8, 'Пароль должен быть не менее 8 символов'),
 });
 
-function ChangePasswordForm() {
+function ChangePasswordForm({
+  setChagePasswordSuccessfully, setChagePasswordError, setErrorText,
+}) {
   const [changePassword, { isLoading: isLoaderChangePassword }] = useChangePasswordMutation();
+
+  const { userId, userName, userEmail } = useContext(AuthContext);
 
   const onClickBtnChangePassword = (values) => {
     const userData = {
-      user_id: '1',
-      username: 'victoruni1',
-      oldPassword: values.oldPassword,
-      newPassword: values.newPassword,
-      email: 'admin6@sanruskmv.ru',
+      user_id: String(userId),
+      username: String(userName),
+      password: values.newPassword,
+      email: String(userEmail),
     };
 
-    changePassword(userData);
+    changePassword(userData).unwrap()
+      .then((response) => {
+        // Обработка успешного изменения пароля
+        setChagePasswordSuccessfully(true)
+      })
+      .catch((error) => {
+        // Обработка ошибки изменения пароля
+        setErrorText(error);
+        setChagePasswordError(true);
+        console.error('Error changing password', error);
+      });
   };
 
-  if (isLoaderChangePassword) {
-    return <Loader />;
-  }
+  // if (isLoaderChangePassword) {
+  //   return <Loader />;
+  // }
 
   return (
-  // <View style={styles.cardBox}>
     <Formik
-      initialValues={{ oldPassword: '', newPassword: '' }}
+      initialValues={{ newPassword: '' }}
       validationSchema={passwordSchema}
       onSubmit={(values, actions) => {
         onClickBtnChangePassword(values);
@@ -114,21 +124,6 @@ function ChangePasswordForm() {
     >
       {(props) => (
         <View style={styles.cardBox}>
-          <View style={styles.inputContainer}>
-            <ApplyIcon style={styles.inputIcon} />
-            <TextInput
-              style={styles.input}
-              placeholder="Старый пароль"
-              onChangeText={props.handleChange('oldPassword')}
-              onBlur={props.handleBlur('oldPassword')}
-              value={props.values.oldPassword}
-            />
-          </View>
-
-          <Text style={styles.errorText}>
-            {props.touched.oldPassword && props.errors.oldPassword}
-          </Text>
-
           <View style={styles.inputContainer}>
             <ApplyIcon style={styles.inputIcon} />
             <TextInput

@@ -8,13 +8,12 @@ import TimerIcon from '../../../img/time.png';
 import Microphone from '../../../img/microfon.png';
 import ModeIcon from '../../../img/mode.png';
 import PowerBtnActiveIcon from '../../../img/power.png';
+import DeleteUnitIcon from '../../../img/delete_unit_icon.png';
 
 const screenWidth = Dimensions.get('window').width;
 const gap = 10;
 const totalGaps = gap * 4;
 const buttonWidth = (screenWidth + totalGaps) / 5;
-const fontSizeBtnText = buttonWidth * 0.12;
-const calculatedLineHeight = buttonWidth * 0.12 + 0.1
 const ImgWidth = buttonWidth * 0.3;
 
 const styles = StyleSheet.create({
@@ -42,17 +41,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  controlsBoxBtnText: {
-    fontFamily: 'SFProDisplay',
-    fontStyle: 'normal',
-    fontWeight: '600',
-    fontSize: fontSizeBtnText,
-    lineHeight: calculatedLineHeight,
-    textAlign: 'center',
-    letterSpacing: 0.374,
-    color: '#ED7635',
-    marginBottom: 4,
-  },
   controlsBoxIconBtn: {
     width: ImgWidth,
     height: ImgWidth,
@@ -60,15 +48,28 @@ const styles = StyleSheet.create({
   },
 })
 
+// Функция для динамического вычисления стилей
+const dynamicBtnTextStyle = (buttonSize) => ({
+  fontFamily: 'SFProDisplay',
+  fontStyle: 'normal',
+  fontWeight: '600',
+  fontSize: buttonSize * 0.13,
+  lineHeight: buttonSize * 0.13 + 0.2,
+  textAlign: 'center',
+  color: '#ED7635',
+  marginBottom: 4,
+});
+
 const FunctionsIconSmall = {
   humRoomTarget: HumidityActiveIcon,
   fanSpeedPTarget: SpeedActiveIcon,
   res: ModeIcon,
   ZagrFiltr: TimerIcon,
   tempChannel: Microphone,
+  co2RoomTarget: DeleteUnitIcon,
 };
 
-const keyForRenderSmall = ['humRoomTarget', 'fanSpeedPTarget', 'res', 'ZagrFiltr', 'tempChannel'];
+const keyForRenderSmall = ['humRoomTarget', 'fanSpeedPTarget', 'res', 'ZagrFiltr', 'tempChannel', 'co2RoomTarget'];
 
 function ControlsImp(props) {
   const {
@@ -87,20 +88,65 @@ function ControlsImp(props) {
     const imageSrc = FunctionsIconSmall[item[0]];
     return (
       <View style={styles.controlsBox}>
-        <TouchableOpacity
-          style={[
-            styles.controlsBoxBtn,
-          ]}
-          onPress={() => openModalHandler(item[0])}
-        >
+
+        <TouchableOpacity style={styles.controlsBoxBtn} onPress={() => openModalHandler(item[0])} >
           <Image source={imageSrc} style={styles.controlsBoxIconBtn} />
+          {(item[0] === 'humRoomTarget')
+            && (
+              <Text
+                style={dynamicBtnTextStyle(buttonWidth)}
+                numberOfLines={2}
+                ellipsizeMode="tail"
+              >
+                Влажность
+              </Text>
+            )}
 
-          {(item[0] === 'humRoomTarget') && <Text style={styles.controlsBoxBtnText}>Влажность</Text>}
-          {(item[0] === 'fanSpeedPTarget') && <Text style={styles.controlsBoxBtnText}>Скорость вращения</Text>}
-          {(item[0] === 'res') && <Text style={styles.controlsBoxBtnText}>Режим</Text>}
-          {(item[0] === 'ZagrFiltr') && <Text style={styles.controlsBoxBtnText}>Автозапуск</Text>}
-          {(item[0] === 'tempChannel') && <Text style={styles.controlsBoxBtnText}>Голосовые ассистенты</Text>}
-
+          {(item[0] === 'fanSpeedPTarget') && (
+            <Text
+              style={dynamicBtnTextStyle(buttonWidth)}
+              numberOfLines={2}
+              ellipsizeMode="tail"
+            >
+              Скорость вращения
+            </Text>
+          )}
+          {(item[0] === 'res') && (
+            <Text
+              style={dynamicBtnTextStyle(buttonWidth)}
+              numberOfLines={2}
+              ellipsizeMode="tail"
+            >
+              Режим
+            </Text>
+          )}
+          {(item[0] === 'ZagrFiltr') && (
+            <Text
+              style={dynamicBtnTextStyle(buttonWidth)}
+              numberOfLines={2}
+              ellipsizeMode="tail"
+            >
+              Автозапуск
+            </Text>
+          )}
+          {(item[0] === 'tempChannel') && (
+            <Text
+              style={dynamicBtnTextStyle(buttonWidth)}
+              numberOfLines={2}
+              ellipsizeMode="tail"
+            >
+              Голосовые ассистенты
+            </Text>
+          )}
+          {(item[0] === 'co2RoomTarget') && (
+            <Text
+              style={dynamicBtnTextStyle(buttonWidth)}
+              numberOfLines={2}
+              ellipsizeMode="tail"
+            >
+              Удалить установку
+            </Text>
+          )}
         </TouchableOpacity>
       </View>
     )
@@ -108,9 +154,16 @@ function ControlsImp(props) {
 
   const renderButtonPower = () => (
     <View style={styles.controlsBox}>
+
       <TouchableOpacity style={styles.controlsBoxBtn} onPress={sendParamsOff}>
         <Image source={PowerBtnActiveIcon} style={styles.controlsBoxIconBtn} />
-        <Text style={styles.controlsBoxBtnText}>Выключить</Text>
+        <Text
+          style={dynamicBtnTextStyle(buttonWidth)}
+          numberOfLines={1}
+          ellipsizeMode="tail"
+        >
+          Выключить
+        </Text>
       </TouchableOpacity>
     </View>
   )

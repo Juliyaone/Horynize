@@ -1,40 +1,27 @@
 import React, { useState } from 'react';
-import { Button, Platform, View } from 'react-native';
+import { View } from 'react-native';
 import DateTimePicker from '@react-native-community/datetimepicker';
 
-// TODO
-export default function TimePicker({ closeModal, setTime }) {
+export default function TimePicker({ setTime }) {
   const [date, setDate] = useState(new Date());
-  const [mode, setMode] = useState('time');
-  const [show, setShow] = useState(false);
 
   const onChange = (event, selectedDate) => {
-    setShow(Platform.OS === 'ios');
-
+    const currentDate = selectedDate || date;
     if (selectedDate) {
-      setDate(selectedDate);
-      setTime(selectedDate);
-
-      if (Platform.OS === 'android') {
-        closeModal(false);
-      }
+      setDate(currentDate); // Обновляем текущую дату
+      setTime(currentDate.getTime()); // Передаем время в формате таймстампа
     }
   };
 
   return (
-    <View
-      style={
-        Platform.OS === 'android'
-          ? { position: 'absolute', zIndex: 99 }
-          : {}
-      }
-    >
+    <View>
       <DateTimePicker
         testID="dateTimePicker"
         value={date}
-        mode={mode}
-        is24Hour
-        display="spinner"
+        locale="ru-RU"
+        mode="time"
+        is24Hour={true}
+        display="spinner" // Стиль отображения
         onChange={onChange}
       />
     </View>

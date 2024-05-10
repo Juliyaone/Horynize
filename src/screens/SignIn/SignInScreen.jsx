@@ -1,19 +1,20 @@
 import React, { useState, useContext } from 'react';
 import {
-  StyleSheet, View, Text, TextInput, TouchableOpacity
+  StyleSheet, View, Text, TextInput, TouchableOpacity,
 } from 'react-native';
+import { responsiveFontSize } from 'react-native-responsive-dimensions';
 
 import { Formik } from 'formik';
 import * as yup from 'yup';
 
 import { AuthContext } from '../../components/providers/AuthContext';
-import { saveCredentials } from '../../components/providers/SecureStore';
 
 import ApplyIcon from '../../img/icons/apply';
 import GoBackComponent from '../../components/GoBack';
 
 import ModalError from '../../components/ModalError';
 import Loader from '../../components/Loader';
+import ModalResetPassword from '../Modal/ModalResetPassword';
 
 import CustomButton from '../../components/CustomButton';
 import { useLoginUserMutation } from '../../redux/usersApi';
@@ -28,9 +29,7 @@ const styles = StyleSheet.create({
     fontFamily: 'SFProDisplay',
     fontStyle: 'normal',
     fontWeight: '600',
-    fontSize: 20,
-    lineHeight: 28,
-    letterSpacing: 0.35,
+    fontSize: responsiveFontSize(2.8),
     color: '#212121',
     marginBottom: 30,
   },
@@ -52,7 +51,7 @@ const styles = StyleSheet.create({
     borderRadius: 16,
     padding: 15,
     color: '#212121',
-    fontSize: 16,
+    fontSize: responsiveFontSize(2.1),
   },
   inputIcon: {
     width: 15,
@@ -76,9 +75,7 @@ const styles = StyleSheet.create({
     fontFamily: 'SFProDisplay',
     fontStyle: 'normal',
     fontWeight: '600',
-    fontSize: 16,
-    lineHeight: 18,
-    letterSpacing: 0.374,
+    fontSize: responsiveFontSize(2.1),
     color: '#787880',
     marginBottom: 20,
     textAlign: 'center',
@@ -97,28 +94,47 @@ const validationSchema = yup.object().shape({
 
 function SignInScreen({ navigation }) {
   const [errorText, setErrorText] = useState('');
+  const [openModalResetPassword, setOpenModalResetPassword] = useState(false);
   const [authorizationError, setAuthorizationError] = useState(false);
 
   const { signIn } = useContext(AuthContext);
 
   const [loginUser, { isLoading }] = useLoginUserMutation();
 
+  const errorMessages = {
+    'error - incorrect password': 'Неверный пароль',
+    'error - username is not active': 'Пользователь не найден',
+    'error - incorect username': 'Пользователь не найден',
+  };
+
+  function getTranslatedErrorMessage(errorMessage) {
+    return errorMessages[errorMessage] || 'Произошла неизвестная ошибка';
+  }
+
   const sendAuthorizationData = async (values) => {
     if (values.username !== '' && values.password !== '') {
       try {
         const answer = await loginUser(values).unwrap();
-
         if (answer['0']?.jwt) {
           const token = answer['0'].jwt;
-          const { controllers } = answer;
-          const controllerId = String(answer.controllers[0].id_controller);
-          const userId = String(answer['0'].id_user);
-          const email = String(answer['0'].email);
-          const userName = String(answer['0'].username);
 
-          await saveCredentials(values.username, values.password);
+          console.log('token', token);
+          const refreshToken = String(answer['0'].jwt_refresh);
+
+          const { controllers } = answer;
+
+          let controllerId = '0';
+
+          if (controllers && controllers.length > 0) {
+            controllerId = String(controllers[0].id_controller);
+          }
+
+          const userIdData = String(answer['0'].id_user);
+          const email = String(answer['0'].email);
+          const userNameData = String(answer['0'].username);
+
           const data = {
-            token, controllerId, userId, controllers, email, userName,
+            token, controllerId, userIdData, controllers, email, userNameData, refreshToken,
           };
 
           await signIn(data);
@@ -129,12 +145,12 @@ function SignInScreen({ navigation }) {
 
         if (error.data) {
           if (error.data.message) {
-            errorMessage = error.data.message;
+            errorMessage = getTranslatedErrorMessage(error.data.message);
           } else {
             errorMessage = JSON.stringify(error.data);
           }
         } else if (error.message) {
-          errorMessage = error.message;
+          errorMessage = getTranslatedErrorMessage(error.message);
         } else {
           errorMessage = JSON.stringify(error);
         }
@@ -149,6 +165,10 @@ function SignInScreen({ navigation }) {
   const handleSubmit = async (values) => {
     sendAuthorizationData(values)
   };
+
+  const openModalResetPasswordFunc = () => {
+    setOpenModalResetPassword(true)
+  }
 
   if (isLoading) {
     return <Loader />;
@@ -165,12 +185,19 @@ function SignInScreen({ navigation }) {
             onDismiss={() => setAuthorizationError(null)}
           />
         )}
+
+      {openModalResetPassword && (
+        <ModalResetPassword
+          modalVisible={openModalResetPassword}
+          setModalVisible={setOpenModalResetPassword}
+        />
+      )}
       <GoBackComponent navigation={navigation} />
 
       <Text style={styles.title}>Авторизация</Text>
 
       <Formik
-        initialValues={{ username: 'Alexalex', password: '!Q@aw3zse4' }}
+        initialValues={{ username: '', password: '' }}
         onSubmit={handleSubmit}
         validationSchema={validationSchema}
       >
@@ -209,7 +236,7 @@ function SignInScreen({ navigation }) {
             </View>
             <CustomButton onPress={handleSubmit} text="Войти" IconComponent={false} style={{ width: '100%' }} />
 
-            <TouchableOpacity style={styles.textPasswordBox}>
+            <TouchableOpacity style={styles.textPasswordBox} onPress={openModalResetPasswordFunc}>
               <Text style={styles.textPassword}>
                 Забыли пароль?
               </Text>

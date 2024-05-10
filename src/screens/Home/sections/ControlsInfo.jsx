@@ -1,11 +1,10 @@
-import React, {
-  useCallback,
-} from 'react';
+import React, { useContext } from 'react';
 import {
-  View, Text, FlatList, Image, StyleSheet, Dimensions, TouchableOpacity,
+  View, Text, FlatList, Image, StyleSheet, Dimensions,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useSelector } from 'react-redux';
+import { UserContext } from '../../../components/providers/UserContext';
 
 import TemperatureIcon from '../../../img/temp-white.png';
 import HumidityIcon from '../../../img/hum-white.png';
@@ -70,9 +69,10 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     width: controlsInfoBgWidth,
     height: controlsInfoBgWidth,
-    marginBottom: 10,
     alignItems: 'center',
     justifyContent: 'center',
+    marginBottom: 10,
+
   },
   controlsInfoBgIcon: {
     width: controlsInfoBgIconWidth,
@@ -86,9 +86,8 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     fontSize: fontSizeHeader,
     lineHeight: calculatedLineHeight,
-    letterSpacing: 0.374,
     color: '#787880',
-    marginBottom: 10,
+    marginBottom: 5,
   },
   controlsInfoBtnText: {
     fontFamily: 'SFProDisplay',
@@ -96,9 +95,9 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     fontSize: fontSizeText,
     lineHeight: calculatedLineHeight,
-    letterSpacing: 0.374,
+
     color: '#787880',
-    marginBottom: 4,
+    marginBottom: 1,
   },
   controlsInfoBtnTextBox: {
     display: 'flex',
@@ -125,28 +124,69 @@ const resNames = {
   2057: 'Hе выбрано',
 };
 
+const dynamicBtnTextStyle = (buttonSize) => ({
+  fontFamily: 'SFProDisplay',
+  fontStyle: 'normal',
+  fontWeight: 'bold',
+  fontSize: buttonSize * 0.10,
+  lineHeight: buttonSize * 0.10 + 0.2,
+  color: '#787880',
+  marginBottom: 5,
+});
+
+const dynamicBtnText2Style = (buttonSize) => ({
+  fontFamily: 'SFProDisplay',
+  fontStyle: 'normal',
+  fontWeight: '400',
+  fontSize: buttonSize * 0.09,
+  lineHeight: buttonSize * 0.09 + 0.2,
+  color: '#787880',
+  marginBottom: 2,
+});
+
 function ControlsInfo(props) {
   const {
-    params, id, filteredEntries, navigation, temperature, flatListRef, indexActive,
+    params, filteredEntries, temperature, flatListRef, indexActive, tokensForAssistants,
   } = props;
 
   const {
     res: resMode, humRoomTarget: humTarget, fanSpeedPTarget: fanTarget,
   } = params;
 
-  const timersDayState = useSelector((state) => state.timersDay);
-  // console.log('timersDayStateControlsInfo', timersDayState);
+  const { currentDayOfWeek } = useContext(UserContext);
 
-  const handleSettings = useCallback(() => {
-    if (id) {
-      navigation.navigate('HomeStack', { screen: 'HomeSchedule', params: { clickedControllerId: String(id) } });
-    }
-  }, [id, navigation]);
+  const timersAllDaysState = useSelector((state) => state.timersAllDays.timersAllDays);
+
+  const timersForCurrentDay = timersAllDaysState[currentDayOfWeek];
+
+  // Находим таймеры с реальными значениями (не "00:00")
+  const activeTimers = timersForCurrentDay.filter((timer) => timer.time !== '00:00');
+
+  // Определяем время для первого и второго таймеров
+  const firstTimer = activeTimers.find((timer) => timer.num === 1) || null;
+  const secondTimer = activeTimers.find((timer) => timer.num === 2) || null;
+  const thirdTimer = activeTimers.find((timer) => timer.num === 3) || null;
+  const fourthTimer = activeTimers.find((timer) => timer.num === 4) || null;
+
+  // Строим строку времени для первого таймера, если он активен
+  let firstTimerTimeRange = '';
+  if (firstTimer && secondTimer) {
+    firstTimerTimeRange = `с: ${firstTimer.time} до: ${secondTimer.time}`;
+  }
+
+  // Строим строку времени для второго таймера, если он активен
+  let secondTimerTimeRange = '';
+  if (thirdTimer && fourthTimer) {
+    secondTimerTimeRange = `с: ${thirdTimer.time} до: ${fourthTimer.time}`;
+  }
+
+  const { tokens } = tokensForAssistants;
+  const { tokenYandex, tokenSber } = tokens[0];
 
   const renderItem = ({ item }) => {
-    // if (item[0] === 'tempTarget' && resMode == '1') {
-    //   return null;
-    // }
+    if (item[0] === 'co2RoomTarget') {
+      return null;
+    }
 
     const imageSrc = FunctionsIcon[item[0]];
 
@@ -154,7 +194,6 @@ function ControlsInfo(props) {
       <View
         style={[
           styles.controlsInfoBox,
-          // (index === indexActive) ? styles.controlsInfoBoxActive : styles.controlsInfoBox,
         ]}
       >
         <View style={styles.controlsInfoBoxIconSettings}>
@@ -164,18 +203,19 @@ function ControlsInfo(props) {
           >
             <Image source={imageSrc} style={styles.controlsInfoBgIcon} />
           </LinearGradient>
-          {(item[0] === 'ZagrFiltr') && (
-          <TouchableOpacity onPress={handleSettings}>
-            <Image source={SettingsIcon} style={styles.controlsInfoBgIcon} />
-          </TouchableOpacity>
-          )}
 
         </View>
 
         {(item[0] === 'tempTarget') && (
           <>
-            <Text style={styles.controlsInfoBtnTextName}>Температура</Text>
-            <Text style={styles.controlsInfoBtnText}>
+            <Text
+              style={dynamicBtnTextStyle(controlsInfoWidth)}
+              numberOfLines={2}
+              ellipsizeMode="tail"
+            >
+              Температура
+            </Text>
+            <Text style={dynamicBtnText2Style(controlsInfoWidth)}>
 
               {resMode === '1'
                 ? '0' : `${temperature} °`}
@@ -186,8 +226,18 @@ function ControlsInfo(props) {
 
         {(item[0] === 'humRoomTarget') && (
           <>
-            <Text style={styles.controlsInfoBtnTextName}>Влажность</Text>
-            <Text style={styles.controlsInfoBtnText}>
+            <Text
+              style={dynamicBtnTextStyle(controlsInfoWidth)}
+              numberOfLines={2}
+              ellipsizeMode="tail"
+            >
+              Влажность
+            </Text>
+            <Text
+              style={dynamicBtnText2Style(controlsInfoWidth)}
+              numberOfLines={2}
+              ellipsizeMode="tail"
+            >
               {humTarget}
               %
             </Text>
@@ -196,42 +246,101 @@ function ControlsInfo(props) {
 
         {(item[0] === 'fanSpeedPTarget') && (
           <>
-            <Text style={styles.controlsInfoBtnTextName}>Скорость</Text>
-            <Text style={styles.controlsInfoBtnText}>{fanTarget}</Text>
+            <Text
+              style={dynamicBtnTextStyle(controlsInfoWidth)}
+              numberOfLines={2}
+              ellipsizeMode="tail"
+            >
+              Скорость
+            </Text>
+            <Text
+              style={dynamicBtnText2Style(controlsInfoWidth)}
+              numberOfLines={2}
+              ellipsizeMode="tail"
+            >
+              {fanTarget}
+            </Text>
           </>
         )}
 
         {(item[0] === 'tempChannel') && (
           <>
-            <Text style={styles.controlsInfoBtnTextName}>Голосовые ассистенты</Text>
-            <Text style={styles.controlsInfoBtnText}>Не подключены</Text>
-            {/* <Text style={styles.controlsInfoBtnText}>Алиса</Text>
-            <Text style={styles.controlsInfoBtnText}>Сбер</Text> */}
+            <Text
+              style={dynamicBtnTextStyle(controlsInfoWidth)}
+              numberOfLines={2}
+              ellipsizeMode="tail"
+            >
+              Голосовые ассистенты
+            </Text>
+
+            <Text
+              style={dynamicBtnText2Style(controlsInfoWidth)}
+              numberOfLines={2}
+              ellipsizeMode="tail"
+            >
+              {tokenYandex === true && 'Алиса '}
+              {tokenSber === true && 'Сбер'}
+              {(tokenSber === false && tokenYandex === false) && 'Не подключены'}
+            </Text>
           </>
         )}
 
         {(item[0] === 'res') && (
           <>
-            <Text style={styles.controlsInfoBtnTextName}>Режим</Text>
-            <Text style={styles.controlsInfoBtnText}>{resNames[resMode]}</Text>
+            <Text
+              style={dynamicBtnTextStyle(controlsInfoWidth)}
+              numberOfLines={2}
+              ellipsizeMode="tail"
+            >
+              Режим
+            </Text>
+            <Text
+              style={dynamicBtnText2Style(controlsInfoWidth)}
+              numberOfLines={2}
+              ellipsizeMode="tail"
+            >
+              {resNames[resMode]}
+            </Text>
           </>
         )}
 
-        {(item[0] === 'ZagrFiltr') && (
+        {(item[0] === 'ZagrFiltr' && timersAllDaysState) && (
           <>
-            <Text style={styles.controlsInfoBtnTextName}>Автозапуск сегодня</Text>
+            <Text
+              style={dynamicBtnTextStyle(controlsInfoWidth)}
+              numberOfLines={2}
+              ellipsizeMode="tail"
+            >
+              Автозапуск сегодня
+            </Text>
 
-            {timersDayState?.timers[0]?.num === 1 && (
-              <View style={styles.controlsInfoBtnTextBox}>
-                <Text style={styles.controlsInfoBtnText}>
-                  {timersDayState?.timers[0].time}
-                  {' '}
-                  до
-                  {' '}
-                  {timersDayState?.timers[1].time}
-                </Text>
-              </View>
+            {firstTimerTimeRange ? (
+              <Text
+                style={dynamicBtnText2Style(controlsInfoWidth)}
+                numberOfLines={2}
+                ellipsizeMode="tail"
+              >
+                {firstTimerTimeRange}
+              </Text>
+            ) : (
+              <Text
+                style={dynamicBtnText2Style(controlsInfoWidth)}
+                numberOfLines={2}
+                ellipsizeMode="tail"
+              >
+                нет
+              </Text>
             )}
+            {secondTimerTimeRange ? (
+              <Text
+                style={dynamicBtnText2Style(controlsInfoWidth)}
+                numberOfLines={2}
+                ellipsizeMode="tail"
+              >
+                {secondTimerTimeRange}
+              </Text>
+            ) : null}
+
           </>
         )}
       </View>

@@ -2,6 +2,8 @@ import React, { useState } from 'react';
 import {
   View, Text, Modal, TouchableOpacity, StyleSheet, Dimensions,
 } from 'react-native';
+import { responsiveFontSize } from 'react-native-responsive-dimensions';
+
 import { LinearGradient } from 'expo-linear-gradient';
 
 // import SaveIcon from '../img/icons/save';
@@ -38,9 +40,7 @@ const styles = StyleSheet.create({
 
     fontStyle: 'normal',
     fontWeight: '600',
-    fontSize: 20,
-    lineHeight: 28,
-    letterSpacing: 0.35,
+    fontSize: responsiveFontSize(2.8),
     color: '#212121',
     marginBottom: 30,
     textAlign: 'center',
@@ -69,12 +69,11 @@ const styles = StyleSheet.create({
   },
   text: {
     color: 'white',
-    fontSize: 16,
+    fontSize: responsiveFontSize(2.1),
     fontWeight: 'bold',
   },
 });
 
-// TODO: icons
 export default function ModalNotControllers({ text, navigation }) {
   const [visible, setVisible] = useState();
 

@@ -1,23 +1,24 @@
 import {
   StyleSheet,
 } from 'react-native';
+import { responsiveFontSize } from 'react-native-responsive-dimensions';
+
 
 export const styles = StyleSheet.create({
   container: {
     flex: 1,
     marginRight: 20,
     marginLeft: 20,
+    flexDirection: 'column',
+    justifyContent: 'space-between',
   },
   headerTextSettings: {
-    flexGrow: 1,
     fontFamily: 'SFProDisplayBold',
     fontStyle: 'normal',
     fontWeight: '700',
-    fontSize: 18,
-    lineHeight: 24,
+    fontSize: responsiveFontSize(2.5),
     alignItems: 'center',
     textAlign: 'center',
-    letterSpacing: 0.38,
     color: '#222222',
     marginBottom: 25,
   },
@@ -25,10 +26,8 @@ export const styles = StyleSheet.create({
     fontFamily: 'SFProDisplayBold',
     fontStyle: 'normal',
     fontWeight: '700',
-    fontSize: 18,
-    lineHeight: 24,
+    fontSize: responsiveFontSize(2.5),
     alignItems: 'center',
-    letterSpacing: 0.38,
     color: '#222222',
     marginBottom: 15,
   },
@@ -58,14 +57,19 @@ export const styles = StyleSheet.create({
     width: '100%',
     marginTop: 25,
   },
+  btnBoxNotRegister: {
+    flexGrow: 1,
+    justifyContent: 'flex-end',
+    marginTop: 'auto',
+    paddingLeft: 20,
+    paddingRight: 20,
+  },
   cardUserName: {
     fontFamily: 'SFProDisplay',
     fontStyle: 'normal',
     fontWeight: '700',
     fontSize: 22,
-    lineHeight: 28,
     alignItems: 'center',
-    letterSpacing: 0.35,
     color: '#212121',
     marginBottom: 12,
   },
@@ -73,10 +77,8 @@ export const styles = StyleSheet.create({
     fontFamily: 'SFProDisplay',
     fontStyle: 'normal',
     fontWeight: '400',
-    fontSize: 16,
-    lineHeight: 28,
+    fontSize: responsiveFontSize(2.1),
     alignItems: 'center',
-    letterSpacing: 0.35,
     color: '#212121',
     marginBottom: 8,
   },
@@ -84,10 +86,8 @@ export const styles = StyleSheet.create({
     fontFamily: 'SFProDisplay',
     fontStyle: 'normal',
     fontWeight: '400',
-    fontSize: 16,
-    lineHeight: 18,
+    fontSize: responsiveFontSize(2.1),
     alignItems: 'center',
-    letterSpacing: 0.35,
     color: '#212121',
   },
   cardUserDataBox: {
@@ -102,5 +102,11 @@ export const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
   },
-
+  textOff: {
+    fontFamily: 'SFProDisplayLight',
+    fontStyle: 'normal',
+    fontWeight: '400',
+    fontSize: responsiveFontSize(1.8),
+    color: '#787880',
+  },
 });

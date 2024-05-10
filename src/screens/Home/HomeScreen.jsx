@@ -1,26 +1,26 @@
-/* eslint-disable global-require */
-import React, { useState } from 'react';
+import React, { useState, useContext } from 'react';
 import {
   View, Text, TouchableOpacity, Dimensions, Image, StyleSheet,
 } from 'react-native';
+import { responsiveFontSize } from 'react-native-responsive-dimensions';
+
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useSelector } from 'react-redux';
-import TimeIcon from '../../img/icons/time';
+
+import { AuthContext } from '../../components/providers/AuthContext'
 import { useSendParamsMutation, useGetParamsQuery } from '../../redux/usersApi';
 import PowerBtnIcon from '../../img/off.png';
-import ModalError from '../../components/ModalError';
 import ModalNotControllers from '../../components/ModalNotControllers';
+import ModalComandsError from '../../components/ModalComandsError';
 
 import DetailedInfoImp from './sections/DetailedInfoImp';
-
+import ModalLoader from '../../components/ModalLoader';
 import Loader from '../../components/Loader';
 
 const screenWidth = Dimensions.get('window').width;
 const gap = 10;
 const totalGaps = gap * 4;
 const buttonWidth = (screenWidth + totalGaps) / 5;
-const fontSizeBtnText = buttonWidth * 0.12;
-const calculatedLineHeight = buttonWidth * 0.12 + 0.1
 const ImgWidth = buttonWidth * 0.3;
 
 const styles = StyleSheet.create({
@@ -67,10 +67,8 @@ const styles = StyleSheet.create({
     fontFamily: 'SFProDisplay',
     fontStyle: 'normal',
     fontWeight: '400',
-    fontSize: 12,
-    lineHeight: 14,
+    fontSize: responsiveFontSize(1.6),
     textAlign: 'center',
-    letterSpacing: 0.374,
     color: '#FFFFFF',
   },
   boxHomeDetaile: {
@@ -92,10 +90,8 @@ const styles = StyleSheet.create({
     fontFamily: 'SFProDisplay',
     fontStyle: 'normal',
     fontWeight: '400',
-    fontSize: 12,
-    lineHeight: 14,
+    fontSize: responsiveFontSize(1.6),
     textAlign: 'center',
-    letterSpacing: 0.374,
     color: '#FFFFFF',
     marginBottom: 5,
   },
@@ -104,9 +100,7 @@ const styles = StyleSheet.create({
     fontStyle: 'normal',
     fontWeight: '600',
     fontSize: 32,
-    lineHeight: 38,
     textAlign: 'center',
-    letterSpacing: 0.374,
     color: '#FFFFFF',
   },
   btnSchedule: {
@@ -142,7 +136,7 @@ const styles = StyleSheet.create({
     marginRight: gap,
     alignItems: 'center',
     justifyContent: 'center',
-    padding: 16,
+    padding: 0,
     backgroundColor: '#FFFFFF',
     borderRadius: 8,
     borderWidth: 1,
@@ -155,13 +149,11 @@ const styles = StyleSheet.create({
     marginBottom: 10,
   },
   homeScreenInAciveControlsBoxBtnText: {
+    width: '100%',
     fontFamily: 'SFProDisplay',
     fontStyle: 'normal',
     fontWeight: '600',
-    fontSize: fontSizeBtnText,
-    lineHeight: calculatedLineHeight,
     textAlign: 'center',
-    letterSpacing: 0.374,
     color: '#787880',
     marginBottom: 4,
   },
@@ -171,27 +163,32 @@ const styles = StyleSheet.create({
     marginBottom: '5%',
   },
 });
+
+// Функция для динамического вычисления стилей
+const dynamicBtnTextStyle = (buttonSize) => ({
+  fontFamily: 'SFProDisplay',
+  fontStyle: 'normal',
+  fontWeight: '600',
+  fontSize: buttonSize * 0.13,
+  lineHeight: buttonSize * 0.13 + 0.2,
+  textAlign: 'center',
+  color: '#787880',
+  marginBottom: 4,
+});
+
 function HomeScreen({ navigation, route }) {
   const clickedControllerId = route?.params?.clickedControllerId ?? undefined;
+  const { userControllers } = useContext(AuthContext);
 
-  console.log('HomeScreen');
-
-  const {
-    data: paramsClickedController,
-    isLoading: isCurrentControllerParamsLoading,
-  } = useGetParamsQuery({ controllerId: String(clickedControllerId) });
-
-  if (isCurrentControllerParamsLoading) {
-    return <Loader />
-  }
   return (
     <SafeAreaView style={{ flex: 1 }}>
       <View style={{ flex: 1 }}>
-        { (clickedControllerId !== undefined && paramsClickedController) ? (
+        {(clickedControllerId !== undefined && userControllers) ? (
           <HomeScreenInAcive
-            paramsClickedController={paramsClickedController}
             navigation={navigation}
             clickedControllerId={clickedControllerId}
+            userControllers={userControllers}
+
           />
         ) : (
           <ModalNotControllers
@@ -204,22 +201,16 @@ function HomeScreen({ navigation, route }) {
   );
 }
 
-const images = {
-  'http://95.142.39.79/images/models/Horynize.CF-500.png': require('../../img/devices/Horynize.CF-500.png'),
-  'http://95.142.39.79/images/models/Horynize.CF-700.png': require('../../img/devices/Horynize.CF-700.png'),
-  'http://95.142.39.79/images/models/Horynize.CF-1100.png': require('../../img/devices/Horynize.CF-1100.png'),
-  'http://95.142.39.79/images/models/Horynize.WF-1200.png': require('../../img/devices/Horynize.WF-1200.png'),
-  'http://95.142.39.79/images/models/Horynize.WF-800.png': require('../../img/devices/Horynize.WF-800.png'),
-  'http://95.142.39.79/images/models/Horynize.EF-450.png': require('../../img/devices/Horynize.EF-450.png'),
-  'http://95.142.39.79/images/models/Horynize.EF-700.png': require('../../img/devices/Horynize.EF-700.png'),
-  // '': require('../../img/vav-active.png'),
-};
+function HomeScreenInAcive({ navigation, clickedControllerId }) {
+  const [statusErrorCommands, setStatusErrorCommands] = useState(false);
+  const [showSuccessModal, setShowSuccessModal] = useState(false);
 
-function HomeScreenInAcive({ navigation, clickedControllerId, paramsClickedController }) {
-  const [userStartError, setUserStartError] = useState(false);
-  const [errorText, setErrorText] = useState('');
+  const {
+    data: paramsClickedController,
+    refetch: refetchCurrentParams,
+  } = useGetParamsQuery({ controllerId: String(clickedControllerId) });
 
-  const [sendParams, { isLoading: isLoadingSendParams }] = useSendParamsMutation();
+  const [sendParams] = useSendParamsMutation();
 
   const models = useSelector((state) => state.contollers.models);
   const findUnitById = (id) => {
@@ -228,65 +219,63 @@ function HomeScreenInAcive({ navigation, clickedControllerId, paramsClickedContr
   };
   const unit = findUnitById(Number(clickedControllerId));
 
-  const localImage = images[unit?.img];
-
   const sendParamsData = async () => {
     const params = {
       controllerId: String(clickedControllerId),
       start: '1',
-    }
+    };
     try {
-      await sendParams(params);
-      navigation.navigate('HomeStack', { screen: 'HomePlay', params: { clickedControllerId } });
-    } catch (error) {
-      setErrorText(error.data.message);
-      setUserStartError(true);
-    }
-  }
+      const resStart = await sendParams(params);
+      console.log('resStart', resStart);
 
-  const handleSettings = () => {
-    if (clickedControllerId) {
-      navigation.navigate(
-        'HomeStack',
-        {
-          screen: 'HomeSchedule',
-          params: { clickedControllerId: String(clickedControllerId) },
-        },
-      );
+      if (resStart.data && resStart.data.error) {
+        setStatusErrorCommands(true);
+        await refetchCurrentParams();
+        return
+      }
+      setShowSuccessModal(true);
+      setTimeout(() => {
+        setShowSuccessModal(false);
+        navigation.navigate('HomeStack', { screen: 'HomePlay', params: { clickedControllerId } });
+      }, 5000);
+    } catch (error) {
+      setStatusErrorCommands(true);
+      await refetchCurrentParams();
+      console.log('paramsClickedController', paramsClickedController);
     }
   };
 
-  if (isLoadingSendParams) {
-    return <Loader />;
-  }
-
   return (
     <View style={{ flex: 1, flexDirection: 'column', justifyContent: 'space-between' }}>
-      {userStartError
-        && (
-        <ModalError
-          errorText={errorText}
-          visible={!!userStartError}
-          onDismiss={() => setUserStartError(null)}
-        />
-        )}
+      <ModalLoader
+        visible={showSuccessModal}
+        onClose={() => setShowSuccessModal(false)}
+        text="Включаю..."
+      />
+      <ModalComandsError
+        visible={statusErrorCommands}
+        onClose={() => setStatusErrorCommands(false)}
+        text="Команда не доставлена, попробуйте еще раз"
+      />
+
       <View style={styles.container}>
         <View style={styles.homeScreenInAciveControlsBox}>
           <TouchableOpacity style={styles.homeScreenInAciveControlsBoxBtn} onPress={sendParamsData}>
             <Image source={PowerBtnIcon} style={styles.homeScreenInAciveControlsBoxIconBtn} />
-            <Text style={styles.homeScreenInAciveControlsBoxBtnText}>Включить</Text>
+            <Text
+              style={dynamicBtnTextStyle(buttonWidth)}
+              numberOfLines={1}
+              ellipsizeMode="tail"
+            >
+              Включить
+            </Text>
           </TouchableOpacity>
         </View>
 
         <View style={styles.boxImageHome}>
           <Text>{unit?.name}</Text>
-          <Image source={localImage} />
+          <Image source={{ uri: unit?.img }} style={styles.deviceImage} resizeMode="contain" />
         </View>
-
-        {/* <TouchableOpacity style={styles.btnSchedule} onPress={handleSettings}>
-          <TimeIcon style={styles.btnScheduleIcon} />
-          <Text style={styles.btnScheduleText}>График работы</Text>
-        </TouchableOpacity> */}
 
         <View style={{ marginTop: 'auto' }}>
           {paramsClickedController ? (

@@ -1,4 +1,4 @@
-import React, { useContext, useEffect } from 'react';
+import React from 'react';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 
 import DevicesIcon from '../../img/icons/nav/devices';
@@ -8,25 +8,23 @@ import SettingIcon from '../../img/icons/nav/setting';
 import HomeStackNavigator from './HomeStackNavigator';
 import SettingsStackNavigator from './SettingsStackNavigator';
 import DevicesStackNavigator from './DevicesStackNavigator';
-import { AuthContext } from '../providers/AuthContext';
+// import { AuthContext } from '../providers/AuthContext';
 
 const Tab = createBottomTabNavigator();
 
-function TabNavigator({ navigation }) {
-  const { userToken, isLoading, isInitialized } = useContext(AuthContext);
+function TabNavigator() {
+  // const { userToken, isLoading, isInitialized } = useContext(AuthContext);
 
-  useEffect(() => {
-    if (isInitialized && !isLoading) {
-      navigation.navigate(userToken ? 'DevicesStack' : 'DevicesStack');
-    }
-  }, [userToken, isLoading, isInitialized, navigation]);
-
-  const initialRouteName = userToken ? 'DevicesStack' : 'DevicesStack';
+  // useEffect(() => {
+  //   if (isInitialized && !isLoading) {
+  //     navigation.navigate(userToken ? 'DevicesStack' : 'DevicesStack');
+  //   }
+  // }, [userToken, isLoading, isInitialized, navigation]);
 
   const activTabIconColor = '#ED7635';
   return (
     <Tab.Navigator
-      initialRouteName={initialRouteName}
+      initialRouteName="DevicesStack"
       screenOptions={({ route }) => ({
         tabBarIcon: ({ focused, color }) => {
           let iconXml;
@@ -63,14 +61,11 @@ function TabNavigator({ navigation }) {
         component={DevicesStackNavigator}
         options={{ unmountOnBlur: true, headerShown: false }}
       />
-      {userToken
-      && (
       <Tab.Screen
         name="HomeStack"
         options={{ unmountOnBlur: true, headerShown: false }}
         component={HomeStackNavigator}
       />
-      )}
       <Tab.Screen
         name="SettingsStack"
         options={{ unmountOnBlur: true, headerShown: false }}

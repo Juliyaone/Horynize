@@ -1,4 +1,5 @@
 import { StyleSheet } from 'react-native';
+import { responsiveFontSize } from 'react-native-responsive-dimensions';
 
 export const styles = StyleSheet.create({
   container: {
@@ -7,6 +8,8 @@ export const styles = StyleSheet.create({
     marginLeft: 20,
   },
   homePlayScreenActiveContainer: {
+    width: '100%',
+    height: '100%',
     flexDirection: 'column',
     justifyContent: 'space-between',
   },
@@ -46,7 +49,7 @@ export const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.12,
     shadowRadius: 2,
-    elevation: 1, // для Android
+    elevation: 1,
   },
   boxPowerBtnBox: {
     width: 130,
@@ -67,19 +70,15 @@ export const styles = StyleSheet.create({
     fontFamily: 'SFProDisplay',
     fontStyle: 'normal',
     fontWeight: '400',
-    fontSize: 10,
-    lineHeight: 12,
-    letterSpacing: 0.374,
+    fontSize: responsiveFontSize(1.5),
     color: '#212121',
   },
   titleText: {
     fontFamily: 'SFProDisplay',
     fontStyle: 'normal',
     fontWeight: '600',
-    fontSize: 14,
-    lineHeight: 12,
+    fontSize: responsiveFontSize(1.8),
     textAlign: 'center',
-    letterSpacing: 0.374,
     color: '#111111',
     marginBottom: 4,
   },
@@ -87,9 +86,7 @@ export const styles = StyleSheet.create({
     fontFamily: 'SFProDisplay',
     fontStyle: 'normal',
     fontWeight: '600',
-    fontSize: 12,
-    lineHeight: 14,
-    letterSpacing: 0.374,
+    fontSize: responsiveFontSize(1.6),
     color: '#787880',
     marginBottom: 6,
   },
@@ -115,10 +112,8 @@ export const styles = StyleSheet.create({
     fontFamily: 'SFProDisplay',
     fontStyle: 'normal',
     fontWeight: '400',
-    fontSize: 12,
-    lineHeight: 14,
+    fontSize: responsiveFontSize(1.6),
     textAlign: 'center',
-    letterSpacing: 0.374,
     color: '#FFFFFF',
   },
   boxHomeDeviceFunctions: {
@@ -138,10 +133,8 @@ export const styles = StyleSheet.create({
     fontFamily: 'SFProDisplay',
     fontStyle: 'normal',
     fontWeight: '400',
-    fontSize: 12,
-    lineHeight: 14,
+    fontSize: responsiveFontSize(1.6),
     textAlign: 'center',
-    letterSpacing: 0.374,
     color: '#FFFFFF',
   },
   boxDeviceFunctionsItemText: {
@@ -149,15 +142,16 @@ export const styles = StyleSheet.create({
     fontStyle: 'normal',
     fontWeight: '600',
     fontSize: 32,
-    lineHeight: 38,
     textAlign: 'center',
-    letterSpacing: 0.374,
     color: '#FFFFFF',
   },
   disabledContainer: {
     display: 'none',
   },
   fullSize: {
+    justifyContent: 'center',
+    alignItems: 'center',
     width: '100%',
+    height: '100%',
   },
 });

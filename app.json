@@ -2,11 +2,10 @@
   "expo": {
     "name": "Horynize",
     "slug": "Horynize",
-    "version": "1.0.5",
+    "version": "1.0.3",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
-    "scheme": "mycoolredirect",
     "splash": {
       "image": "./assets/splash.png",
       "resizeMode": "contain",
@@ -20,14 +19,16 @@
       "config": {
         "usesNonExemptEncryption": false
       },
-      "bundleIdentifier": "com.Horynize.Horynize"
+      "bundleIdentifier": "com.Horynize.Horynizeapp",
+      "buildNumber": "1.0.3"
     },
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"
       },
-      "package": "com.juliyasemenuha.Horynize"
+      "package": "com.Horynize.Horynize",
+      "versionCode": 6
     },
     "web": {
       "favicon": "./assets/favicon.png"

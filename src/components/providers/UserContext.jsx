@@ -1,6 +1,7 @@
 import React, {
   createContext, useState, useEffect, useMemo,
 } from 'react';
+import { getDay } from 'date-fns';
 
 export const UserContext = createContext();
 
@@ -8,8 +9,9 @@ export function UserProvider({ children }) {
   const [currentDayOfWeek, setCurrentDayOfWeek] = useState(null);
 
   useEffect(() => {
-    const today = new Date(); // Получаем текущую дату
-    const dayOfWeek = today.getDay(); // Получаем номер дня недели (0 - воскресенье, 1 - понедельник, и т.д.)
+    const today = new Date();
+    const dayOfWeek = getDay(today); // Возвращает день недели от 0 (воскресенье) до 6 (суббота)
+    // Для смещения, чтобы понедельник был 0, воскресенье - 6
     setCurrentDayOfWeek(dayOfWeek);
   }, []);
 

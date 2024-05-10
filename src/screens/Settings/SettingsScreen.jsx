@@ -1,9 +1,7 @@
-import React, { useContext, useEffect, useState } from 'react';
+import React, { useContext } from 'react';
 import {
-  StyleSheet, View, Text, TouchableOpacity, ScrollView, SafeAreaView,
+  View, Text, TouchableOpacity, ScrollView,
 } from 'react-native';
-import { CommonActions } from '@react-navigation/native';
-import { UserContext } from '../../components/providers/UserContext';
 import GoBackComponent from '../../components/GoBack';
 import { AuthContext } from '../../components/providers/AuthContext';
 
@@ -24,12 +22,6 @@ function SettingsScreen({ navigation }) {
   } = useContext(AuthContext);
 
   const handleLogout = () => {
-    navigation.dispatch(
-      CommonActions.reset({
-        index: 0,
-        routes: [{ name: 'Start' }],
-      }),
-    );
     signOut();
     navigation.navigate('Start');
   }
@@ -44,7 +36,6 @@ function SettingsScreen({ navigation }) {
       <View style={styles.container}>
 
         <Text style={styles.headerTextSettings}>Настройки</Text>
-        {userToken && (
         <>
           <View style={styles.cardUserBox}>
             <View style={styles.cardUserDataBox}>
@@ -57,11 +48,16 @@ function SettingsScreen({ navigation }) {
             </View>
             <View style={styles.cardUserNumberOfDevicesBox}>
               <TouchableOpacity style={styles.btnDevices} onPress={() => navigation.navigate('DevicesStack', { screen: 'DevicesUser' })}>
-                <Text style={styles.cardUserNumberOfDevicesText}>
-                  {userControllers?.length || 0}
-                  {' '}
-                  {getDeviceWordForm(1)}
-                </Text>
+                {userControllers && userControllers.length > 0
+                  ? (
+                    <Text style={styles.cardUserNumberOfDevicesText}>
+                      {userControllers.length}
+                      {' '}
+                      {getDeviceWordForm(userControllers.length)}
+                    </Text>
+                  )
+                  : (<Text style={styles.textOff}> Нет устройств</Text>)}
+
                 <ArrowRightSmallIcon />
               </TouchableOpacity>
             </View>
@@ -71,7 +67,6 @@ function SettingsScreen({ navigation }) {
           </View>
           <PersonalData navigation={navigation} />
         </>
-        ) }
         <Contacts />
 
         {!userToken && (
